@@ -1,3 +1,3 @@
 library spotflow_flutter;
 
-export 'package:spotflow_flutter/src/spotflow.dart';
+export 'package:spotflow/src/spotflow.dart';
