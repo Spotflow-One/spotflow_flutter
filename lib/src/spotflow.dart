@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:spotflow/src/ui/views/error_page.dart';
+import 'package:spotflow/src/ui/views/ussd/copy_ussd_page.dart';
 
 class Spotflow {
   start({
@@ -8,7 +8,7 @@ class Spotflow {
   }) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => const ErrorPage(),
+        builder: (context) => const CopyUssdPage(),
       ),
     );
   }

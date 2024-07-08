@@ -15,6 +15,9 @@ import 'package:vector_graphics/vector_graphics.dart';
 class $AssetsSvgGen {
   const $AssetsSvgGen();
 
+  /// File path: assets/svg/copy-icon.svg
+  SvgGenImage get copyIcon => const SvgGenImage('assets/svg/copy-icon.svg');
+
   /// File path: assets/svg/info-circle.svg
   SvgGenImage get infoCircle => const SvgGenImage('assets/svg/info-circle.svg');
 
@@ -33,16 +36,21 @@ class $AssetsSvgGen {
   /// File path: assets/svg/shield.svg
   SvgGenImage get shield => const SvgGenImage('assets/svg/shield.svg');
 
+  /// File path: assets/svg/ussd-icon.svg
+  SvgGenImage get ussdIcon => const SvgGenImage('assets/svg/ussd-icon.svg');
+
   /// File path: assets/svg/warning.svg
   SvgGenImage get warning => const SvgGenImage('assets/svg/warning.svg');
 
   /// List of all assets
   List<SvgGenImage> get values => [
+        copyIcon,
         infoCircle,
         payWithCardIcon,
         payWithTransferIcon,
         payWithUsdIcon,
         shield,
+        ussdIcon,
         warning
       ];
 }
