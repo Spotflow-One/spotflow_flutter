@@ -5,11 +5,17 @@ class SpotFlowColors {
 
   static const tone20 = Color(0xFFCECDD0);
 
+  static const tone50 = Color(0xFF86838A);
+
   SpotFlowColors._();
 
   static const primary5 = Color(0xFFF4F4FF);
 
   static const primary20 = Color(0xFFAAAAD9);
+
+  static const primary10 = Color(0xFFCCCCE8);
+
+  static const primary40 = Color(0xFF5655B4);
 
   static const primaryBase = Color(0xFF01008E);
 
@@ -24,8 +30,6 @@ class SpotFlowColors {
   static const kcBaseWhite = Color(0xFFFFFFFF);
 
   static const greenBase = Color(0xFF32BB78);
-
-  static const primary10 = Color(0xFFCCCCE8);
 
   static const tone70 = Color(0xFF55515B);
 }
