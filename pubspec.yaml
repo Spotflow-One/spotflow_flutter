@@ -8,10 +8,15 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
+  credit_card_validator: ^2.1.0
+  dio: ^5.5.0+1
   flutter:
     sdk: flutter
+  flutter_multi_formatter: ^2.12.8
   flutter_svg: ^2.0.10+1
   pin_code_fields: ^8.0.1
+  simple_ripple_animation: ^0.0.9
+  uuid: ^4.4.2
 
 dev_dependencies:
   flutter_test:

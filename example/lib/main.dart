@@ -60,10 +60,22 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   void _incrementCounter() {
     Spotflow().start(
-        context: context,
+      context: context,
+      paymentManager: SpotFlowPaymentManager(
+        merchantId: "2f020a56-fbd3-40a3-ac90-d77d38399b6d",
+        customerEmail: "nkwachi@spotflow.one",
+        paymentId: "paymentId",
+        fromCurrency: "USD",
+        toCurrency: "NGN",
+        amount: 10,
+        key: "sk_test_9b4208cb7d4d4747bf6f5c4ac1f978af",
+        provider: "flutterwave",
+        paymentDescription: "League Pass",
         appLogo: Image.asset(
           'assets/images/nba-logo.png',
-        ));
+        ),
+      ),
+    );
   }
 
   @override

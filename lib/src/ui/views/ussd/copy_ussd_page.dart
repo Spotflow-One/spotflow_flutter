@@ -5,7 +5,6 @@ import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
 import 'package:spotflow/src/ui/widgets/cancel_payment_button.dart';
 import 'package:spotflow/src/ui/widgets/change_payment_button.dart';
-import 'package:spotflow/src/ui/widgets/payment_card.dart';
 import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
 import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 
@@ -21,7 +20,7 @@ class CopyUssdPage extends StatelessWidget {
           icon: Assets.svg.payWithUsdIcon.svg(),
           text: 'Pay with USSD',
         ),
-        const PaymentCard(),
+        // const PaymentCard(),
         const SizedBox(
           height: 23,
         ),

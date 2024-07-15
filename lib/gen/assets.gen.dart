@@ -15,6 +15,9 @@ import 'package:vector_graphics/vector_graphics.dart';
 class $AssetsSvgGen {
   const $AssetsSvgGen();
 
+  /// File path: assets/svg/check-icon.svg
+  SvgGenImage get checkIcon => const SvgGenImage('assets/svg/check-icon.svg');
+
   /// File path: assets/svg/copy-icon.svg
   SvgGenImage get copyIcon => const SvgGenImage('assets/svg/copy-icon.svg');
 
@@ -44,6 +47,7 @@ class $AssetsSvgGen {
 
   /// List of all assets
   List<SvgGenImage> get values => [
+        checkIcon,
         copyIcon,
         infoCircle,
         payWithCardIcon,

@@ -7,6 +7,7 @@ class BaseScaffold extends StatelessWidget {
   final CrossAxisAlignment crossAxisAlignment;
   final MainAxisAlignment mainAxisAlignment;
   final MainAxisSize mainAxisSize;
+  final EdgeInsets padding;
 
   const BaseScaffold({
     super.key,
@@ -15,6 +16,7 @@ class BaseScaffold extends StatelessWidget {
     this.crossAxisAlignment = CrossAxisAlignment.center,
     this.mainAxisAlignment = MainAxisAlignment.start,
     this.mainAxisSize = MainAxisSize.max,
+    this.padding = const EdgeInsets.symmetric(horizontal: 19.0),
   });
 
   @override
@@ -36,7 +38,7 @@ class BaseScaffold extends StatelessWidget {
             ),
             child: IntrinsicHeight(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 19.0),
+                padding: padding,
                 child: Column(
                   crossAxisAlignment: crossAxisAlignment,
                   mainAxisAlignment: mainAxisAlignment,

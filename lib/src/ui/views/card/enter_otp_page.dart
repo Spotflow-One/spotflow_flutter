@@ -1,5 +1,11 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:spotflow/gen/assets.gen.dart';
+import 'package:spotflow/spotflow.dart';
+import 'package:spotflow/src/core/models/payment_response_body.dart';
+import 'package:spotflow/src/core/models/validate_payment_request_body.dart';
+import 'package:spotflow/src/core/services/payment_service.dart';
+import 'package:spotflow/src/ui/utils/spot_flow_route_name.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
@@ -8,7 +14,18 @@ import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
 import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 
 class EnterOtpPage extends StatelessWidget {
-  const EnterOtpPage({super.key});
+  final String message;
+  final String reference;
+  final Rate? rate;
+  final SpotFlowPaymentManager paymentManager;
+
+  const EnterOtpPage({
+    super.key,
+    required this.message,
+    required this.reference,
+    required this.paymentManager,
+    this.rate,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -19,13 +36,63 @@ class EnterOtpPage extends StatelessWidget {
           text: 'Pay with Card',
           icon: Assets.svg.payWithCardIcon.svg(),
         ),
-        const PaymentCard(),
+        PaymentCard(
+          rate: rate,
+          paymentManager: paymentManager,
+        ),
+        Expanded(
+          child: _EnterOtpPageUi(
+            message: message,
+            reference: reference,
+            paymentManager: paymentManager,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _EnterOtpPageUi extends StatefulWidget {
+  final String message;
+  final String reference;
+  final SpotFlowPaymentManager paymentManager;
+
+  const _EnterOtpPageUi(
+      {super.key,
+      required this.message,
+      required this.reference,
+      required this.paymentManager});
+
+  @override
+  State<_EnterOtpPageUi> createState() => _EnterOtpPageUiState();
+}
+
+class _EnterOtpPageUiState extends State<_EnterOtpPageUi> {
+  TextEditingController controller = TextEditingController();
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final paymentManager = widget.paymentManager;
+    if (creatingPayment) {
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+    return Column(
+      children: [
         const SizedBox(
           height: 47.0,
         ),
         Center(
           child: Text(
-            "Kindly enter the OTP sent to 234249***3875",
+            widget.message,
+            textAlign: TextAlign.center,
             style: SpotFlowTextStyle.body14SemiBold.copyWith(
               color: SpotFlowColors.tone70,
             ),
@@ -40,6 +107,8 @@ class EnterOtpPage extends StatelessWidget {
           ),
           child: TextField(
             keyboardType: TextInputType.number,
+            textAlign: TextAlign.center,
+            controller: controller,
             decoration: InputDecoration(
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -65,21 +134,24 @@ class EnterOtpPage extends StatelessWidget {
         const SizedBox(
           height: 31,
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 70.0),
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              vertical: 18.0,
-            ),
-            decoration: BoxDecoration(
-              color: SpotFlowColors.greenBase,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Center(
-              child: Text(
-                'Authorize',
-                style: SpotFlowTextStyle.body14SemiBold.copyWith(
-                  color: Colors.white,
+        InkWell(
+          onTap: () => _authorizePayment(paymentManager),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 70.0),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                vertical: 18.0,
+              ),
+              decoration: BoxDecoration(
+                color: SpotFlowColors.greenBase,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Center(
+                child: Text(
+                  'Authorize',
+                  style: SpotFlowTextStyle.body14SemiBold.copyWith(
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
@@ -104,7 +176,11 @@ class EnterOtpPage extends StatelessWidget {
           height: 29.0,
         ),
         TextButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context).popUntil(
+                (route) => route.settings.name == SpotFlowRouteName.homePage);
+            Navigator.of(context).pop();
+          },
           style: TextButton.styleFrom(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(4))),
@@ -122,5 +198,36 @@ class EnterOtpPage extends StatelessWidget {
         )
       ],
     );
+  }
+
+  bool creatingPayment = false;
+
+  Future<void> _authorizePayment(SpotFlowPaymentManager paymentManager) async {
+    final paymentRequestBody = ValidatePaymentRequestBody(
+      merchantId: paymentManager.merchantId,
+      reference: widget.reference,
+      otp: controller.text,
+    );
+    setState(() {
+      creatingPayment = true;
+    });
+
+    final paymentService = PaymentService(paymentManager.key);
+    try {
+      final response = await paymentService.validatePayment(
+        paymentRequestBody,
+      );
+      if (mounted == false) return;
+      paymentService.handleCardSuccessResponse(
+        response: response,
+        paymentManager: paymentManager,
+        context: context,
+      );
+    } on DioException catch (e) {
+      //todo: handle errors
+    }
+    setState(() {
+      creatingPayment = false;
+    });
   }
 }
