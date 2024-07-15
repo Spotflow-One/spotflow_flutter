@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:spotflow/gen/assets.gen.dart';
+import 'package:spotflow/spotflow.dart';
+import 'package:spotflow/src/core/models/payment_options_enum.dart';
+import 'package:spotflow/src/core/models/payment_response_body.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
@@ -8,7 +11,18 @@ import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
 import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 
 class ErrorPage extends StatelessWidget {
-  const ErrorPage({super.key});
+  final SpotFlowPaymentManager paymentManager;
+  final String message;
+  final PaymentOptionsEnum paymentOptionsEnum;
+  final Rate? rate;
+
+  const ErrorPage({
+    super.key,
+    required this.paymentManager,
+    required this.message,
+    required this.paymentOptionsEnum,
+    this.rate,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,10 +42,13 @@ class ErrorPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         PaymentOptionsTile(
-          text: 'Pay with Card',
-          icon: Assets.svg.payWithCardIcon.svg(),
+          text: paymentOptionsEnum.title,
+          icon: paymentOptionsEnum.icon,
         ),
-        const PaymentCard(),
+        PaymentCard(
+          paymentManager: paymentManager,
+          rate: rate,
+        ),
         const SizedBox(
           height: 49,
         ),
@@ -40,7 +57,7 @@ class ErrorPage extends StatelessWidget {
           height: 6,
         ),
         Text(
-          'Incorrect otp.\nPlease retry with the correct otp',
+          message,
           textAlign: TextAlign.center,
           style: SpotFlowTextStyle.body14SemiBold.copyWith(
             color: SpotFlowColors.tone70,
@@ -66,7 +83,7 @@ class ErrorPage extends StatelessWidget {
           onPressed: () {},
           style: buttonStyle,
           child: Text(
-            'Try again with your card',
+            'Try again with transfer',
             style: SpotFlowTextStyle.body14Regular.copyWith(
               color: SpotFlowColors.tone70,
             ),
@@ -79,7 +96,7 @@ class ErrorPage extends StatelessWidget {
           onPressed: () {},
           style: buttonStyle,
           child: Text(
-            'Try again with your card',
+            'Try again with USSD',
             style: SpotFlowTextStyle.body14Regular.copyWith(
               color: SpotFlowColors.tone70,
             ),

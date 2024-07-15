@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:spotflow/gen/assets.gen.dart';
+import 'package:spotflow/spotflow.dart';
+import 'package:spotflow/src/core/models/payment_response_body.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 
 class PaymentCard extends StatelessWidget {
-  const PaymentCard({super.key});
+  final SpotFlowPaymentManager paymentManager;
+  final Rate? rate;
+
+  const PaymentCard({
+    super.key,
+    required this.paymentManager,
+    this.rate,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -29,13 +38,13 @@ class PaymentCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Julesanums@gmail.com",
+                paymentManager.customerEmail,
                 style: SpotFlowTextStyle.body12Regular.copyWith(
                   color: SpotFlowColors.kcBaseWhite,
                 ),
               ),
               Text(
-                "League Pass",
+                paymentManager.paymentDescription ?? "",
                 style: SpotFlowTextStyle.body14Regular.copyWith(
                   color: SpotFlowColors.kcBaseWhite,
                 ),
@@ -51,16 +60,18 @@ class PaymentCard extends StatelessWidget {
           ),
           Row(
             children: [
-              Text(
-                "USD 1 = NGN 1,483.98",
-                style: SpotFlowTextStyle.body14Regular.copyWith(
-                  color: SpotFlowColors.kcBaseWhite,
+              if (rate != null) ...[
+                Text(
+                  "${rate?.from} 1 = ${rate?.to} ${rate?.rate}",
+                  style: SpotFlowTextStyle.body14Regular.copyWith(
+                    color: SpotFlowColors.kcBaseWhite,
+                  ),
                 ),
-              ),
-              const SizedBox(
-                width: 3,
-              ),
-              Assets.svg.infoCircle.svg(),
+                const SizedBox(
+                  width: 3,
+                ),
+                Assets.svg.infoCircle.svg(),
+              ],
               const Spacer(),
               Text(
                 'Pay',
@@ -72,7 +83,7 @@ class PaymentCard extends StatelessWidget {
                 width: 4,
               ),
               Text(
-                'USD 14.99',
+                '${paymentManager.fromCurrency} ${paymentManager.amount.toStringAsFixed(2)}',
                 style: SpotFlowTextStyle.body16SemiBold.copyWith(
                   color: SpotFlowColors.kcBaseWhite,
                 ),
@@ -82,25 +93,27 @@ class PaymentCard extends StatelessWidget {
           const SizedBox(
             height: 6.0,
           ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 3,
-              ),
-              decoration: BoxDecoration(
-                color: SpotFlowColors.greenBase,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                "NGN 22,244.86",
-                style: SpotFlowTextStyle.body12Regular.copyWith(
-                  color: SpotFlowColors.kcBaseWhite,
+          if (rate != null) ...[
+            Align(
+              alignment: Alignment.centerRight,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 3,
+                ),
+                decoration: BoxDecoration(
+                  color: SpotFlowColors.greenBase,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  "${rate?.to} ${(rate!.rate * paymentManager.amount).toStringAsFixed(2)}",
+                  style: SpotFlowTextStyle.body12Regular.copyWith(
+                    color: SpotFlowColors.kcBaseWhite,
+                  ),
                 ),
               ),
-            ),
-          )
+            )
+          ]
         ],
       ),
     );

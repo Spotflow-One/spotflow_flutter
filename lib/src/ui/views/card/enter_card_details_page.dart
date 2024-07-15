@@ -1,5 +1,12 @@
+import 'package:credit_card_validator/credit_card_validator.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:spotflow/gen/assets.gen.dart';
+import 'package:spotflow/src/core/models/payment_request_body.dart';
+import 'package:spotflow/src/core/models/spot_flow_card.dart';
+import 'package:spotflow/src/core/services/payment_service.dart';
+import 'package:spotflow/src/spotflow.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
@@ -9,142 +16,286 @@ import 'package:spotflow/src/ui/widgets/payment_card.dart';
 import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
 import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 
+import 'widgets/card_input_field.dart';
+
 class EnterCardDetailsPage extends StatelessWidget {
-  const EnterCardDetailsPage({super.key});
+  final SpotFlowPaymentManager paymentManager;
+
+  const EnterCardDetailsPage({
+    super.key,
+    required this.paymentManager,
+  });
 
   @override
   Widget build(BuildContext context) {
     return BaseScaffold(
+      appLogo: paymentManager.appLogo,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         PaymentOptionsTile(
           text: 'Pay with Card',
           icon: Assets.svg.payWithCardIcon.svg(),
         ),
-        const PaymentCard(),
-        const SizedBox(
-          height: 34.0,
+        PaymentCard(
+          paymentManager: paymentManager,
         ),
-        Center(
-          child: Text(
-            'Enter your card details to pay',
-            style: SpotFlowTextStyle.body16SemiBold.copyWith(
-              color: SpotFlowColors.tone70,
-            ),
-          ),
+        Expanded(
+          child: _CardInputUI(paymentManager: paymentManager),
         ),
-        const SizedBox(
-          height: 34,
-        ),
-        const _CardInputField(
-          labelText: 'CARD NUMBER',
-          hintText: '0000 0000 0000 0000',
-        ),
-        const SizedBox(
-          height: 28,
-        ),
-        const Row(
-          children: [
-            Expanded(
-              child: _CardInputField(
-                labelText: 'CARD EXPIRY',
-                hintText: 'MM/YY',
-              ),
-            ),
-            SizedBox(
-              width: 18.0,
-            ),
-            Expanded(
-              child: _CardInputField(
-                labelText: 'CVV',
-                hintText: '123',
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(
-          height: 28.0,
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(
-            vertical: 13,
-          ),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: SpotFlowColors.primary5,
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: Text(
-            'Pay USD 14.99',
-            style: SpotFlowTextStyle.body14SemiBold.copyWith(
-              color: SpotFlowColors.primary20,
-            ),
-          ),
-        ),
-        const SizedBox(
-          height: 60,
-        ),
-        const Row(
-          children: [
-            Expanded(
-              child: ChangePaymentButton(),
-            ),
-            SizedBox(
-              width: 8.0,
-            ),
-            Expanded(
-              child: CancelPaymentButton(),
-            ),
-          ],
-        ),
-        const Spacer(),
-        const PciDssIcon(),
-        const SizedBox(
-          height: 32,
-        )
       ],
     );
   }
 }
 
-class _CardInputField extends StatelessWidget {
-  final String labelText;
-  final String hintText;
+class _CardInputUI extends StatefulWidget {
+  final SpotFlowPaymentManager paymentManager;
 
-  const _CardInputField({
+  const _CardInputUI({
     super.key,
-    required this.labelText,
-    required this.hintText,
+    required this.paymentManager,
   });
 
   @override
+  State<_CardInputUI> createState() => _CardInputUIState();
+}
+
+class _CardInputUIState extends State<_CardInputUI> {
+  TextEditingController cardNumberController = TextEditingController();
+
+  TextEditingController expiryController = TextEditingController();
+
+  TextEditingController cvvController = TextEditingController();
+
+  bool creatingPayment = false;
+
+  bool buttonEnabled = false;
+
+  @override
+  void dispose() {
+    cardNumberController.dispose();
+    expiryController.dispose();
+    cvvController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16.0,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: SpotFlowColors.tone10,
-          width: 0.5,
-        ),
-      ),
-      child: TextField(
-        decoration: InputDecoration(
-          labelText: labelText,
-          labelStyle: SpotFlowTextStyle.body12Regular.copyWith(
-            color: SpotFlowColors.tone40,
+    final paymentManager = widget.paymentManager;
+    if (creatingPayment) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    } else {
+      return Column(
+        children: [
+          const SizedBox(
+            height: 34.0,
           ),
-          hintText: hintText,
-          hintStyle: SpotFlowTextStyle.body14Regular.copyWith(
-            color: SpotFlowColors.tone30,
+          Center(
+            child: Text(
+              'Enter your card details to pay',
+              style: SpotFlowTextStyle.body16SemiBold.copyWith(
+                color: SpotFlowColors.tone70,
+              ),
+            ),
           ),
-          focusedBorder: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          border: InputBorder.none,
-        ),
+          const SizedBox(
+            height: 34,
+          ),
+          CardInputField(
+            labelText: 'CARD NUMBER',
+            hintText: '0000 0000 0000 0000',
+            textEditingController: cardNumberController,
+            onChanged: onCardNumberChanged,
+            inputFormatters: [
+              CreditCardNumberInputFormatter(),
+            ],
+          ),
+          const SizedBox(
+            height: 28,
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: CardInputField(
+                  labelText: 'CARD EXPIRY',
+                  hintText: 'MM/YY',
+                  textEditingController: expiryController,
+                  onChanged: onExpiryDateChanged,
+                  inputFormatters: [
+                    CreditCardExpirationDateFormatter(),
+                  ],
+                ),
+              ),
+              const SizedBox(
+                width: 18.0,
+              ),
+              Expanded(
+                child: CardInputField(
+                  labelText: 'CVV',
+                  hintText: '123',
+                  textEditingController: cvvController,
+                  onChanged: onCvvChanged,
+                  inputFormatters: [
+                    CreditCardCvcInputFormatter(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(
+            height: 28.0,
+          ),
+          InkWell(
+            onTap: () {
+              _createPayment(paymentManager, context);
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                vertical: 13,
+              ),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: buttonEnabled
+                    ? SpotFlowColors.primaryBase
+                    : SpotFlowColors.primary5,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                'Pay ${paymentManager.fromCurrency} ${paymentManager.amount.toStringAsFixed(2)}',
+                style: SpotFlowTextStyle.body14SemiBold.copyWith(
+                  color: buttonEnabled
+                      ? SpotFlowColors.kcBaseWhite
+                      : SpotFlowColors.primary20,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(
+            height: 60,
+          ),
+          const Row(
+            children: [
+              Expanded(
+                child: ChangePaymentButton(),
+              ),
+              SizedBox(
+                width: 8.0,
+              ),
+              Expanded(
+                child: CancelPaymentButton(),
+              ),
+            ],
+          ),
+          const Spacer(),
+          const PciDssIcon(),
+          const SizedBox(
+            height: 32,
+          )
+        ],
+      );
+    }
+  }
+
+  Future<void> _createPayment(
+      SpotFlowPaymentManager paymentManager, BuildContext context) async {
+    setState(() {
+      creatingPayment = true;
+    });
+    String? expiryMonth = extractExpiryMonth(expiryController.text);
+    String? expiryYear = extractExpiryYear(expiryController.text);
+    if (expiryMonth == null || expiryYear == null) {
+      return;
+    }
+    final paymentRequestBody = PaymentRequestBody(
+      customer: paymentManager.customer,
+      currency: paymentManager.fromCurrency,
+      amount: paymentManager.amount,
+      channel: 'card',
+      card: SpotFlowCard(
+        cvv: cvvController.text,
+        expiryMonth: expiryMonth,
+        expiryYear: expiryYear,
+        pan: cardNumberController.text.replaceAll(" ", ""),
       ),
+      provider: paymentManager.provider,
     );
+    final paymentService = PaymentService(paymentManager.key);
+    try {
+      final response = await paymentService.createPayment(
+        paymentRequestBody,
+      );
+      if (mounted == false) return;
+      paymentService.handleCardSuccessResponse(
+        response: response,
+        paymentManager: paymentManager,
+        context: context,
+      );
+    } on DioException catch (e) {
+      //todo: handle errors
+    }
+    setState(() {
+      creatingPayment = false;
+    });
+  }
+
+  String? extractExpiryMonth(String expiryString) {
+    if (expiryString.isEmpty || expiryString.length != 5) {
+      return null;
+    }
+
+    final parts = expiryString.split('/');
+    if (parts.length != 2) {
+      return null;
+    }
+
+    final month = int.tryParse(parts[0]);
+    if (month == null) {
+      return null;
+    }
+
+    // Ensure leading zero for single-digit months (optional)
+    return month.toString().padLeft(2, '0');
+  }
+
+  String? extractExpiryYear(String expiryString) {
+    if (expiryString.isEmpty || expiryString.length != 5) {
+      return null;
+    }
+    final parts = expiryString.split('/');
+    if (parts.length != 2) {
+      return null;
+    }
+    final year = int.tryParse(parts[1]);
+    if (year == null) {
+      return null;
+    }
+    return year.toString().padLeft(2, '0');
+  }
+
+  void onExpiryDateChanged(String? value) {
+    _validateCreditCard();
+  }
+
+  void onCvvChanged(String? value) {
+    _validateCreditCard();
+  }
+
+  void onCardNumberChanged(String? value) {
+    _validateCreditCard();
+  }
+
+  final _ccValidator = CreditCardValidator();
+
+  _validateCreditCard() {
+    final ccNumResults = _ccValidator.validateCCNum(cardNumberController.text);
+    final expDateResults = _ccValidator.validateExpDate(expiryController.text);
+    final cvvResults =
+        _ccValidator.validateCVV(cvvController.text, ccNumResults.ccType);
+    setState(() {
+      buttonEnabled = ccNumResults.isPotentiallyValid &&
+          expDateResults.isPotentiallyValid &&
+          cvvResults.isValid;
+    });
   }
 }

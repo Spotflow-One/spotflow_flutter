@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spotflow/gen/assets.gen.dart';
+import 'package:spotflow/spotflow.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
 import 'package:spotflow/src/ui/widgets/cancel_payment_button.dart';
 import 'package:spotflow/src/ui/widgets/change_payment_button.dart';
@@ -8,7 +9,8 @@ import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
 import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 
 class TransferInfoPage extends StatelessWidget {
-  const TransferInfoPage({super.key});
+  final SpotFlowPaymentManager paymentManager;
+  const TransferInfoPage({super.key, required this.paymentManager});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +19,9 @@ class TransferInfoPage extends StatelessWidget {
         icon: Assets.svg.payWithTransferIcon.svg(),
         text: 'Pay with transfer',
       ),
-      const PaymentCard(),
+      PaymentCard(
+        paymentManager: paymentManager,
+      ),
       const Spacer(),
       const Row(
         children: [
