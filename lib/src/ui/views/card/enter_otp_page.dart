@@ -31,6 +31,7 @@ class EnterOtpPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BaseScaffold(
       crossAxisAlignment: CrossAxisAlignment.stretch,
+      appLogo: paymentManager.appLogo,
       children: [
         PaymentOptionsTile(
           text: 'Pay with Card',

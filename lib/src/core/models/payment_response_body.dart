@@ -97,14 +97,19 @@ class Authorization {
 class BankDetails {
   String accountNumber;
   String name;
+  DateTime expiresAt;
 
   BankDetails({
     required this.name,
     required this.accountNumber,
-  });
+  }) : expiresAt = _getDateTime();
 
   factory BankDetails.fromJson(Map<String, dynamic> json) => BankDetails(
         accountNumber: json['accountNumber'] as String,
         name: json['bankName'] as String,
       );
+
+  static DateTime _getDateTime() {
+    return DateTime.now().add(const Duration(seconds: 30));
+  }
 }

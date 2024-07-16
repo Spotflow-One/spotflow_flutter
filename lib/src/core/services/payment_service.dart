@@ -47,6 +47,16 @@ class PaymentService {
     );
   }
 
+  Future<Response> verifyPayment({
+    required String reference,
+    required String merchantId,
+  }) {
+    return apiClient.get(ApiRoute.verifyPayment, queryParameters: {
+      "merchantId": merchantId,
+      "reference": reference,
+    });
+  }
+
   void handleCardSuccessResponse(
       {required Response<dynamic> response,
       required SpotFlowPaymentManager paymentManager,

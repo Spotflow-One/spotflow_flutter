@@ -7,6 +7,8 @@ import 'package:spotflow/src/core/models/payment_response_body.dart';
 import 'package:spotflow/src/core/services/payment_service.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
+import 'package:spotflow/src/ui/views/transfer/transfer_error_page.dart';
+import 'package:spotflow/src/ui/views/transfer/transfer_info_page.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
 import 'package:spotflow/src/ui/widgets/cancel_payment_button.dart';
 import 'package:spotflow/src/ui/widgets/change_payment_button.dart';
@@ -17,8 +19,13 @@ import '../../widgets/payment_card.dart';
 
 class ViewBankDetailsPage extends StatelessWidget {
   final SpotFlowPaymentManager paymentManager;
+  final PaymentResponseBody? paymentResponseBody;
 
-  const ViewBankDetailsPage({super.key, required this.paymentManager});
+  const ViewBankDetailsPage({
+    super.key,
+    required this.paymentManager,
+    this.paymentResponseBody,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +41,10 @@ class ViewBankDetailsPage extends StatelessWidget {
             text: 'Pay with transfer',
           ),
           Expanded(
-            child: _ViewBankDetailsUi(paymentManager: paymentManager),
+            child: _ViewBankDetailsUi(
+              paymentManager: paymentManager,
+              paymentResponseBody: paymentResponseBody,
+            ),
           ),
         ]);
   }
@@ -42,8 +52,10 @@ class ViewBankDetailsPage extends StatelessWidget {
 
 class _ViewBankDetailsUi extends StatefulWidget {
   final SpotFlowPaymentManager paymentManager;
+  final PaymentResponseBody? paymentResponseBody;
 
-  const _ViewBankDetailsUi({super.key, required this.paymentManager});
+  const _ViewBankDetailsUi(
+      {super.key, required this.paymentManager, this.paymentResponseBody});
 
   @override
   State<_ViewBankDetailsUi> createState() => _ViewBankDetailsUiState();
@@ -59,28 +71,27 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(minutes: 30),
-    );
-    _animation = Tween<double>(begin: 1.0, end: 0.0).animate(_controller);
 
-    _controller.addListener(() {
-      setState(() {
-        double remainingSeconds =
-            (_controller.duration!.inMilliseconds * _animation.value).round() /
-                1000;
-        _remainingTime = formatTime(remainingSeconds.toInt());
-      });
-    });
-
-    _initiatePayment();
+    if (widget.paymentResponseBody == null) {
+      _initiatePayment();
+    } else {
+      paymentResponseBody = widget.paymentResponseBody;
+      final expiresAt = widget.paymentResponseBody?.bankDetails?.expiresAt ??
+          DateTime.now().add(const Duration(minutes: 30));
+      _initCountDown(expiresAt);
+    }
   }
 
   String formatTime(int remainingSeconds) {
     int minutes = remainingSeconds ~/ 60;
     int seconds = remainingSeconds % 60;
     return "${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}";
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   bool initiatingPayment = false;
@@ -117,6 +128,7 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
     final formattedAmount =
         "${rate?.to} ${(rate!.rate * widget.paymentManager.amount).toStringAsFixed(2)}";
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         PaymentCard(
           paymentManager: widget.paymentManager,
@@ -125,10 +137,12 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
         const SizedBox(
           height: 20,
         ),
-        Text(
-          'Transfer $formattedAmount to the details below',
-          style: SpotFlowTextStyle.body16SemiBold.copyWith(
-            color: SpotFlowColors.tone70,
+        Center(
+          child: Text(
+            'Transfer $formattedAmount to the details below',
+            style: SpotFlowTextStyle.body16SemiBold.copyWith(
+              color: SpotFlowColors.tone70,
+            ),
           ),
         ),
         const SizedBox(
@@ -226,10 +240,13 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
                     ],
                   ),
                   Spacer(),
-                  Assets.svg.copyIcon.svg(
-                    colorFilter: const ColorFilter.mode(
-                      SpotFlowColors.primary50,
-                      BlendMode.srcIn,
+                  InkWell(
+                    onTap: () {},
+                    child: Assets.svg.copyIcon.svg(
+                      colorFilter: const ColorFilter.mode(
+                        SpotFlowColors.primary50,
+                        BlendMode.srcIn,
+                      ),
                     ),
                   )
                 ],
@@ -256,52 +273,93 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
         const SizedBox(
           height: 18,
         ),
-        SizedBox.square(
-          dimension: 50,
-          child: Stack(
-            alignment: Alignment.center,
-            fit: StackFit.expand,
-            children: [
-              CircularProgressIndicator(
-                value: _animation.value,
-                backgroundColor: Color(0xFFE1E0F1),
-                valueColor: const AlwaysStoppedAnimation<Color>(
-                    SpotFlowColors.primaryBase),
-                strokeCap: StrokeCap.round,
-              ),
-              Center(
-                child: Assets.svg.payWithTransferIcon.svg(
-                  height: 22,
-                  width: 22,
-                  colorFilter: const ColorFilter.mode(
-                    SpotFlowColors.greenBase,
-                    BlendMode.srcIn,
+        Center(
+          child: SizedBox.square(
+            dimension: 50,
+            child: Stack(
+              alignment: Alignment.center,
+              fit: StackFit.expand,
+              children: [
+                CircularProgressIndicator(
+                  value: _animation.value,
+                  backgroundColor: Color(0xFFE1E0F1),
+                  valueColor: const AlwaysStoppedAnimation<Color>(
+                      SpotFlowColors.primaryBase),
+                  strokeCap: StrokeCap.round,
+                ),
+                Center(
+                  child: Assets.svg.payWithTransferIcon.svg(
+                    height: 22,
+                    width: 22,
+                    colorFilter: const ColorFilter.mode(
+                      SpotFlowColors.greenBase,
+                      BlendMode.srcIn,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         const SizedBox(
           height: 12,
         ),
-        RichText(
-          text: TextSpan(
-            text: 'Expires in ',
-            style: SpotFlowTextStyle.body14Regular.copyWith(
-              color: SpotFlowColors.tone30,
-            ),
-            children: [
-              TextSpan(
-                text: _remainingTime,
-                style: SpotFlowTextStyle.body14Regular.copyWith(
-                  color: SpotFlowColors.greenBase,
-                ),
+        Center(
+          child: RichText(
+            text: TextSpan(
+              text: 'Expires in ',
+              style: SpotFlowTextStyle.body14Regular.copyWith(
+                color: SpotFlowColors.tone30,
               ),
-            ],
+              children: [
+                TextSpan(
+                  text: _remainingTime,
+                  style: SpotFlowTextStyle.body14Regular.copyWith(
+                    color: SpotFlowColors.greenBase,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         const Spacer(),
+        const SizedBox(
+          height: 16,
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: TextButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => TransferInfoPage(
+                    paymentManager: widget.paymentManager,
+                    paymentResponseBody: paymentResponseBody!,
+                  ),
+                ),
+              );
+            },
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+                side: BorderSide(
+                  color: Color(0xFFC0B5CF),
+                  width: 1,
+                ),
+              ),
+            ),
+            child: Text(
+              "I've sent the money",
+              style: SpotFlowTextStyle.body14SemiBold.copyWith(
+                color: SpotFlowColors.tone70,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(
+          height: 32,
+        ),
         const Row(
           children: [
             Expanded(
@@ -318,6 +376,9 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
           ],
         ),
         const Spacer(),
+        const SizedBox(
+          height: 16,
+        ),
         const PciDssIcon(),
         const SizedBox(
           height: 32,
@@ -344,14 +405,47 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
     );
     try {
       final response = await paymentService.createPayment(paymentRequestBody);
-      setState(() {
-        paymentResponseBody = PaymentResponseBody.fromJson(response.data);
-      });
-      _controller.forward();
+
+      paymentResponseBody = PaymentResponseBody.fromJson(response.data);
+
+      final expiresAt = paymentResponseBody?.bankDetails?.expiresAt ??
+          DateTime.now().add(const Duration(minutes: 30));
+      _initCountDown(expiresAt);
     } on DioException catch (e) {}
 
     setState(() {
       initiatingPayment = false;
     });
+  }
+
+  _initCountDown(DateTime expiresAt) {
+    final time = expiresAt.difference(DateTime.now());
+    _controller = AnimationController(
+      vsync: this,
+      duration: time,
+    );
+    _animation = Tween<double>(begin: 1.0, end: 0.0).animate(_controller);
+
+    _controller.addListener(() {
+      if (_animation.value == 0) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => TransferErrorPage(
+                paymentManager: widget.paymentManager,
+                message: "Account Expired",
+                paymentResponseBody: paymentResponseBody!),
+          ),
+        );
+      } else {
+        setState(() {
+          double remainingSeconds =
+              (_controller.duration!.inMilliseconds * _animation.value)
+                      .round() /
+                  1000;
+          _remainingTime = formatTime(remainingSeconds.toInt());
+        });
+      }
+    });
+    _controller.forward();
   }
 }

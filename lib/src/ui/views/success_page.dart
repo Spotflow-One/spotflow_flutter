@@ -111,7 +111,7 @@ class _SuccessPageState extends State<SuccessPage> {
   }
 
   Future<void> _close() async {
-    await Future.delayed(const Duration(seconds: 1));
+    await Future.delayed(const Duration(seconds: 10));
     if (mounted == false) return;
     Navigator.of(context)
         .popUntil((route) => route.settings.name == SpotFlowRouteName.homePage);

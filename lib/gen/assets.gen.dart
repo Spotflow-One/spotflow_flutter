@@ -21,6 +21,10 @@ class $AssetsSvgGen {
   /// File path: assets/svg/copy-icon.svg
   SvgGenImage get copyIcon => const SvgGenImage('assets/svg/copy-icon.svg');
 
+  /// File path: assets/svg/dotted-circle.svg
+  SvgGenImage get dottedCircle =>
+      const SvgGenImage('assets/svg/dotted-circle.svg');
+
   /// File path: assets/svg/info-circle.svg
   SvgGenImage get infoCircle => const SvgGenImage('assets/svg/info-circle.svg');
 
@@ -49,6 +53,7 @@ class $AssetsSvgGen {
   List<SvgGenImage> get values => [
         checkIcon,
         copyIcon,
+        dottedCircle,
         infoCircle,
         payWithCardIcon,
         payWithTransferIcon,
