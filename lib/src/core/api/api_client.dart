@@ -24,10 +24,14 @@ class ApiClient {
         options: options,
       );
 
-  Future get(String path, {Map<String, dynamic>? data, Options? options}) =>
+  Future<Response> get(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+  }) =>
       dio.get(
         path,
-        data: data,
+        queryParameters: queryParameters,
         options: options,
       );
 
