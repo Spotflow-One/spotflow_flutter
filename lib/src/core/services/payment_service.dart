@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:spotflow/spotflow.dart';
 import 'package:spotflow/src/core/api/api_client.dart';
 import 'package:spotflow/src/core/api/api_route.dart';
@@ -8,12 +9,13 @@ import 'package:spotflow/src/core/models/payment_options_enum.dart';
 import 'package:spotflow/src/core/models/payment_request_body.dart';
 import 'package:spotflow/src/core/models/payment_response_body.dart';
 import 'package:spotflow/src/core/models/validate_payment_request_body.dart';
+import 'package:spotflow/src/ui/views/authorization_web_view.dart';
 import 'package:spotflow/src/ui/views/card/enter_otp_page.dart';
 import 'package:spotflow/src/ui/views/card/enter_pin_page.dart';
 import 'package:spotflow/src/ui/views/error_page.dart';
 import 'package:spotflow/src/ui/views/success_page.dart';
 
-class PaymentService {
+class PaymentService implements TransactionCallBack {
   final String authToken;
 
   PaymentService(this.authToken);
@@ -94,6 +96,27 @@ class PaymentService {
           ),
         ),
       );
+    } else if (paymentResponseBody.authorization?.mode == '3DS') {
+      if (paymentManager.provider == 'flutterwave') {
+        final settings = InAppBrowserClassSettings(
+          browserSettings: InAppBrowserSettings(
+            hideUrlBar: true,
+            hideTitleBar: true,
+          ),
+          webViewSettings: InAppWebViewSettings(
+            javaScriptEnabled: true,
+          ),
+        );
+        final browser = FlutterwaveInAppBrowser(callBack: this);
+
+        browser.openUrlRequest(
+          urlRequest: URLRequest(
+              url: WebUri(
+            paymentResponseBody.authorization!.redirectUrl!,
+          )),
+          settings: settings,
+        );
+      }
     } else {
       Navigator.of(context).push(
         MaterialPageRoute(
@@ -108,5 +131,15 @@ class PaymentService {
     }
   }
 
-  getRate() async {}
+  Future<Response> getRate({required String from, required String to}) async {
+    final response = await apiClient
+        .get(ApiRoute.fetchRate, queryParameters: {"from": from, "to": to});
+    return response;
+  }
+
+  @override
+  onTransactionComplete(ChargeResponse? chargeResponse) {
+    print('charge response');
+    print(chargeResponse?.toJson());
+  }
 }

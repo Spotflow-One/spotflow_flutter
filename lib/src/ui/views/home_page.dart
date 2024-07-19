@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spotflow/spotflow.dart';
 import 'package:spotflow/src/core/models/payment_options_enum.dart';
+import 'package:spotflow/src/core/models/payment_response_body.dart';
 import 'package:spotflow/src/core/services/payment_service.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
@@ -34,11 +35,20 @@ class _HomePageState extends State<HomePage> {
       appLogo: widget.paymentManager.appLogo,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: _HomePageUi(
-            paymentManager: widget.paymentManager,
+        if (fetchingRate) ...[
+          const Expanded(
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          )
+        ] else ...[
+          Expanded(
+            child: _HomePageUi(
+              paymentManager: widget.paymentManager,
+              rate: rate,
+            ),
           ),
-        ),
+        ]
       ],
     );
   }
@@ -49,36 +59,61 @@ class _HomePageState extends State<HomePage> {
     _fetchRate();
   }
 
-  void _fetchRate() {
+  Rate? rate;
+
+  bool fetchingRate = false;
+
+  Future<void> _fetchRate() async {
+    setState(() {
+      fetchingRate = true;
+    });
     final paymentService = PaymentService(widget.paymentManager.key);
-    final rateResponse = paymentService.getRate();
+    final rateResponse = await paymentService.getRate(
+      from: widget.paymentManager.fromCurrency,
+      to: widget.paymentManager.toCurrency,
+    );
+    setState(() {
+      rate = Rate.fromJson(rateResponse.data);
+      fetchingRate = false;
+    });
   }
 }
 
 class _HomePageUi extends StatelessWidget {
   final SpotFlowPaymentManager paymentManager;
+  final Rate? rate;
 
-  const _HomePageUi({super.key, required this.paymentManager});
+  const _HomePageUi(
+      {super.key, required this.paymentManager, required this.rate});
 
   @override
   Widget build(BuildContext context) {
+    final toFormattedAmount =
+        "${rate?.to}${(rate!.rate * paymentManager.amount).toStringAsFixed(2)}";
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(
           height: 34,
         ),
         PaymentCard(
           paymentManager: paymentManager,
+          rate: rate,
         ),
         const SizedBox(
           height: 27,
         ),
-        Text(
-          'Use one of the payment methods below to pay NGN500,000,000 to Spotflow',
-          style: SpotFlowTextStyle.body12Regular.copyWith(
-            color: SpotFlowColors.tone40,
+        if (rate != null) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5.0),
+            child: Text(
+              'Use one of the payment methods below to pay ${toFormattedAmount} to Spotflow',
+              style: SpotFlowTextStyle.body12Regular.copyWith(
+                color: SpotFlowColors.tone40,
+              ),
+            ),
           ),
-        ),
+        ],
         Padding(
           padding: const EdgeInsets.only(left: 22.0, top: 60.0),
           child: Text(
@@ -91,9 +126,12 @@ class _HomePageUi extends StatelessWidget {
         const SizedBox(
           height: 10.5,
         ),
-        const Divider(
-          thickness: 0.5,
-          color: SpotFlowColors.tone10,
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 4.0),
+          child: Divider(
+            thickness: 0.5,
+            color: SpotFlowColors.tone10,
+          ),
         ),
         ...PaymentOptionsEnum.values.map((e) {
           return Padding(
@@ -102,7 +140,7 @@ class _HomePageUi extends StatelessWidget {
               icon: e.icon,
               text: e.title,
               onTap: () {
-                onSelected(e, context, paymentManager);
+                onSelected(e, context, paymentManager, rate);
               },
             ),
           );
@@ -111,7 +149,9 @@ class _HomePageUi extends StatelessWidget {
           height: 40,
         ),
         const Center(
-          child: CancelPaymentButton(),
+          child: CancelPaymentButton(
+            alignment: null,
+          ),
         ),
         const Spacer(),
         const PciDssIcon(),
@@ -122,17 +162,16 @@ class _HomePageUi extends StatelessWidget {
     );
   }
 
-  void onSelected(
-    PaymentOptionsEnum e,
-    BuildContext context,
-    SpotFlowPaymentManager paymentManager,
-  ) {
+  void onSelected(PaymentOptionsEnum e, BuildContext context,
+      SpotFlowPaymentManager paymentManager, Rate? rate) {
     switch (e) {
       case PaymentOptionsEnum.card:
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) =>
-                EnterCardDetailsPage(paymentManager: paymentManager),
+            builder: (context) => EnterCardDetailsPage(
+              paymentManager: paymentManager,
+              rate: rate,
+            ),
           ),
         );
       case PaymentOptionsEnum.transfer:
@@ -146,7 +185,10 @@ class _HomePageUi extends StatelessWidget {
       case PaymentOptionsEnum.ussd:
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => const ViewBanksUssdPage(),
+            builder: (context) => ViewBanksUssdPage(
+              paymentManager: paymentManager,
+              rate: rate,
+            ),
           ),
         );
     }

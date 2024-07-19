@@ -135,6 +135,9 @@ class _EnterPinPageUIState extends State<_EnterPinPageUI> {
           height: 64,
         ),
         const PciDssIcon(),
+        const SizedBox(
+          height: 64,
+        ),
       ],
     );
   }

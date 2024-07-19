@@ -16,7 +16,7 @@ class BaseScaffold extends StatelessWidget {
     this.crossAxisAlignment = CrossAxisAlignment.center,
     this.mainAxisAlignment = MainAxisAlignment.start,
     this.mainAxisSize = MainAxisSize.max,
-    this.padding = const EdgeInsets.symmetric(horizontal: 19.0),
+    this.padding = const EdgeInsets.symmetric(horizontal: 17.0),
   });
 
   @override

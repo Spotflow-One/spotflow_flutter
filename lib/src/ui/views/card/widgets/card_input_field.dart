@@ -32,23 +32,44 @@ class CardInputField extends StatelessWidget {
           width: 0.5,
         ),
       ),
-      child: TextField(
-        inputFormatters: inputFormatters,
-        controller: textEditingController,
-        onChanged: onChanged,
-        decoration: InputDecoration(
-          labelText: labelText,
-          labelStyle: SpotFlowTextStyle.body12Regular.copyWith(
-            color: SpotFlowColors.tone40,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(
+            height: 4.5,
           ),
-          hintText: hintText,
-          hintStyle: SpotFlowTextStyle.body14Regular.copyWith(
-            color: SpotFlowColors.tone30,
+          Text(
+            labelText,
+            style: SpotFlowTextStyle.body12Regular.copyWith(
+              color: SpotFlowColors.tone40,
+            ),
           ),
-          focusedBorder: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          border: InputBorder.none,
-        ),
+          const SizedBox(
+            height: 2,
+          ),
+          TextField(
+            inputFormatters: inputFormatters,
+            controller: textEditingController,
+            onChanged: onChanged,
+            maxLines: 1,
+            decoration: InputDecoration(
+              hintText: hintText,
+              isCollapsed: true,
+              hintStyle: SpotFlowTextStyle.body14Regular.copyWith(
+                color: SpotFlowColors.tone30,
+              ),
+              fillColor: Colors.transparent,
+              filled: true,
+              contentPadding: EdgeInsets.zero,
+              focusedBorder: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              border: InputBorder.none,
+            ),
+          ),
+          const SizedBox(
+            height: 4.5,
+          ),
+        ],
       ),
     );
   }

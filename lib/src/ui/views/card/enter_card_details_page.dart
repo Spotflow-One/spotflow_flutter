@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:spotflow/gen/assets.gen.dart';
 import 'package:spotflow/src/core/models/payment_request_body.dart';
+import 'package:spotflow/src/core/models/payment_response_body.dart';
 import 'package:spotflow/src/core/models/spot_flow_card.dart';
 import 'package:spotflow/src/core/services/payment_service.dart';
 import 'package:spotflow/src/spotflow.dart';
@@ -20,10 +21,12 @@ import 'widgets/card_input_field.dart';
 
 class EnterCardDetailsPage extends StatelessWidget {
   final SpotFlowPaymentManager paymentManager;
+  final Rate? rate;
 
   const EnterCardDetailsPage({
     super.key,
     required this.paymentManager,
+    this.rate,
   });
 
   @override
@@ -38,6 +41,7 @@ class EnterCardDetailsPage extends StatelessWidget {
         ),
         PaymentCard(
           paymentManager: paymentManager,
+          rate: rate,
         ),
         Expanded(
           child: _CardInputUI(paymentManager: paymentManager),
@@ -180,7 +184,7 @@ class _CardInputUIState extends State<_CardInputUI> {
                 child: ChangePaymentButton(),
               ),
               SizedBox(
-                width: 8.0,
+                width: 18.0,
               ),
               Expanded(
                 child: CancelPaymentButton(),

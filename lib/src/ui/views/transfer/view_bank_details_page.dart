@@ -327,7 +327,7 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
           height: 16,
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 0.0),
           child: TextButton(
             onPressed: () {
               Navigator.of(context).push(
@@ -367,7 +367,7 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
               child: ChangePaymentButton(),
             ),
             SizedBox(
-              width: 16.0,
+              width: 18.0,
             ),
             Expanded(
               flex: 2,

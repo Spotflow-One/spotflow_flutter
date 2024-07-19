@@ -17,104 +17,107 @@ class PaymentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(
-        14,
-        48,
-        14,
-        32,
-      ),
-      decoration: BoxDecoration(
-        color: SpotFlowColors.primaryBase,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: SpotFlowColors.primary5,
-          width: 1.0,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(
+          14,
+          48,
+          14,
+          32,
         ),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                paymentManager.customerEmail,
-                style: SpotFlowTextStyle.body12Regular.copyWith(
-                  color: SpotFlowColors.kcBaseWhite,
-                ),
-              ),
-              Text(
-                paymentManager.paymentDescription ?? "",
-                style: SpotFlowTextStyle.body14Regular.copyWith(
-                  color: SpotFlowColors.kcBaseWhite,
-                ),
-              )
-            ],
+        decoration: BoxDecoration(
+          color: SpotFlowColors.primaryBase,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: SpotFlowColors.primary5,
+            width: 1.0,
           ),
-          const SizedBox(
-            height: 8.0,
-          ),
-          const Divider(
-            color: SpotFlowColors.tone10,
-            thickness: 1,
-          ),
-          Row(
-            children: [
-              if (rate != null) ...[
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
                 Text(
-                  "${rate?.from} 1 = ${rate?.to} ${rate?.rate}",
+                  paymentManager.customerEmail,
+                  style: SpotFlowTextStyle.body12Regular.copyWith(
+                    color: SpotFlowColors.kcBaseWhite,
+                  ),
+                ),
+                Text(
+                  paymentManager.paymentDescription ?? "",
+                  style: SpotFlowTextStyle.body14Regular.copyWith(
+                    color: SpotFlowColors.kcBaseWhite,
+                  ),
+                )
+              ],
+            ),
+            const SizedBox(
+              height: 8.0,
+            ),
+            const Divider(
+              color: SpotFlowColors.tone10,
+              thickness: 1,
+            ),
+            Row(
+              children: [
+                if (rate != null) ...[
+                  Text(
+                    "${rate?.from} 1 = ${rate?.to} ${rate?.rate}",
+                    style: SpotFlowTextStyle.body14Regular.copyWith(
+                      color: SpotFlowColors.kcBaseWhite,
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 3,
+                  ),
+                  Assets.svg.infoCircle.svg(),
+                ],
+                const Spacer(),
+                Text(
+                  'Pay',
                   style: SpotFlowTextStyle.body14Regular.copyWith(
                     color: SpotFlowColors.kcBaseWhite,
                   ),
                 ),
                 const SizedBox(
-                  width: 3,
+                  width: 4,
                 ),
-                Assets.svg.infoCircle.svg(),
-              ],
-              const Spacer(),
-              Text(
-                'Pay',
-                style: SpotFlowTextStyle.body14Regular.copyWith(
-                  color: SpotFlowColors.kcBaseWhite,
-                ),
-              ),
-              const SizedBox(
-                width: 4,
-              ),
-              Text(
-                '${paymentManager.fromCurrency} ${paymentManager.amount.toStringAsFixed(2)}',
-                style: SpotFlowTextStyle.body16SemiBold.copyWith(
-                  color: SpotFlowColors.kcBaseWhite,
-                ),
-              )
-            ],
-          ),
-          const SizedBox(
-            height: 6.0,
-          ),
-          if (rate != null) ...[
-            Align(
-              alignment: Alignment.centerRight,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 3,
-                ),
-                decoration: BoxDecoration(
-                  color: SpotFlowColors.greenBase,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  "${rate?.to} ${(rate!.rate * paymentManager.amount).toStringAsFixed(2)}",
-                  style: SpotFlowTextStyle.body12Regular.copyWith(
+                Text(
+                  '${paymentManager.fromCurrency} ${paymentManager.amount.toStringAsFixed(2)}',
+                  style: SpotFlowTextStyle.body16SemiBold.copyWith(
                     color: SpotFlowColors.kcBaseWhite,
                   ),
+                )
+              ],
+            ),
+            const SizedBox(
+              height: 6.0,
+            ),
+            if (rate != null) ...[
+              Align(
+                alignment: Alignment.centerRight,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: SpotFlowColors.greenBase,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    "${rate?.to} ${(rate!.rate * paymentManager.amount).toStringAsFixed(2)}",
+                    style: SpotFlowTextStyle.body12Regular.copyWith(
+                      color: SpotFlowColors.kcBaseWhite,
+                    ),
+                  ),
                 ),
-              ),
-            )
-          ]
-        ],
+              )
+            ]
+          ],
+        ),
       ),
     );
   }
