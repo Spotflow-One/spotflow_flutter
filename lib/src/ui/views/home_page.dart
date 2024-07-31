@@ -69,8 +69,8 @@ class _HomePageState extends State<HomePage> {
     });
     final paymentService = PaymentService(widget.paymentManager.key);
     final rateResponse = await paymentService.getRate(
-      from: widget.paymentManager.fromCurrency,
-      to: widget.paymentManager.toCurrency,
+      to: widget.paymentManager.fromCurrency,
+      from: widget.paymentManager.toCurrency,
     );
     setState(() {
       rate = Rate.fromJson(rateResponse.data);
@@ -88,8 +88,12 @@ class _HomePageUi extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final toFormattedAmount =
-        "${rate?.to}${(rate!.rate * paymentManager.amount).toStringAsFixed(2)}";
+    String toFormattedAmount = "";
+    if (rate != null) {
+      toFormattedAmount =
+          "${rate?.to}${(rate!.rate * paymentManager.amount).toStringAsFixed(2)}";
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -107,7 +111,7 @@ class _HomePageUi extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 5.0),
             child: Text(
-              'Use one of the payment methods below to pay ${toFormattedAmount} to Spotflow',
+              'Use one of the payment methods below to pay $toFormattedAmount to Spotflow',
               style: SpotFlowTextStyle.body12Regular.copyWith(
                 color: SpotFlowColors.tone40,
               ),

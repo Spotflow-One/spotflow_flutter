@@ -15,21 +15,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
         textTheme: GoogleFonts.latoTextTheme(),
@@ -63,11 +48,13 @@ class _MyHomePageState extends State<MyHomePage> {
       context: context,
       paymentManager: SpotFlowPaymentManager(
         merchantId: "2f020a56-fbd3-40a3-ac90-d77d38399b6d",
-        customerEmail: "nkwachi@spotflow.one",
+        customerEmail: emailController.text.isEmpty
+            ? "nkwachi@spotflow.one"
+            : emailController.text,
         paymentId: "paymentId",
         fromCurrency: "USD",
         toCurrency: "NGN",
-        amount: 10,
+        amount: num.tryParse(amountController.text) ?? 10,
         key: "sk_test_9b4208cb7d4d4747bf6f5c4ac1f978af",
         provider: "flutterwave",
         paymentDescription: "League Pass",
@@ -77,6 +64,9 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+
+  TextEditingController emailController = TextEditingController();
+  TextEditingController amountController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -99,16 +89,38 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            ElevatedButton(
-              onPressed: () {
-                _startPayment();
-              },
-              child: Text('Start payment'),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              TextField(
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  hintText: "email@sample.com",
+                ),
+              ),
+              const SizedBox(
+                height: 16,
+              ),
+              TextField(
+                controller: amountController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(hintText: 'amount'),
+              ),
+              const SizedBox(
+                height: 16,
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  _startPayment();
+                },
+                child: const Text('Start payment'),
+              ),
+            ],
+          ),
         ),
       ),
       // This trailing comma makes auto-formatting nicer for build methods.
