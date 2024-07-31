@@ -4,7 +4,11 @@ import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 
 class CancelPaymentButton extends StatelessWidget {
-  const CancelPaymentButton({super.key});
+  final Alignment? alignment;
+  const CancelPaymentButton({
+    super.key,
+    this.alignment = Alignment.center,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +23,7 @@ class CancelPaymentButton extends StatelessWidget {
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-        alignment: Alignment.center,
+        alignment: alignment,
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(4),
             border: Border.all(

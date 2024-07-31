@@ -24,10 +24,12 @@ class ChangePaymentButton extends StatelessWidget {
             border: Border.all(
               color: SpotFlowColors.tone10,
             )),
-        child: Text(
-          'x Change Payment Method',
-          style: SpotFlowTextStyle.body12SemiBold.copyWith(
-            color: SpotFlowColors.tone70,
+        child: FittedBox(
+          child: Text(
+            'x Change Payment Method',
+            style: SpotFlowTextStyle.body12SemiBold.copyWith(
+              color: SpotFlowColors.tone70,
+            ),
           ),
         ),
       ),

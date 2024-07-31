@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spotflow/gen/assets.gen.dart';
+import 'package:spotflow/spotflow.dart';
+import 'package:spotflow/src/core/models/payment_response_body.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
@@ -8,8 +10,12 @@ import 'package:spotflow/src/ui/widgets/change_payment_button.dart';
 import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
 import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 
+import '../../widgets/payment_card.dart';
+
 class ViewBanksUssdPage extends StatelessWidget {
-  const ViewBanksUssdPage({super.key});
+  final SpotFlowPaymentManager paymentManager;
+  final Rate? rate;
+  const ViewBanksUssdPage({super.key, required this.paymentManager, this.rate});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +25,10 @@ class ViewBanksUssdPage extends StatelessWidget {
           icon: Assets.svg.payWithUsdIcon.svg(),
           text: 'Pay with USSD',
         ),
-        // const PaymentCard(),
+        PaymentCard(
+          paymentManager: paymentManager,
+          rate: rate,
+        ),
         const SizedBox(
           height: 70,
         ),
@@ -81,7 +90,7 @@ class ViewBanksUssdPage extends StatelessWidget {
               child: ChangePaymentButton(),
             ),
             SizedBox(
-              width: 8.0,
+              width: 18.0,
             ),
             Expanded(
               child: CancelPaymentButton(),

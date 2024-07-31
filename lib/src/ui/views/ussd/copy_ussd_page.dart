@@ -117,7 +117,7 @@ class CopyUssdPage extends StatelessWidget {
               child: ChangePaymentButton(),
             ),
             SizedBox(
-              width: 8.0,
+              width: 18.0,
             ),
             Expanded(
               child: CancelPaymentButton(),

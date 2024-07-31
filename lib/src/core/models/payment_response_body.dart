@@ -84,13 +84,16 @@ class Rate {
 
 class Authorization {
   final String mode;
+  final String? redirectUrl;
 
   Authorization({
     required this.mode,
+    this.redirectUrl,
   });
 
   factory Authorization.fromJson(Map<String, dynamic> json) => Authorization(
         mode: json['mode'] as String,
+        redirectUrl: json['redirectUrl'] as String?,
       );
 }
 
@@ -110,6 +113,6 @@ class BankDetails {
       );
 
   static DateTime _getDateTime() {
-    return DateTime.now().add(const Duration(seconds: 30));
+    return DateTime.now().add(const Duration(minutes: 30));
   }
 }

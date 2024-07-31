@@ -90,12 +90,15 @@ class _EnterOtpPageUiState extends State<_EnterOtpPageUi> {
         const SizedBox(
           height: 47.0,
         ),
-        Center(
-          child: Text(
-            widget.message,
-            textAlign: TextAlign.center,
-            style: SpotFlowTextStyle.body14SemiBold.copyWith(
-              color: SpotFlowColors.tone70,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 19.0),
+          child: Center(
+            child: Text(
+              widget.message,
+              textAlign: TextAlign.center,
+              style: SpotFlowTextStyle.body14SemiBold.copyWith(
+                color: SpotFlowColors.tone70,
+              ),
             ),
           ),
         ),

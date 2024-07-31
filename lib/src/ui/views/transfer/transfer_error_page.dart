@@ -112,12 +112,14 @@ class TransferErrorPage extends StatelessWidget {
           const Row(
             children: [
               Expanded(
+                flex: 3,
                 child: ChangePaymentButton(),
               ),
               SizedBox(
-                width: 8.0,
+                width: 18.0,
               ),
               Expanded(
+                flex: 2,
                 child: CancelPaymentButton(),
               ),
             ],

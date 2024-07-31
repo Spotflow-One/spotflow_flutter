@@ -233,7 +233,7 @@ class _TransferStatusCheckPageState extends State<TransferStatusCheckPage>
                 child: ChangePaymentButton(),
               ),
               SizedBox(
-                width: 8.0,
+                width: 18.0,
               ),
               Expanded(
                 child: CancelPaymentButton(),
@@ -276,6 +276,7 @@ class _TransferStatusCheckPageState extends State<TransferStatusCheckPage>
           builder: (context) => SuccessPage(
             paymentOptionsEnum: PaymentOptionsEnum.transfer,
             paymentManager: widget.paymentManager,
+            rate: widget.rate,
             successMessage:
                 "${widget.paymentManager.paymentDescription} payment successful",
           ),
