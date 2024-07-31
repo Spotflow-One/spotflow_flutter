@@ -1,39 +1,71 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# Spotflow Flutter Package Documentation
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/guides/libraries/writing-package-pages).
+## Introduction
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-library-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/developing-packages).
--->
+The `Spotflow` package allows developers to integrate seamless payment functionalities into their Flutter applications using various providers such as Flutterwave. It supports both Android and iOS platforms, making it versatile for mobile app development.
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+## Installation
 
-## Features
+To use the `Spotflow` package, add it to your `pubspec.yaml` file:
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+```yaml
+dependencies:
+  spotflow: ^1.0.0
+ ```
 
-## Getting started
-
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+Then run `flutter pub get` to install the package.
 
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
+### Making payments
+
+To start the `Spotflow` package, use the `Spotflow().start()` method. This method requires a `BuildContext` and a `SpotFlowPaymentManager` with various parameters.
+
+Here is an example of how to make a payment using the `Spotflow` package:
 
 ```dart
-const like = 'sample';
-```
+Spotflow().start( context: context,
+ paymentManager: SpotFlowPaymentManager( merchantId: "",
+  customerEmail: "" , 
+  paymentId: "", 
+  fromCurrency: "", 
+  toCurrency: "",
+  amount: 0,
+  key: "",
+  provider: "",
+  paymentDescription: "",
+  appLogo: SizedBox() 
+ );
+ ```
 
-## Additional information
+### Parameters
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+-   **context**: The `BuildContext` of the application.
+-   **paymentManager**: An instance of `SpotFlowPaymentManager` containing the payment details.
+
+### SpotFlowPaymentManager
+
+The `SpotFlowPaymentManager` class requires the following parameters:
+
+-   **merchantId**: The unique identifier for the merchant.
+-   **customerEmail**: The email address of the customer.
+-   **paymentId**: A unique identifier for the payment.
+-   **fromCurrency**: The currency from which the amount is being converted.
+-   **toCurrency**: The currency to which the amount is being converted.
+-   **amount**: The amount to be paid.
+-   **key**: The API key for the payment provider.
+-   **provider**: The payment provider (e.g., "flutterwave").
+-   **paymentDescription**: A description of the payment.
+-   **appLogo**: An image widget for the application logo.
+
+## Testing Your Implementation
+
+Use test cards provided by your payment provider to test your implementation.
+
+## Running the Example Project
+
+An example project has been provided in this plugin. Clone the repository and navigate to the example folder. Open it with a supported IDE or run `flutter run` from the terminal in that folder.
+
+## Contributing, Issues, and Bug Reports
+
+The project is open to public contributions. Feel free to contribute. If you experience any issues or want to report a bug, please open an issue on the repository. Be as descriptive as possible.
