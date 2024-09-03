@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:spotflow/gen/assets.gen.dart';
 import 'package:spotflow/spotflow.dart';
 import 'package:spotflow/src/core/models/payment_options_enum.dart';
-import 'package:spotflow/src/core/models/payment_response_body.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
+import 'package:spotflow/src/ui/views/card/enter_card_details_page.dart';
+import 'package:spotflow/src/ui/views/transfer/view_bank_details_page.dart';
+import 'package:spotflow/src/ui/views/ussd/view_banks_ussd_page.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
 import 'package:spotflow/src/ui/widgets/payment_card.dart';
 import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
@@ -14,7 +16,7 @@ class ErrorPage extends StatelessWidget {
   final SpotFlowPaymentManager paymentManager;
   final String message;
   final PaymentOptionsEnum paymentOptionsEnum;
-  final Rate? rate;
+  final double? rate;
 
   const ErrorPage({
     super.key,
@@ -67,7 +69,14 @@ class ErrorPage extends StatelessWidget {
           height: 60.0,
         ),
         TextButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) =>
+                    EnterCardDetailsPage(paymentManager: paymentManager),
+              ),
+            );
+          },
           style: buttonStyle,
           child: Text(
             'Try again with your card',
@@ -80,7 +89,14 @@ class ErrorPage extends StatelessWidget {
           height: 16,
         ),
         TextButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) =>
+                    ViewBankDetailsPage(paymentManager: paymentManager),
+              ),
+            );
+          },
           style: buttonStyle,
           child: Text(
             'Try again with transfer',
@@ -93,7 +109,14 @@ class ErrorPage extends StatelessWidget {
           height: 16,
         ),
         TextButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) =>
+                    ViewBanksUssdPage(paymentManager: paymentManager),
+              ),
+            );
+          },
           style: buttonStyle,
           child: Text(
             'Try again with USSD',

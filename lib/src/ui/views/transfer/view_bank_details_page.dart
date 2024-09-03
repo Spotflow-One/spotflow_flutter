@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:spotflow/gen/assets.gen.dart';
 import 'package:spotflow/spotflow.dart';
 import 'package:spotflow/src/core/models/payment_request_body.dart';
@@ -125,8 +126,9 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
     }
 
     final rate = paymentResponseBody!.rate;
-    final formattedAmount =
-        "${rate?.to} ${(rate!.rate * widget.paymentManager.amount).toStringAsFixed(2)}";
+    final totalAmount =
+        (rate! * widget.paymentManager.amount).toStringAsFixed(2);
+    final formattedAmount = "${widget.paymentManager.toCurrency} $totalAmount";
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -175,13 +177,6 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
                       ),
                     ],
                   ),
-                  Spacer(),
-                  Text(
-                    'CHANGE BANK',
-                    style: SpotFlowTextStyle.body10Regular.copyWith(
-                      color: SpotFlowColors.tone60,
-                    ),
-                  )
                 ],
               ),
               const SizedBox(
@@ -208,10 +203,21 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
                     ],
                   ),
                   const Spacer(),
-                  Assets.svg.copyIcon.svg(
-                    colorFilter: const ColorFilter.mode(
-                      SpotFlowColors.primary50,
-                      BlendMode.srcIn,
+                  InkWell(
+                    onTap: () {
+                      Clipboard.setData(
+                        ClipboardData(
+                          text:
+                              paymentResponseBody?.bankDetails?.accountNumber ??
+                                  "",
+                        ),
+                      );
+                    },
+                    child: Assets.svg.copyIcon.svg(
+                      colorFilter: const ColorFilter.mode(
+                        SpotFlowColors.primary50,
+                        BlendMode.srcIn,
+                      ),
                     ),
                   )
                 ],
@@ -239,9 +245,15 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
                       ),
                     ],
                   ),
-                  Spacer(),
+                  const Spacer(),
                   InkWell(
-                    onTap: () {},
+                    onTap: () {
+                      Clipboard.setData(
+                        ClipboardData(
+                          text: totalAmount,
+                        ),
+                      );
+                    },
                     child: Assets.svg.copyIcon.svg(
                       colorFilter: const ColorFilter.mode(
                         SpotFlowColors.primary50,
@@ -252,22 +264,6 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
                 ],
               ),
             ],
-          ),
-        ),
-        const SizedBox(
-          height: 19,
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30.0),
-          child: Center(
-            child: Text(
-              'Search for Spotflow Direct  or Direct Spotflow on your bank app. '
-              'Use this account for this transaction only',
-              style: SpotFlowTextStyle.body12Regular.copyWith(
-                color: SpotFlowColors.tone60,
-              ),
-              textAlign: TextAlign.start,
-            ),
           ),
         ),
         const SizedBox(
@@ -282,7 +278,7 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
               children: [
                 CircularProgressIndicator(
                   value: _animation.value,
-                  backgroundColor: Color(0xFFE1E0F1),
+                  backgroundColor: const Color(0xFFE1E0F1),
                   valueColor: const AlwaysStoppedAnimation<Color>(
                       SpotFlowColors.primaryBase),
                   strokeCap: StrokeCap.round,
@@ -343,7 +339,7 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
-                side: BorderSide(
+                side: const BorderSide(
                   color: Color(0xFFC0B5CF),
                   width: 1,
                 ),
@@ -401,7 +397,6 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
       currency: paymentManager.fromCurrency,
       amount: paymentManager.amount,
       channel: "bank_transfer",
-      provider: paymentManager.provider,
     );
     try {
       final response = await paymentService.createPayment(paymentRequestBody);

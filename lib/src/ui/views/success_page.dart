@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:simple_ripple_animation/simple_ripple_animation.dart';
 import 'package:spotflow/spotflow.dart';
 import 'package:spotflow/src/core/models/payment_options_enum.dart';
-import 'package:spotflow/src/core/models/payment_response_body.dart';
 import 'package:spotflow/src/ui/utils/spot_flow_route_name.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
@@ -14,7 +13,7 @@ import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 class SuccessPage extends StatefulWidget {
   final PaymentOptionsEnum paymentOptionsEnum;
   final SpotFlowPaymentManager paymentManager;
-  final Rate? rate;
+  final double? rate;
   final String successMessage;
 
   const SuccessPage({
@@ -73,8 +72,8 @@ class _SuccessPageState extends State<SuccessPage> {
               Text(
                 widget.successMessage,
                 textAlign: TextAlign.center,
-                style: SpotFlowTextStyle.body14Regular.copyWith(
-                  color: SpotFlowColors.tone80,
+                style: SpotFlowTextStyle.body16SemiBold.copyWith(
+                  color: SpotFlowColors.tone70,
                 ),
               )
             ],
@@ -111,7 +110,7 @@ class _SuccessPageState extends State<SuccessPage> {
   }
 
   Future<void> _close() async {
-    await Future.delayed(const Duration(seconds: 10));
+    await Future.delayed(const Duration(seconds: 2));
     if (mounted == false) return;
     Navigator.of(context)
         .popUntil((route) => route.settings.name == SpotFlowRouteName.homePage);

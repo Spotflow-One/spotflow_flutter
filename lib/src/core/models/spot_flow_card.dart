@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class SpotFlowCard {
   String pan;
   String cvv;
@@ -17,4 +19,20 @@ class SpotFlowCard {
         'expiryYear': expiryYear,
         'expiryMonth': expiryMonth,
       };
+
+  @override
+  String toString() {
+    return jsonEncode(toJson());
+  }
+
+// String toJson() {
+  //   return '''
+  // {
+  // "pan" : "$pan",
+  // "cvv": "$cvv",
+  // "expiryYear":"$expiryYear",
+  // "expiryMonth":"$expiryMonth"
+  // }
+  // ''';
+  // }
 }

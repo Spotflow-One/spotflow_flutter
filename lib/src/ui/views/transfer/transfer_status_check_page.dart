@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:spotflow/gen/assets.gen.dart';
 import 'package:spotflow/spotflow.dart';
@@ -9,6 +10,7 @@ import 'package:spotflow/src/core/services/payment_service.dart';
 import 'package:spotflow/src/ui/utils/spot_flow_route_name.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
+import 'package:spotflow/src/ui/views/error_page.dart';
 import 'package:spotflow/src/ui/views/success_page.dart';
 import 'package:spotflow/src/ui/views/transfer/view_bank_details_page.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
@@ -20,7 +22,7 @@ import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 
 class TransferStatusCheckPage extends StatefulWidget {
   final SpotFlowPaymentManager paymentManager;
-  final Rate? rate;
+  final double? rate;
   final String reference;
   final PaymentResponseBody paymentResponseBody;
 
@@ -257,28 +259,61 @@ class _TransferStatusCheckPageState extends State<TransferStatusCheckPage>
   }
 
   _verifyPayment() async {
-    final paymentService = PaymentService(widget.paymentManager.key);
-    final response = await paymentService.verifyPayment(
-      reference: widget.paymentResponseBody.reference,
-      merchantId: widget.paymentManager.merchantId,
-    );
-    final body = PaymentResponseBody.fromJson(response.data);
-    if (body.status == 'successful') {
-      if (context.mounted == false) {
-        return;
-      }
+    try {
+      final paymentService = PaymentService(widget.paymentManager.key);
+      final response = await paymentService.verifyPayment(
+        reference: widget.paymentResponseBody.reference,
+        merchantId: widget.paymentManager.merchantId,
+      );
+      final body = PaymentResponseBody.fromJson(response.data);
+      if (body.status == 'successful') {
+        if (context.mounted == false) {
+          return;
+        }
 
-      Navigator.of(context).push(
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            settings: const RouteSettings(
+              name: SpotFlowRouteName.successPage,
+            ),
+            builder: (context) => SuccessPage(
+              paymentOptionsEnum: PaymentOptionsEnum.transfer,
+              paymentManager: widget.paymentManager,
+              rate: widget.rate,
+              successMessage:
+                  "${widget.paymentManager.paymentDescription} payment successful",
+            ),
+          ),
+        );
+      } else if (body.status == "failed") {
+        if (context.mounted == false) {
+          return;
+        }
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            settings: const RouteSettings(
+              name: SpotFlowRouteName.errorPage,
+            ),
+            builder: (context) => ErrorPage(
+              paymentOptionsEnum: PaymentOptionsEnum.transfer,
+              paymentManager: widget.paymentManager,
+              rate: widget.rate,
+              message: body.providerMessage ?? "Payment failed",
+            ),
+          ),
+        );
+      }
+    } on DioException catch (e) {
+      Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           settings: const RouteSettings(
-            name: SpotFlowRouteName.successPage,
+            name: SpotFlowRouteName.errorPage,
           ),
-          builder: (context) => SuccessPage(
+          builder: (context) => ErrorPage(
             paymentOptionsEnum: PaymentOptionsEnum.transfer,
             paymentManager: widget.paymentManager,
             rate: widget.rate,
-            successMessage:
-                "${widget.paymentManager.paymentDescription} payment successful",
+            message: "Payment failed",
           ),
         ),
       );

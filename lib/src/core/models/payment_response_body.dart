@@ -10,13 +10,14 @@ class PaymentResponseBody {
   final String status;
   final CustomerInfo customer;
   final String provider;
-  final Rate?
+  final double?
       rate; // Made nullable to handle potential absence of "rate" object
   final Authorization?
       authorization; // Made nullable to handle potential absence of "authorization" object
-  final DateTime createdAt;
+  final DateTime? createdAt;
   final String? providerMessage;
   final BankDetails? bankDetails;
+  final UssdResponse? ussd;
 
   PaymentResponseBody({
     required this.id,
@@ -30,9 +31,10 @@ class PaymentResponseBody {
     required this.provider,
     this.rate,
     this.authorization,
-    required this.createdAt,
+    this.createdAt,
     this.providerMessage,
     this.bankDetails,
+    this.ussd,
   });
 
   factory PaymentResponseBody.fromJson(Map<String, dynamic> json) =>
@@ -47,9 +49,7 @@ class PaymentResponseBody {
         customer:
             CustomerInfo.fromJson(json['customer'] as Map<String, dynamic>),
         provider: json['provider'] as String,
-        rate: json['rate'] != null
-            ? Rate.fromJson(json['rate'] as Map<String, dynamic>)
-            : null,
+        rate: json['rate'],
         authorization: json['authorization'] != null
             ? Authorization.fromJson(
                 json['authorization'] as Map<String, dynamic>)
@@ -57,9 +57,7 @@ class PaymentResponseBody {
         bankDetails: json['bankDetails'] != null
             ? BankDetails.fromJson(json['bankDetails'] as Map<String, dynamic>)
             : null,
-        createdAt: DateTime.parse(
-          json['createdAt'] as String,
-        ),
+        ussd: json['ussd'] != null ? UssdResponse.fromJson(json['ussd']) : null,
         providerMessage: json['providerMessage'],
       );
 }
@@ -114,5 +112,19 @@ class BankDetails {
 
   static DateTime _getDateTime() {
     return DateTime.now().add(const Duration(minutes: 30));
+  }
+}
+
+class UssdResponse {
+  String code;
+  String paymentCode;
+
+  UssdResponse({required this.code, required this.paymentCode});
+
+  factory UssdResponse.fromJson(Map<String, dynamic> json) {
+    return UssdResponse(
+      code: json['code'],
+      paymentCode: json['paymentCode'],
+    );
   }
 }

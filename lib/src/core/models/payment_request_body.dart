@@ -1,4 +1,4 @@
-import 'package:spotflow/src/core/models/spot_flow_card.dart';
+import 'package:spotflow/src/core/models/country.dart';
 import 'package:uuid/uuid.dart';
 
 import 'customer_info.dart';
@@ -9,19 +9,19 @@ class PaymentRequestBody {
 
   String currency;
   String channel;
-  SpotFlowCard? card;
+  String? encryptedCard;
   String? planId;
-  String provider;
   CustomerInfo customer;
+  Bank? bank;
 
   PaymentRequestBody({
     required this.customer,
-    this.card,
     required this.currency,
     required this.amount,
     required this.channel,
     this.planId,
-    required this.provider,
+    this.encryptedCard,
+    this.bank,
   }) : reference = _generateReference();
 
   Map<String, dynamic> toJson() {
@@ -30,15 +30,30 @@ class PaymentRequestBody {
       'amount': amount,
       'currency': currency,
       'channel': channel,
-      if (card != null) 'card': card?.toJson(),
+      if (encryptedCard != null) 'encryptedCard': encryptedCard,
       if (planId != null) 'planId': planId,
-      'provider': provider,
       'customer': customer.toJson(),
+      if (bank != null) "bank": bank!.toJson()
     };
   }
 
   static String _generateReference() {
     const uuid = Uuid();
     return "ref-${uuid.v4()}";
+  }
+}
+
+class Bank extends BaseModel {
+  String name;
+  String code;
+
+  Bank({required this.name, required this.code}) : super(name: name);
+
+  factory Bank.fromJson(Map<String, dynamic> json) {
+    return Bank(name: json['name'], code: json['code']);
+  }
+
+  Map<String, dynamic> toJson() {
+    return {"code": code};
   }
 }

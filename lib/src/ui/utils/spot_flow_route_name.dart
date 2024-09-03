@@ -8,4 +8,6 @@ class SpotFlowRouteName {
   static const enterOtpPage = 'spot-flow-enter-otp-page';
 
   static const enterPinPage = 'spot-flow-enter-pin-page';
+
+  static const errorPage = 'spot=flow-error-page';
 }

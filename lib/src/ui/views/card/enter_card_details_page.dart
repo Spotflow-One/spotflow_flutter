@@ -1,8 +1,13 @@
+import 'dart:convert';
+
 import 'package:credit_card_validator/credit_card_validator.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
+import 'package:encrypt/encrypt.dart';
+import 'package:flutter/material.dart' hide Key;
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
+import 'package:pattern_formatter/pattern_formatter.dart' as pf;
 import 'package:spotflow/gen/assets.gen.dart';
+import 'package:spotflow/src/core/models/payment_options_enum.dart';
 import 'package:spotflow/src/core/models/payment_request_body.dart';
 import 'package:spotflow/src/core/models/payment_response_body.dart';
 import 'package:spotflow/src/core/models/spot_flow_card.dart';
@@ -10,6 +15,9 @@ import 'package:spotflow/src/core/services/payment_service.dart';
 import 'package:spotflow/src/spotflow.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
+import 'package:spotflow/src/ui/views/authorization_web_view.dart';
+import 'package:spotflow/src/ui/views/card/card_payment_status_check_page.dart';
+import 'package:spotflow/src/ui/views/error_page.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
 import 'package:spotflow/src/ui/widgets/cancel_payment_button.dart';
 import 'package:spotflow/src/ui/widgets/change_payment_button.dart';
@@ -21,7 +29,7 @@ import 'widgets/card_input_field.dart';
 
 class EnterCardDetailsPage extends StatelessWidget {
   final SpotFlowPaymentManager paymentManager;
-  final Rate? rate;
+  final double? rate;
 
   const EnterCardDetailsPage({
     super.key,
@@ -44,7 +52,10 @@ class EnterCardDetailsPage extends StatelessWidget {
           rate: rate,
         ),
         Expanded(
-          child: _CardInputUI(paymentManager: paymentManager),
+          child: _CardInputUI(
+            paymentManager: paymentManager,
+            rate: rate,
+          ),
         ),
       ],
     );
@@ -53,17 +64,20 @@ class EnterCardDetailsPage extends StatelessWidget {
 
 class _CardInputUI extends StatefulWidget {
   final SpotFlowPaymentManager paymentManager;
+  final double? rate;
 
   const _CardInputUI({
     super.key,
     required this.paymentManager,
+    this.rate,
   });
 
   @override
   State<_CardInputUI> createState() => _CardInputUIState();
 }
 
-class _CardInputUIState extends State<_CardInputUI> {
+class _CardInputUIState extends State<_CardInputUI>
+    implements TransactionCallBack {
   TextEditingController cardNumberController = TextEditingController();
 
   TextEditingController expiryController = TextEditingController();
@@ -85,6 +99,15 @@ class _CardInputUIState extends State<_CardInputUI> {
   @override
   Widget build(BuildContext context) {
     final paymentManager = widget.paymentManager;
+    String formattedAmount = "";
+    if (widget.rate != null) {
+      formattedAmount =
+          "${paymentManager.toCurrency} ${(widget.rate! * paymentManager.amount).toStringAsFixed(2)}";
+    } else {
+      formattedAmount =
+          'Pay ${paymentManager.fromCurrency} ${paymentManager.amount.toStringAsFixed(2)}';
+    }
+
     if (creatingPayment) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -111,9 +134,7 @@ class _CardInputUIState extends State<_CardInputUI> {
             hintText: '0000 0000 0000 0000',
             textEditingController: cardNumberController,
             onChanged: onCardNumberChanged,
-            inputFormatters: [
-              CreditCardNumberInputFormatter(),
-            ],
+            inputFormatters: [pf.CreditCardFormatter()],
           ),
           const SizedBox(
             height: 28,
@@ -166,7 +187,7 @@ class _CardInputUIState extends State<_CardInputUI> {
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
-                'Pay ${paymentManager.fromCurrency} ${paymentManager.amount.toStringAsFixed(2)}',
+                formattedAmount,
                 style: SpotFlowTextStyle.body14SemiBold.copyWith(
                   color: buttonEnabled
                       ? SpotFlowColors.kcBaseWhite
@@ -211,36 +232,67 @@ class _CardInputUIState extends State<_CardInputUI> {
     if (expiryMonth == null || expiryYear == null) {
       return;
     }
-    final paymentRequestBody = PaymentRequestBody(
-      customer: paymentManager.customer,
-      currency: paymentManager.fromCurrency,
-      amount: paymentManager.amount,
-      channel: 'card',
-      card: SpotFlowCard(
-        cvv: cvvController.text,
-        expiryMonth: expiryMonth,
-        expiryYear: expiryYear,
-        pan: cardNumberController.text.replaceAll(" ", ""),
-      ),
-      provider: paymentManager.provider,
+    final card = SpotFlowCard(
+      cvv: cvvController.text,
+      expiryMonth: expiryMonth,
+      expiryYear: expiryYear,
+      pan: cardNumberController.text.replaceAll(" ", ""),
     );
+    final encryptedCard = await encryptCard(card, paymentManager.encryptionKey);
+    final paymentRequestBody = PaymentRequestBody(
+        customer: paymentManager.customer,
+        currency: paymentManager.fromCurrency,
+        amount: paymentManager.amount,
+        channel: 'card',
+        encryptedCard: encryptedCard);
     final paymentService = PaymentService(paymentManager.key);
     try {
       final response = await paymentService.createPayment(
         paymentRequestBody,
       );
+      paymentResponseBody = PaymentResponseBody.fromJson(response.data);
+
       if (mounted == false) return;
       paymentService.handleCardSuccessResponse(
         response: response,
         paymentManager: paymentManager,
         context: context,
+        transactionCallBack: this,
       );
     } on DioException catch (e) {
-      //todo: handle errors
+      final data = e.response?.data;
+      String? message;
+      if (data is Map) {
+        message = data['message'];
+      }
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => ErrorPage(
+              paymentManager: paymentManager,
+              message: message ?? "Couldn't process your payment",
+              paymentOptionsEnum: PaymentOptionsEnum.card),
+        ),
+      );
     }
     setState(() {
       creatingPayment = false;
     });
+  }
+
+  PaymentResponseBody? paymentResponseBody;
+
+  @override
+  onTransactionComplete(ChargeResponse? chargeResponse) {
+    if (paymentResponseBody == null) return;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => CardPaymentStatusCheckPage(
+          paymentManager: widget.paymentManager,
+          rate: paymentResponseBody!.rate,
+          paymentReference: paymentResponseBody!.reference,
+        ),
+      ),
+    );
   }
 
   String? extractExpiryMonth(String expiryString) {
@@ -301,5 +353,41 @@ class _CardInputUIState extends State<_CardInputUI> {
           expDateResults.isPotentiallyValid &&
           cvvResults.isValid;
     });
+  }
+
+  Future<String> encryptCard(SpotFlowCard card, String encryptionKey) async {
+    try {
+      print(card.toString());
+      return encryptAES256(encryptionKey, card.toString());
+    } catch (e) {
+      print(e);
+      return "null";
+    }
+  }
+
+  String encryptAES256(String key, String data) {
+    final iv = IV.fromSecureRandom(12); // 12 bytes IV for GCM
+
+    // Create encrypter
+    final encrypter = Encrypter(AES(
+      Key.fromBase64(key),
+      mode: AESMode.gcm,
+    ));
+
+    // Encrypt data
+    final encrypted = encrypter.encrypt(data, iv: iv);
+
+    // return encrypted.base64;
+
+    // Get auth tag
+    final authTag = encrypted.bytes.sublist(encrypted.bytes.length - 16);
+
+    // Base64 encode IV, ciphertext, and auth tag
+    final ivBase64 = base64.encode(iv.bytes);
+    final encryptedBase64 =
+        base64.encode(encrypted.bytes.sublist(0, encrypted.bytes.length - 16));
+    final authTagBase64 = base64.encode(authTag);
+
+    return '$ivBase64$encryptedBase64$authTagBase64';
   }
 }

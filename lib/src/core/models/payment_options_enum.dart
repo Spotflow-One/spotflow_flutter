@@ -4,7 +4,18 @@ import 'package:spotflow/gen/assets.gen.dart';
 enum PaymentOptionsEnum {
   card,
   transfer,
-  ussd,
+  ussd;
+
+  static PaymentOptionsEnum? fromString(String string) {
+    if (string.toLowerCase() == "card") {
+      return PaymentOptionsEnum.card;
+    } else if (string.toLowerCase() == "bank_transfer") {
+      return PaymentOptionsEnum.transfer;
+    } else if (string.toLowerCase() == "ussd") {
+      return PaymentOptionsEnum.ussd;
+    }
+    return null;
+  }
 }
 
 extension Helpers on PaymentOptionsEnum {

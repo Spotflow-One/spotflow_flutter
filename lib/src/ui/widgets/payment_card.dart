@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:spotflow/gen/assets.gen.dart';
 import 'package:spotflow/spotflow.dart';
-import 'package:spotflow/src/core/models/payment_response_body.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 
 class PaymentCard extends StatelessWidget {
   final SpotFlowPaymentManager paymentManager;
-  final Rate? rate;
+  final double? rate;
 
   const PaymentCard({
     super.key,
@@ -64,7 +63,7 @@ class PaymentCard extends StatelessWidget {
               children: [
                 if (rate != null) ...[
                   Text(
-                    "${rate?.from} 1 = ${rate?.to} ${rate?.rate}",
+                    "${paymentManager.fromCurrency} 1 = ${paymentManager.toCurrency} $rate",
                     style: SpotFlowTextStyle.body14Regular.copyWith(
                       color: SpotFlowColors.kcBaseWhite,
                     ),
@@ -108,7 +107,7 @@ class PaymentCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    "${rate?.to} ${(rate!.rate * paymentManager.amount).toStringAsFixed(2)}",
+                    "${paymentManager.toCurrency} ${(rate! * paymentManager.amount).toStringAsFixed(2)}",
                     style: SpotFlowTextStyle.body12Regular.copyWith(
                       color: SpotFlowColors.kcBaseWhite,
                     ),

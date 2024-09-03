@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spotflow/spotflow.dart';
+import 'package:spotflow/src/core/models/merchant_config_response.dart';
 import 'package:spotflow/src/core/models/payment_options_enum.dart';
-import 'package:spotflow/src/core/models/payment_response_body.dart';
 import 'package:spotflow/src/core/services/payment_service.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
@@ -35,7 +35,7 @@ class _HomePageState extends State<HomePage> {
       appLogo: widget.paymentManager.appLogo,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (fetchingRate) ...[
+        if (fetchingConfig) ...[
           const Expanded(
             child: Center(
               child: CircularProgressIndicator(),
@@ -45,7 +45,7 @@ class _HomePageState extends State<HomePage> {
           Expanded(
             child: _HomePageUi(
               paymentManager: widget.paymentManager,
-              rate: rate,
+              merchantConfig: merchantConfig,
             ),
           ),
         ]
@@ -59,39 +59,39 @@ class _HomePageState extends State<HomePage> {
     _fetchRate();
   }
 
-  Rate? rate;
+  MerchantConfig? merchantConfig;
 
-  bool fetchingRate = false;
+  bool fetchingConfig = false;
 
   Future<void> _fetchRate() async {
     setState(() {
-      fetchingRate = true;
+      fetchingConfig = true;
     });
     final paymentService = PaymentService(widget.paymentManager.key);
-    final rateResponse = await paymentService.getRate(
-      to: widget.paymentManager.fromCurrency,
-      from: widget.paymentManager.toCurrency,
+    var response = await paymentService.getMerchantConfig(
+      planId: widget.paymentManager.planId,
     );
     setState(() {
-      rate = Rate.fromJson(rateResponse.data);
-      fetchingRate = false;
+      merchantConfig = MerchantConfig.fromJson(response.data);
+      fetchingConfig = false;
     });
   }
 }
 
 class _HomePageUi extends StatelessWidget {
   final SpotFlowPaymentManager paymentManager;
-  final Rate? rate;
+  final MerchantConfig? merchantConfig;
 
   const _HomePageUi(
-      {super.key, required this.paymentManager, required this.rate});
+      {super.key, required this.paymentManager, required this.merchantConfig});
 
   @override
   Widget build(BuildContext context) {
     String toFormattedAmount = "";
+    final rate = merchantConfig?.rate;
     if (rate != null) {
       toFormattedAmount =
-          "${rate?.to}${(rate!.rate * paymentManager.amount).toStringAsFixed(2)}";
+          "${rate.from}${(rate.rate * paymentManager.amount).toStringAsFixed(2)}";
     }
 
     return Column(
@@ -102,7 +102,7 @@ class _HomePageUi extends StatelessWidget {
         ),
         PaymentCard(
           paymentManager: paymentManager,
-          rate: rate,
+          rate: rate?.rate.toDouble(),
         ),
         const SizedBox(
           height: 27,
@@ -137,18 +137,23 @@ class _HomePageUi extends StatelessWidget {
             color: SpotFlowColors.tone10,
           ),
         ),
-        ...PaymentOptionsEnum.values.map((e) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 3.0),
-            child: PaymentOptionsTile(
-              icon: e.icon,
-              text: e.title,
-              onTap: () {
-                onSelected(e, context, paymentManager, rate);
-              },
-            ),
-          );
-        }),
+        if (merchantConfig?.paymentMethods != null) ...[
+          ...PaymentOptionsEnum.values.map((e) {
+            if (e == null) {
+              return const SizedBox();
+            }
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 3.0),
+              child: PaymentOptionsTile(
+                icon: e.icon,
+                text: e.title,
+                onTap: () {
+                  onSelected(e, context, paymentManager, rate?.rate.toDouble());
+                },
+              ),
+            );
+          }),
+        ],
         const SizedBox(
           height: 40,
         ),
@@ -167,7 +172,7 @@ class _HomePageUi extends StatelessWidget {
   }
 
   void onSelected(PaymentOptionsEnum e, BuildContext context,
-      SpotFlowPaymentManager paymentManager, Rate? rate) {
+      SpotFlowPaymentManager paymentManager, double? rate) {
     switch (e) {
       case PaymentOptionsEnum.card:
         Navigator.of(context).push(

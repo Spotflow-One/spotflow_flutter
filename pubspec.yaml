@@ -18,6 +18,8 @@ dependencies:
   simple_ripple_animation: ^0.0.9
   uuid: ^4.4.2
   flutter_inappwebview: ^6.0.0
+  encrypt: ^5.0.3
+  pattern_formatter: ^4.0.0
 
 
 dev_dependencies:
@@ -46,4 +48,5 @@ flutter:
 
   assets:
     - assets/svg/
+    - assets/json/
 

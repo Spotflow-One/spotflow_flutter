@@ -4,19 +4,21 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:spotflow/gen/assets.gen.dart';
 import 'package:spotflow/spotflow.dart';
 import 'package:spotflow/src/core/models/authorize_payment_request_body.dart';
-import 'package:spotflow/src/core/models/payment_response_body.dart';
 import 'package:spotflow/src/core/services/payment_service.dart';
 import 'package:spotflow/src/ui/utils/spot_flow_route_name.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
+import 'package:spotflow/src/ui/views/card/card_payment_status_check_page.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
 import 'package:spotflow/src/ui/widgets/payment_card.dart';
 import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
 import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 
+import '../authorization_web_view.dart';
+
 class EnterPinPage extends StatelessWidget {
   final SpotFlowPaymentManager paymentManager;
-  final Rate? rate;
+  final double? rate;
   final String reference;
 
   const EnterPinPage({
@@ -53,18 +55,21 @@ class EnterPinPage extends StatelessWidget {
 class _EnterPinPageUI extends StatefulWidget {
   final SpotFlowPaymentManager paymentManager;
   final String reference;
+  final double? rate;
 
   const _EnterPinPageUI({
     super.key,
     required this.paymentManager,
     required this.reference,
+    this.rate,
   });
 
   @override
   State<_EnterPinPageUI> createState() => _EnterPinPageUIState();
 }
 
-class _EnterPinPageUIState extends State<_EnterPinPageUI> {
+class _EnterPinPageUIState extends State<_EnterPinPageUI>
+    implements TransactionCallBack {
   @override
   Widget build(BuildContext context) {
     final paymentManager = widget.paymentManager;
@@ -158,19 +163,32 @@ class _EnterPinPageUIState extends State<_EnterPinPageUI> {
     final paymentService = PaymentService(paymentManager.key);
     try {
       final response = await paymentService.authorizePayment(
-        paymentRequestBody,
+        paymentRequestBody.toJson(),
       );
       if (mounted == false) return;
       paymentService.handleCardSuccessResponse(
-        response: response,
-        paymentManager: paymentManager,
-        context: context,
-      );
+          response: response,
+          paymentManager: paymentManager,
+          context: context,
+          transactionCallBack: this);
     } on DioException catch (e) {
       //todo: handle errors
     }
     setState(() {
       creatingPayment = false;
     });
+  }
+
+  @override
+  onTransactionComplete(ChargeResponse? chargeResponse) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => CardPaymentStatusCheckPage(
+          paymentManager: widget.paymentManager,
+          rate: widget.rate,
+          paymentReference: widget.reference,
+        ),
+      ),
+    );
   }
 }

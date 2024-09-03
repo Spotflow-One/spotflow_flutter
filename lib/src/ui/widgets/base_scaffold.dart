@@ -27,6 +27,7 @@ class BaseScaffold extends StatelessWidget {
         backgroundColor: SpotFlowColors.primary5,
         toolbarHeight: 56,
         title: appLogo,
+        centerTitle: false,
         leading: const SizedBox(),
         leadingWidth: 0,
       ),

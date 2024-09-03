@@ -33,8 +33,6 @@ class SpotFlowPaymentManager {
 
   String merchantId;
 
-  String paymentId;
-
   String fromCurrency;
 
   String toCurrency;
@@ -44,9 +42,11 @@ class SpotFlowPaymentManager {
   ///auth token
   String key;
 
-  String provider;
+  String encryptionKey;
 
   String? paymentDescription;
+
+  String planId;
 
   CustomerInfo get customer {
     return CustomerInfo(
@@ -59,13 +59,13 @@ class SpotFlowPaymentManager {
 
   SpotFlowPaymentManager({
     required this.merchantId,
-    required this.paymentId,
     required this.fromCurrency,
     required this.toCurrency,
     required this.amount,
     required this.key,
-    required this.provider,
     required this.customerEmail,
+    required this.planId,
+    required this.encryptionKey,
     this.customerName,
     this.customerPhoneNumber,
     this.customerId,

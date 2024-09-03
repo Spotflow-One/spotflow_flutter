@@ -15,7 +15,7 @@ import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 
 class TransferErrorPage extends StatelessWidget {
   final SpotFlowPaymentManager paymentManager;
-  final Rate? rate;
+  final double? rate;
   final String message;
   final PaymentResponseBody paymentResponseBody;
 
