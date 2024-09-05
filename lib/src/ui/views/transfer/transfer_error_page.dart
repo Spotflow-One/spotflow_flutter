@@ -14,17 +14,15 @@ import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
 import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 
 class TransferErrorPage extends StatelessWidget {
-  final SpotFlowPaymentManager paymentManager;
-  final Rate? rate;
   final String message;
   final PaymentResponseBody paymentResponseBody;
+  final GestureTapCallback close;
 
   const TransferErrorPage({
     super.key,
-    required this.paymentManager,
-    this.rate,
     required this.message,
     required this.paymentResponseBody,
+    required this.close,
   });
 
   @override
@@ -48,10 +46,7 @@ class TransferErrorPage extends StatelessWidget {
             icon: Assets.svg.payWithTransferIcon.svg(),
             text: 'Pay with transfer',
           ),
-          PaymentCard(
-            paymentManager: paymentManager,
-            rate: rate,
-          ),
+          const PaymentCard(),
           const SizedBox(
             height: 49,
           ),
@@ -73,8 +68,9 @@ class TransferErrorPage extends StatelessWidget {
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) =>
-                      ViewBankDetailsPage(paymentManager: paymentManager),
+                  builder: (context) => ViewBankDetailsPage(
+                    close: close,
+                  ),
                 ),
               );
             },
@@ -94,8 +90,8 @@ class TransferErrorPage extends StatelessWidget {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => TransferInfoPage(
-                    paymentManager: paymentManager,
                     paymentResponseBody: paymentResponseBody,
+                    close: close,
                   ),
                 ),
               );
@@ -109,18 +105,20 @@ class TransferErrorPage extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          const Row(
+          Row(
             children: [
-              Expanded(
+              const Expanded(
                 flex: 3,
                 child: ChangePaymentButton(),
               ),
-              SizedBox(
+              const SizedBox(
                 width: 18.0,
               ),
               Expanded(
                 flex: 2,
-                child: CancelPaymentButton(),
+                child: CancelPaymentButton(
+                  close: close,
+                ),
               ),
             ],
           ),

@@ -6,10 +6,10 @@ abstract class TransactionCallBack {
   onTransactionComplete(ChargeResponse? chargeResponse);
 }
 
-class FlutterwaveInAppBrowser extends InAppBrowser {
+class SpotFlowInAppBrowser extends InAppBrowser {
   final TransactionCallBack callBack;
 
-  FlutterwaveInAppBrowser({required this.callBack});
+  SpotFlowInAppBrowser({required this.callBack});
 
   ChargeResponse? _chargeResponse;
 
@@ -24,7 +24,6 @@ class FlutterwaveInAppBrowser extends InAppBrowser {
   }
 
   _processUrl(Uri uri) {
-    print('processing url');
     if (_checkHasAppendedWithResponse(uri)) {
       _finishWithAppendedResponse(uri);
     } else {
@@ -80,8 +79,7 @@ class FlutterwaveInAppBrowser extends InAppBrowser {
         txRef: txRef,
         success: status?.contains("success") == true);
     _closeTransactionScreen(chargeResponse);
-    // callBack.onTransactionComplete(chargeResponse);
-    // close();
+    callBack.onTransactionComplete(chargeResponse);
   }
 
   _closeTransactionScreen(final ChargeResponse chargeResponse) {

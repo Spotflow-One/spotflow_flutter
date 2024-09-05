@@ -1,21 +1,22 @@
+// import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:spotflow/spotflow.dart';
 import 'package:spotflow/src/core/api/api_client.dart';
 import 'package:spotflow/src/core/api/api_route.dart';
-import 'package:spotflow/src/core/models/authorize_payment_request_body.dart';
 import 'package:spotflow/src/core/models/payment_options_enum.dart';
 import 'package:spotflow/src/core/models/payment_request_body.dart';
-import 'package:spotflow/src/core/models/payment_response_body.dart';
-import 'package:spotflow/src/core/models/validate_payment_request_body.dart';
+import 'package:spotflow/src/ui/utils/spot_flow_route_name.dart';
 import 'package:spotflow/src/ui/views/authorization_web_view.dart';
+import 'package:spotflow/src/ui/views/card/enter_billing_address_page.dart';
 import 'package:spotflow/src/ui/views/card/enter_otp_page.dart';
 import 'package:spotflow/src/ui/views/card/enter_pin_page.dart';
 import 'package:spotflow/src/ui/views/error_page.dart';
 import 'package:spotflow/src/ui/views/success_page.dart';
 
-class PaymentService implements TransactionCallBack {
+class PaymentService {
   final String authToken;
 
   PaymentService(this.authToken);
@@ -32,20 +33,11 @@ class PaymentService implements TransactionCallBack {
   }
 
   Future<Response> authorizePayment(
-    AuthorizePaymentRequestBody body,
+    Map<String, dynamic> body,
   ) {
     return apiClient.post(
       ApiRoute.authorizePayment,
-      data: body.toJson(),
-    );
-  }
-
-  Future<Response> validatePayment(
-    ValidatePaymentRequestBody body,
-  ) {
-    return apiClient.post(
-      ApiRoute.validatePayment,
-      data: body.toJson(),
+      data: body,
     );
   }
 
@@ -59,20 +51,28 @@ class PaymentService implements TransactionCallBack {
     });
   }
 
+  Future<Response> getBanks() {
+    return apiClient
+        .get(ApiRoute.getUssdBanks, queryParameters: {"ussd": true});
+  }
+
   void handleCardSuccessResponse(
       {required Response<dynamic> response,
       required SpotFlowPaymentManager paymentManager,
-      required BuildContext context}) {
+      required BuildContext context,
+      required TransactionCallBack transactionCallBack}) {
     if (context.mounted == false) return;
     final paymentResponseBody = PaymentResponseBody.fromJson(response.data);
     if (paymentResponseBody.status == 'successful') {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => SuccessPage(
-            paymentOptionsEnum: PaymentOptionsEnum.card,
-            paymentManager: paymentManager,
-            successMessage: "Card payment successful",
-          ),
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        SpotFlowRouteName.successPage,
+        (route) {
+          return route.isFirst;
+        },
+        arguments: SuccessPageArguments(
+          paymentOptionsEnum: PaymentOptionsEnum.card,
+          paymentResponseBody: paymentResponseBody,
+          successMessage: "Card payment successful",
         ),
       );
     } else if (paymentResponseBody.authorization?.mode == 'pin') {
@@ -80,8 +80,6 @@ class PaymentService implements TransactionCallBack {
         MaterialPageRoute(
           builder: (context) => EnterPinPage(
             reference: paymentResponseBody.reference,
-            paymentManager: paymentManager,
-            rate: paymentResponseBody.rate,
           ),
         ),
       );
@@ -90,56 +88,53 @@ class PaymentService implements TransactionCallBack {
         MaterialPageRoute(
           builder: (context) => EnterOtpPage(
             message: paymentResponseBody.providerMessage ?? "",
-            paymentManager: paymentManager,
             reference: paymentResponseBody.reference,
-            rate: paymentResponseBody.rate,
           ),
         ),
       );
     } else if (paymentResponseBody.authorization?.mode == '3DS') {
-      if (paymentManager.provider == 'flutterwave') {
-        final settings = InAppBrowserClassSettings(
-          browserSettings: InAppBrowserSettings(
-            hideUrlBar: true,
-            hideTitleBar: true,
-          ),
-          webViewSettings: InAppWebViewSettings(
-            javaScriptEnabled: true,
-          ),
-        );
-        final browser = FlutterwaveInAppBrowser(callBack: this);
+      String? redirectUrl = paymentResponseBody.authorization?.redirectUrl;
 
-        browser.openUrlRequest(
-          urlRequest: URLRequest(
-              url: WebUri(
-            paymentResponseBody.authorization!.redirectUrl!,
-          )),
-          settings: settings,
-        );
-      }
+      final settings = InAppBrowserClassSettings(
+        browserSettings: InAppBrowserSettings(
+          hideUrlBar: true,
+          hideTitleBar: true,
+        ),
+        webViewSettings: InAppWebViewSettings(
+          javaScriptEnabled: true,
+        ),
+      );
+      final browser = SpotFlowInAppBrowser(callBack: transactionCallBack);
+
+      browser.openUrlRequest(
+        urlRequest: URLRequest(
+            url: WebUri(
+          redirectUrl!,
+        )),
+        settings: settings,
+      );
+    } else if (paymentResponseBody.authorization?.mode == 'avs') {
+      Navigator.of(context).pushNamed(
+        SpotFlowRouteName.enterBillingAddressPage,
+        arguments: EnterBillingAddressPageArgs(
+            paymentResponseBody: paymentResponseBody),
+      );
     } else {
-      Navigator.of(context).push(
+      Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => ErrorPage(
-            paymentManager: paymentManager,
             message: paymentResponseBody.providerMessage ?? "",
             paymentOptionsEnum: PaymentOptionsEnum.card,
-            rate: paymentResponseBody.rate,
           ),
         ),
       );
     }
   }
 
-  Future<Response> getRate({required String from, required String to}) async {
+  Future<Response> getMerchantConfig({required String planId}) async {
     final response = await apiClient
-        .get(ApiRoute.fetchRate, queryParameters: {"from": from, "to": to});
-    return response;
-  }
+        .get(ApiRoute.getMerchantConfig, queryParameters: {"planId": planId});
 
-  @override
-  onTransactionComplete(ChargeResponse? chargeResponse) {
-    print('charge response');
-    print(chargeResponse?.toJson());
+    return response;
   }
 }

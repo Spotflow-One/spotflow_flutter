@@ -5,18 +5,20 @@ import 'package:spotflow/src/ui/utils/text_theme.dart';
 
 class CardInputField extends StatelessWidget {
   final String labelText;
-  final String hintText;
+  final String? hintText;
   final List<TextInputFormatter>? inputFormatters;
   final TextEditingController? textEditingController;
   final ValueChanged<String>? onChanged;
+  final TextInputType? textInputType;
 
   const CardInputField({
     super.key,
     required this.labelText,
-    required this.hintText,
+    this.hintText,
     this.inputFormatters,
     this.textEditingController,
     this.onChanged,
+    this.textInputType,
   });
 
   @override
@@ -52,6 +54,7 @@ class CardInputField extends StatelessWidget {
             controller: textEditingController,
             onChanged: onChanged,
             maxLines: 1,
+            keyboardType: textInputType,
             decoration: InputDecoration(
               hintText: hintText,
               isCollapsed: true,

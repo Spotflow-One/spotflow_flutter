@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:spotflow/src/ui/app_state_provider.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 
 class BaseScaffold extends StatelessWidget {
-  final Widget? appLogo;
   final List<Widget> children;
   final CrossAxisAlignment crossAxisAlignment;
   final MainAxisAlignment mainAxisAlignment;
@@ -12,7 +13,6 @@ class BaseScaffold extends StatelessWidget {
   const BaseScaffold({
     super.key,
     required this.children,
-    this.appLogo,
     this.crossAxisAlignment = CrossAxisAlignment.center,
     this.mainAxisAlignment = MainAxisAlignment.start,
     this.mainAxisSize = MainAxisSize.max,
@@ -21,12 +21,14 @@ class BaseScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appLogo = context.read<AppStateProvider>().paymentManager?.appLogo;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: SpotFlowColors.primary5,
         toolbarHeight: 56,
         title: appLogo,
+        centerTitle: false,
         leading: const SizedBox(),
         leadingWidth: 0,
       ),

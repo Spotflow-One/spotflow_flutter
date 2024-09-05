@@ -1,22 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:spotflow/gen/assets.gen.dart';
-import 'package:spotflow/spotflow.dart';
-import 'package:spotflow/src/core/models/payment_response_body.dart';
+import 'package:spotflow/src/ui/app_state_provider.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 
 class PaymentCard extends StatelessWidget {
-  final SpotFlowPaymentManager paymentManager;
-  final Rate? rate;
-
   const PaymentCard({
     super.key,
-    required this.paymentManager,
-    this.rate,
   });
 
   @override
   Widget build(BuildContext context) {
+    final merchantConfig = context.watch<AppStateProvider>().merchantConfig;
+    final paymentManager = context.watch<AppStateProvider>().paymentManager!;
+
+    num? conversionRate = merchantConfig?.rate.rate;
+    String? fromCurrency = merchantConfig?.rate.from;
+    String? toCurrency = merchantConfig?.rate.to;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2),
       child: Container(
@@ -62,9 +64,9 @@ class PaymentCard extends StatelessWidget {
             ),
             Row(
               children: [
-                if (rate != null) ...[
+                if (merchantConfig != null) ...[
                   Text(
-                    "${rate?.from} 1 = ${rate?.to} ${rate?.rate}",
+                    "$toCurrency 1 = $fromCurrency ${conversionRate?.toStringAsFixed(2) ?? ""}",
                     style: SpotFlowTextStyle.body14Regular.copyWith(
                       color: SpotFlowColors.kcBaseWhite,
                     ),
@@ -85,7 +87,7 @@ class PaymentCard extends StatelessWidget {
                   width: 4,
                 ),
                 Text(
-                  '${paymentManager.fromCurrency} ${paymentManager.amount.toStringAsFixed(2)}',
+                  '$toCurrency ${paymentManager.amount.toStringAsFixed(2)}',
                   style: SpotFlowTextStyle.body16SemiBold.copyWith(
                     color: SpotFlowColors.kcBaseWhite,
                   ),
@@ -95,7 +97,7 @@ class PaymentCard extends StatelessWidget {
             const SizedBox(
               height: 6.0,
             ),
-            if (rate != null) ...[
+            if (conversionRate != null) ...[
               Align(
                 alignment: Alignment.centerRight,
                 child: Container(
@@ -108,7 +110,7 @@ class PaymentCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    "${rate?.to} ${(rate!.rate * paymentManager.amount).toStringAsFixed(2)}",
+                    "$fromCurrency ${(conversionRate * paymentManager.amount).toStringAsFixed(2)}",
                     style: SpotFlowTextStyle.body12Regular.copyWith(
                       color: SpotFlowColors.kcBaseWhite,
                     ),

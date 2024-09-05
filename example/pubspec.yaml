@@ -38,6 +38,7 @@ dependencies:
   google_fonts: ^6.2.1
   spotflow:
     path: "../"
+  country: ^4.1.8
 dev_dependencies:
   flutter_test:
     sdk: flutter

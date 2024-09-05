@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
         useMaterial3: true,
         textTheme: GoogleFonts.latoTextTheme(),
       ),
@@ -47,17 +47,15 @@ class _MyHomePageState extends State<MyHomePage> {
     Spotflow().start(
       context: context,
       paymentManager: SpotFlowPaymentManager(
-        merchantId: "2f020a56-fbd3-40a3-ac90-d77d38399b6d",
-        customerEmail: emailController.text.isEmpty
-            ? "nkwachi@spotflow.one"
-            : emailController.text,
-        paymentId: "paymentId",
-        fromCurrency: "USD",
-        toCurrency: "NGN",
+        merchantId: merchantIdController.text,
+        customerEmail: emailController.text,
         amount: num.tryParse(amountController.text) ?? 10,
-        key: "sk_test_9b4208cb7d4d4747bf6f5c4ac1f978af",
-        provider: "flutterwave",
-        paymentDescription: "League Pass",
+        key: merchantKeyController.text,
+        encryptionKey: encryptionKeyController.text,
+        paymentDescription: paymentDescriptionController.text.isEmpty
+            ? "League Pass"
+            : paymentDescriptionController.text,
+        planId: planIdController.text,
         appLogo: Image.asset(
           'assets/images/nba-logo.png',
         ),
@@ -65,8 +63,15 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  TextEditingController emailController = TextEditingController();
-  TextEditingController amountController = TextEditingController();
+  TextEditingController emailController =
+      TextEditingController(text: "jon@snow.com"); //
+  TextEditingController amountController = TextEditingController(); //
+  TextEditingController merchantIdController = TextEditingController(); //
+  TextEditingController encryptionKeyController = TextEditingController(); //
+  TextEditingController planIdController = TextEditingController(); //
+  TextEditingController merchantKeyController = TextEditingController(); //
+  TextEditingController paymentDescriptionController =
+      TextEditingController(text: "League Pass");
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         // TRY THIS: Try changing the color here to a specific color (to
         // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
@@ -84,42 +90,162 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
       ),
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              TextField(
-                controller: emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  hintText: "email@sample.com",
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                const SizedBox(
+                  height: 16,
                 ),
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              TextField(
-                controller: amountController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(hintText: 'amount'),
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  _startPayment();
-                },
-                child: const Text('Start payment'),
-              ),
-            ],
+                const Text(
+                  "Click the button below to start your payment",
+                  style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(
+                  height: 32,
+                ),
+                TextField(
+                  controller: emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(
+                    hintText: "email@sample.com",
+                    border: OutlineInputBorder(),
+                    enabledBorder: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                TextField(
+                  controller: amountController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    hintText: 'amount (optional)',
+                    border: OutlineInputBorder(),
+                    enabledBorder: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                TextField(
+                  controller: planIdController,
+                  decoration: const InputDecoration(
+                    hintText: 'plan id ',
+                    border: OutlineInputBorder(),
+                    enabledBorder: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                TextField(
+                  controller: merchantIdController,
+                  decoration: const InputDecoration(
+                    hintText: 'merchant id',
+                    border: OutlineInputBorder(),
+                    enabledBorder: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                TextField(
+                  controller: merchantKeyController,
+                  decoration: const InputDecoration(
+                    hintText: 'merchant key',
+                    border: OutlineInputBorder(),
+                    enabledBorder: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                TextField(
+                  controller: encryptionKeyController,
+                  decoration: const InputDecoration(
+                    hintText: 'encryption key',
+                    border: OutlineInputBorder(),
+                    enabledBorder: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                TextField(
+                  controller: paymentDescriptionController,
+                  decoration: const InputDecoration(
+                    hintText: 'payment description (optional)',
+                    border: OutlineInputBorder(),
+                    enabledBorder: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(
+                  height: 64,
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (emailController.text.isEmpty ||
+                        planIdController.text.isEmpty ||
+                        merchantIdController.text.isEmpty ||
+                        merchantKeyController.text.isEmpty ||
+                        encryptionKeyController.text.isEmpty) {
+                      const snackBar = SnackBar(
+                        backgroundColor: Colors.red,
+                        content: Text(
+                          'Please enter all required fields',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                          ),
+                        ),
+                      );
+
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      return;
+                    }
+                    _startPayment();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepOrange,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4)),
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10.0),
+                    child: Text(
+                      'Start payment',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  height: 64,
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:spotflow/gen/assets.gen.dart';
-import 'package:spotflow/spotflow.dart';
-import 'package:spotflow/src/core/models/payment_response_body.dart';
 import 'package:spotflow/src/core/models/validate_payment_request_body.dart';
 import 'package:spotflow/src/core/services/payment_service.dart';
+import 'package:spotflow/src/ui/app_state_provider.dart';
 import 'package:spotflow/src/ui/utils/spot_flow_route_name.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
@@ -13,39 +13,33 @@ import 'package:spotflow/src/ui/widgets/payment_card.dart';
 import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
 import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 
+import '../authorization_web_view.dart';
+import 'card_payment_status_check_page.dart';
+
 class EnterOtpPage extends StatelessWidget {
   final String message;
   final String reference;
-  final Rate? rate;
-  final SpotFlowPaymentManager paymentManager;
 
   const EnterOtpPage({
     super.key,
     required this.message,
     required this.reference,
-    required this.paymentManager,
-    this.rate,
   });
 
   @override
   Widget build(BuildContext context) {
     return BaseScaffold(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      appLogo: paymentManager.appLogo,
       children: [
         PaymentOptionsTile(
           text: 'Pay with Card',
           icon: Assets.svg.payWithCardIcon.svg(),
         ),
-        PaymentCard(
-          rate: rate,
-          paymentManager: paymentManager,
-        ),
+        const PaymentCard(),
         Expanded(
           child: _EnterOtpPageUi(
             message: message,
             reference: reference,
-            paymentManager: paymentManager,
           ),
         ),
       ],
@@ -56,19 +50,19 @@ class EnterOtpPage extends StatelessWidget {
 class _EnterOtpPageUi extends StatefulWidget {
   final String message;
   final String reference;
-  final SpotFlowPaymentManager paymentManager;
 
-  const _EnterOtpPageUi(
-      {super.key,
-      required this.message,
-      required this.reference,
-      required this.paymentManager});
+  const _EnterOtpPageUi({
+    super.key,
+    required this.message,
+    required this.reference,
+  });
 
   @override
   State<_EnterOtpPageUi> createState() => _EnterOtpPageUiState();
 }
 
-class _EnterOtpPageUiState extends State<_EnterOtpPageUi> {
+class _EnterOtpPageUiState extends State<_EnterOtpPageUi>
+    implements TransactionCallBack {
   TextEditingController controller = TextEditingController();
 
   @override
@@ -79,9 +73,8 @@ class _EnterOtpPageUiState extends State<_EnterOtpPageUi> {
 
   @override
   Widget build(BuildContext context) {
-    final paymentManager = widget.paymentManager;
     if (creatingPayment) {
-      return Center(
+      return const Center(
         child: CircularProgressIndicator(),
       );
     }
@@ -139,7 +132,7 @@ class _EnterOtpPageUiState extends State<_EnterOtpPageUi> {
           height: 31,
         ),
         InkWell(
-          onTap: () => _authorizePayment(paymentManager),
+          onTap: () => _authorizePayment(),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 70.0),
             child: Container(
@@ -206,7 +199,8 @@ class _EnterOtpPageUiState extends State<_EnterOtpPageUi> {
 
   bool creatingPayment = false;
 
-  Future<void> _authorizePayment(SpotFlowPaymentManager paymentManager) async {
+  Future<void> _authorizePayment() async {
+    final paymentManager = context.read<AppStateProvider>().paymentManager!;
     final paymentRequestBody = ValidatePaymentRequestBody(
       merchantId: paymentManager.merchantId,
       reference: widget.reference,
@@ -218,20 +212,31 @@ class _EnterOtpPageUiState extends State<_EnterOtpPageUi> {
 
     final paymentService = PaymentService(paymentManager.key);
     try {
-      final response = await paymentService.validatePayment(
-        paymentRequestBody,
+      final response = await paymentService.authorizePayment(
+        paymentRequestBody.toJson(),
       );
       if (mounted == false) return;
       paymentService.handleCardSuccessResponse(
-        response: response,
-        paymentManager: paymentManager,
-        context: context,
-      );
+          response: response,
+          paymentManager: paymentManager,
+          context: context,
+          transactionCallBack: this);
     } on DioException catch (e) {
-      //todo: handle errors
+      debugPrint(e.message);
     }
     setState(() {
       creatingPayment = false;
     });
+  }
+
+  @override
+  onTransactionComplete(ChargeResponse? chargeResponse) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => CardPaymentStatusCheckPage(
+          paymentReference: widget.reference,
+        ),
+      ),
+    );
   }
 }

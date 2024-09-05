@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:spotflow/gen/assets.gen.dart';
-import 'package:spotflow/spotflow.dart';
 import 'package:spotflow/src/core/models/payment_response_body.dart';
 import 'package:spotflow/src/ui/utils/spot_flow_route_name.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
@@ -14,13 +13,13 @@ import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
 import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 
 class TransferInfoPage extends StatefulWidget {
-  final SpotFlowPaymentManager paymentManager;
   final PaymentResponseBody paymentResponseBody;
+  final GestureTapCallback close;
 
   const TransferInfoPage({
     super.key,
-    required this.paymentManager,
     required this.paymentResponseBody,
+    required this.close,
   });
 
   @override
@@ -39,16 +38,12 @@ class _TransferInfoPageState extends State<TransferInfoPage> {
   Widget build(BuildContext context) {
     return BaseScaffold(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        appLogo: widget.paymentManager.appLogo,
         children: [
           PaymentOptionsTile(
             icon: Assets.svg.payWithTransferIcon.svg(),
             text: 'Pay with transfer',
           ),
-          PaymentCard(
-            paymentManager: widget.paymentManager,
-            rate: widget.paymentResponseBody.rate,
-          ),
+          const PaymentCard(),
           const SizedBox(height: 70),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30.0),
@@ -89,7 +84,7 @@ class _TransferInfoPageState extends State<TransferInfoPage> {
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16.5),
                   shape: RoundedRectangleBorder(
-                    side: BorderSide(color: Color(0xFFC0B5CF), width: 1),
+                    side: const BorderSide(color: Color(0xFFC0B5CF), width: 1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -142,10 +137,9 @@ class _TransferInfoPageState extends State<TransferInfoPage> {
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => TransferStatusCheckPage(
-                        paymentManager: widget.paymentManager,
                         reference: widget.paymentResponseBody.reference,
                         paymentResponseBody: widget.paymentResponseBody,
-                        rate: widget.paymentResponseBody.rate,
+                        close: widget.close,
                       ),
                     ),
                   );
@@ -166,16 +160,18 @@ class _TransferInfoPageState extends State<TransferInfoPage> {
             )
           ],
           const Spacer(),
-          const Row(
+          Row(
             children: [
-              Expanded(
+              const Expanded(
                 child: ChangePaymentButton(),
               ),
-              SizedBox(
+              const SizedBox(
                 width: 18.0,
               ),
               Expanded(
-                child: CancelPaymentButton(),
+                child: CancelPaymentButton(
+                  close: widget.close,
+                ),
               ),
             ],
           ),
@@ -205,7 +201,9 @@ class Indicator extends StatelessWidget {
             : Colors.transparent,
         border: Border.all(
           width: 1,
-          color: currentIndex == index ? Colors.transparent : Color(0xFFC0B5CF),
+          color: currentIndex == index
+              ? Colors.transparent
+              : const Color(0xFFC0B5CF),
         ),
         shape: BoxShape.circle,
       ),

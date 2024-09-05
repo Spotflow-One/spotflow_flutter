@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spotflow/gen/assets.gen.dart';
-import 'package:spotflow/spotflow.dart';
 import 'package:spotflow/src/core/models/payment_options_enum.dart';
-import 'package:spotflow/src/core/models/payment_response_body.dart';
+import 'package:spotflow/src/ui/utils/spot_flow_route_name.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
@@ -11,17 +10,13 @@ import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
 import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 
 class ErrorPage extends StatelessWidget {
-  final SpotFlowPaymentManager paymentManager;
   final String message;
   final PaymentOptionsEnum paymentOptionsEnum;
-  final Rate? rate;
 
   const ErrorPage({
     super.key,
-    required this.paymentManager,
     required this.message,
     required this.paymentOptionsEnum,
-    this.rate,
   });
 
   @override
@@ -45,10 +40,7 @@ class ErrorPage extends StatelessWidget {
           text: paymentOptionsEnum.title,
           icon: paymentOptionsEnum.icon,
         ),
-        PaymentCard(
-          paymentManager: paymentManager,
-          rate: rate,
-        ),
+        const PaymentCard(),
         const SizedBox(
           height: 49,
         ),
@@ -67,7 +59,10 @@ class ErrorPage extends StatelessWidget {
           height: 60.0,
         ),
         TextButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context)
+                .pushReplacementNamed(SpotFlowRouteName.enterCardDetailsPage);
+          },
           style: buttonStyle,
           child: Text(
             'Try again with your card',
@@ -80,7 +75,11 @@ class ErrorPage extends StatelessWidget {
           height: 16,
         ),
         TextButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context).pushReplacementNamed(
+              SpotFlowRouteName.viewBankDetailsPage,
+            );
+          },
           style: buttonStyle,
           child: Text(
             'Try again with transfer',
@@ -93,7 +92,10 @@ class ErrorPage extends StatelessWidget {
           height: 16,
         ),
         TextButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context)
+                .pushReplacementNamed(SpotFlowRouteName.viewBanksUssdPage);
+          },
           style: buttonStyle,
           child: Text(
             'Try again with USSD',

@@ -12,6 +12,17 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:vector_graphics/vector_graphics.dart';
 
+class $AssetsJsonGen {
+  const $AssetsJsonGen();
+
+  /// File path: assets/json/countries+states+cities.json
+  String get countriesStatesCities =>
+      'packages/spotflow/assets/json/countries+states+cities.json';
+
+  /// List of all assets
+  List<String> get values => [countriesStatesCities];
+}
+
 class $AssetsSvgGen {
   const $AssetsSvgGen();
 
@@ -69,6 +80,7 @@ class Assets {
 
   static const String package = 'spotflow';
 
+  static const $AssetsJsonGen json = $AssetsJsonGen();
   static const $AssetsSvgGen svg = $AssetsSvgGen();
 }
 
