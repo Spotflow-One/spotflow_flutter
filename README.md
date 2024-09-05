@@ -1,71 +1,84 @@
-# Spotflow Flutter Package Documentation
+## **Flutter SDK**
 
-## Introduction
+Our Flutter SDK provides a rich set of pre-built UI components and APIs to seamlessly integrate payment functionalities within your Flutter application.
 
-The `Spotflow` package allows developers to integrate seamless payment functionalities into their Flutter applications using various providers such as Flutterwave. It supports both Android and iOS platforms, making it versatile for mobile app development.
+### **Introduction**
 
-## Installation
+The `Spotflow Flutter SDK` package allows developers to effortlessly integrate seamless payment functionalities into their Flutter applications. It supports both Android and iOS platforms, making it versatile for mobile app development.
 
-To use the `Spotflow` package, add it to your `pubspec.yaml` file:
+### **Installation**
+
+To use the `Spotflow Flutter SDK` package, add the following dependency to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
   spotflow: ^1.0.0
- ```
+```
 
-Then run `flutter pub get` to install the package.
+Then run `flutter pub get` to fetch the package.
 
-## Usage
+<aside>
+⚠️ **Beta Release**
 
-### Making payments
+The Flutter SDK is currently a beta release. If you encounter any issues, kindly reach out to our support team at support@spotflow.one. 
 
-To start the `Spotflow` package, use the `Spotflow().start()` method. This method requires a `BuildContext` and a `SpotFlowPaymentManager` with various parameters.
+</aside>
 
-Here is an example of how to make a payment using the `Spotflow` package:
+### **Usage**
+
+### **Making payments**
+
+To start the `Spotflow` package, use the `Spotflow().start()` method. This method requires a `BuildContext` and a `SpotFlowPaymentManager` with various parameters.
+
+Here is an example of how to make a payment using the `Spotflow` package:
 
 ```dart
 Spotflow().start( context: context,
  paymentManager: SpotFlowPaymentManager( merchantId: "",
-  customerEmail: "" , 
-  paymentId: "", 
-  fromCurrency: "", 
-  toCurrency: "",
-  amount: 0,
-  key: "",
-  provider: "",
-  paymentDescription: "",
-  appLogo: SizedBox() 
+  customerEmail: "customer@example.com" ,
+  customerName: "John Snow", //optional
+  customerPhoneNumber: "000-000-000", //optional
+  customerId: "unique_id" //optional
+  merchantId: "unique_id" 
+  planId: "plan_id",
+  amount: 10,
+  key: "your_api_key",
+  encryptionKey: "encryption_key",
+  paymentDescription: "Product purchase",
+  appLogo: SizedBox() // Optional
+ ),
+ onComplete: (paymentResponseBody) {
+ }
  );
- ```
+```
 
-### Parameters
+### **Parameters**
 
--   **context**: The `BuildContext` of the application.
--   **paymentManager**: An instance of `SpotFlowPaymentManager` containing the payment details.
+- **context**: The `BuildContext` of the application.
+- **paymentManager**: An instance of `SpotFlowPaymentManager` containing the payment details.
+- onComplete: An optional function to be called when the payment is completed successfully.
 
-### SpotFlowPaymentManager
+### **SpotFlowPaymentManager**
 
 The `SpotFlowPaymentManager` class requires the following parameters:
 
--   **merchantId**: The unique identifier for the merchant.
--   **customerEmail**: The email address of the customer.
--   **paymentId**: A unique identifier for the payment.
--   **fromCurrency**: The currency from which the amount is being converted.
--   **toCurrency**: The currency to which the amount is being converted.
--   **amount**: The amount to be paid.
--   **key**: The API key for the payment provider.
--   **provider**: The payment provider (e.g., "flutterwave").
--   **paymentDescription**: A description of the payment.
--   **appLogo**: An image widget for the application logo.
+- **merchantId**: The unique identifier for the merchant.
+- **customerEmail**: The email address of the customer.
+- **amount**: The amount to be paid.
+- **key**: The API key for the payment provider.
+- **planId**: The unique identifier for the payment plan.
+- **encryptionKey**: The encryption key for securing the transaction.
+- **customerId** *(optional)*: The unique identifier for the customer.
+- **customerName** *(optional)*: The name of the customer.
+- **customerPhoneNumber** *(optional)*: The phone number of the customer.
+- **paymentDescription** *(optional)*: A description of the payment.
+- **appLogo** *(optional)*: An image widget for the application logo.
+- **appName** *(optional)*: The name of the application.
 
-## Testing Your Implementation
+### **Testing Your Implementation**
 
 Use test cards provided by your payment provider to test your implementation.
 
-## Running the Example Project
+### **Running the Example Project**
 
-An example project has been provided in this plugin. Clone the repository and navigate to the example folder. Open it with a supported IDE or run `flutter run` from the terminal in that folder.
-
-## Contributing, Issues, and Bug Reports
-
-The project is open to public contributions. Feel free to contribute. If you experience any issues or want to report a bug, please open an issue on the repository. Be as descriptive as possible.
+An example project has been provided on our [Github repository.](https://github.com/Spotflow-One/spotflow_flutter) Clone the repository and navigate to the example folder. Open it with a supported IDE or run `flutter run` from the terminal in that folder.
