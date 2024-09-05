@@ -113,8 +113,6 @@ class SpotFlowPaymentManager {
 
   String planId;
 
-  Function(PaymentResponseBody paymentResponse)? onComplete;
-
   CustomerInfo get customer {
     return CustomerInfo(
       email: customerEmail,
@@ -137,6 +135,5 @@ class SpotFlowPaymentManager {
     this.paymentDescription,
     this.appLogo,
     this.appName,
-    this.onComplete,
   });
 }
