@@ -1,11 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:spotflow/gen/assets.gen.dart';
-import 'package:spotflow/spotflow.dart';
 import 'package:spotflow/src/core/models/payment_request_body.dart';
 import 'package:spotflow/src/core/models/payment_response_body.dart';
 import 'package:spotflow/src/core/services/payment_service.dart';
+import 'package:spotflow/src/ui/app_state_provider.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/views/transfer/transfer_error_page.dart';
@@ -19,19 +20,18 @@ import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 import '../../widgets/payment_card.dart';
 
 class ViewBankDetailsPage extends StatelessWidget {
-  final SpotFlowPaymentManager paymentManager;
   final PaymentResponseBody? paymentResponseBody;
+  final GestureTapCallback close;
 
   const ViewBankDetailsPage({
     super.key,
-    required this.paymentManager,
     this.paymentResponseBody,
+    required this.close,
   });
 
   @override
   Widget build(BuildContext context) {
     return BaseScaffold(
-        appLogo: paymentManager.appLogo,
         padding: const EdgeInsets.only(
           left: 11,
           right: 23,
@@ -43,8 +43,8 @@ class ViewBankDetailsPage extends StatelessWidget {
           ),
           Expanded(
             child: _ViewBankDetailsUi(
-              paymentManager: paymentManager,
               paymentResponseBody: paymentResponseBody,
+              close: close,
             ),
           ),
         ]);
@@ -52,11 +52,14 @@ class ViewBankDetailsPage extends StatelessWidget {
 }
 
 class _ViewBankDetailsUi extends StatefulWidget {
-  final SpotFlowPaymentManager paymentManager;
   final PaymentResponseBody? paymentResponseBody;
+  final GestureTapCallback close;
 
-  const _ViewBankDetailsUi(
-      {super.key, required this.paymentManager, this.paymentResponseBody});
+  const _ViewBankDetailsUi({
+    super.key,
+    this.paymentResponseBody,
+    required this.close,
+  });
 
   @override
   State<_ViewBankDetailsUi> createState() => _ViewBankDetailsUiState();
@@ -99,6 +102,8 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
 
   @override
   Widget build(BuildContext context) {
+    final paymentManager = context.read<AppStateProvider>().paymentManager!;
+    final merchantConfig = context.read<AppStateProvider>().merchantConfig;
     if (initiatingPayment) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -107,9 +112,7 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
     if (paymentResponseBody == null) {
       return Column(
         children: [
-          PaymentCard(
-            paymentManager: widget.paymentManager,
-          ),
+          PaymentCard(),
           const SizedBox(
             height: 20,
           ),
@@ -126,16 +129,12 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
     }
 
     final rate = paymentResponseBody!.rate;
-    final totalAmount =
-        (rate! * widget.paymentManager.amount).toStringAsFixed(2);
-    final formattedAmount = "${widget.paymentManager.toCurrency} $totalAmount";
+    final totalAmount = (rate! * paymentManager.amount).toStringAsFixed(2);
+    final formattedAmount = "${merchantConfig?.rate.from} $totalAmount";
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        PaymentCard(
-          paymentManager: widget.paymentManager,
-          rate: rate,
-        ),
+        const PaymentCard(),
         const SizedBox(
           height: 20,
         ),
@@ -329,8 +328,8 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => TransferInfoPage(
-                    paymentManager: widget.paymentManager,
                     paymentResponseBody: paymentResponseBody!,
+                    close: widget.close,
                   ),
                 ),
               );
@@ -356,18 +355,20 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
         const SizedBox(
           height: 32,
         ),
-        const Row(
+        Row(
           children: [
-            Expanded(
+            const Expanded(
               flex: 3,
               child: ChangePaymentButton(),
             ),
-            SizedBox(
+            const SizedBox(
               width: 18.0,
             ),
             Expanded(
               flex: 2,
-              child: CancelPaymentButton(),
+              child: CancelPaymentButton(
+                close: widget.close,
+              ),
             ),
           ],
         ),
@@ -389,12 +390,12 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
     setState(() {
       initiatingPayment = true;
     });
-    final paymentManager = widget.paymentManager;
+    final paymentManager = context.read<AppStateProvider>().paymentManager!;
     final paymentService = PaymentService(paymentManager.key);
 
     final paymentRequestBody = PaymentRequestBody(
       customer: paymentManager.customer,
-      currency: paymentManager.fromCurrency,
+      currency: context.read<AppStateProvider>().merchantConfig?.rate.to ?? "",
       amount: paymentManager.amount,
       channel: "bank_transfer",
     );
@@ -406,7 +407,9 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
       final expiresAt = paymentResponseBody?.bankDetails?.expiresAt ??
           DateTime.now().add(const Duration(minutes: 30));
       _initCountDown(expiresAt);
-    } on DioException catch (e) {}
+    } on DioException catch (e) {
+      debugPrint(e.message);
+    }
 
     setState(() {
       initiatingPayment = false;
@@ -426,9 +429,10 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (context) => TransferErrorPage(
-                paymentManager: widget.paymentManager,
-                message: "Account Expired",
-                paymentResponseBody: paymentResponseBody!),
+              message: "Account Expired",
+              paymentResponseBody: paymentResponseBody!,
+              close: widget.close,
+            ),
           ),
         );
       } else {

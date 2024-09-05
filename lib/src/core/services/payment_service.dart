@@ -8,7 +8,7 @@ import 'package:spotflow/src/core/api/api_client.dart';
 import 'package:spotflow/src/core/api/api_route.dart';
 import 'package:spotflow/src/core/models/payment_options_enum.dart';
 import 'package:spotflow/src/core/models/payment_request_body.dart';
-import 'package:spotflow/src/core/models/payment_response_body.dart';
+import 'package:spotflow/src/ui/utils/spot_flow_route_name.dart';
 import 'package:spotflow/src/ui/views/authorization_web_view.dart';
 import 'package:spotflow/src/ui/views/card/enter_billing_address_page.dart';
 import 'package:spotflow/src/ui/views/card/enter_otp_page.dart';
@@ -56,22 +56,23 @@ class PaymentService {
         .get(ApiRoute.getUssdBanks, queryParameters: {"ussd": true});
   }
 
-  void handleCardSuccessResponse({
-    required Response<dynamic> response,
-    required SpotFlowPaymentManager paymentManager,
-    required BuildContext context,
-    required TransactionCallBack transactionCallBack,
-  }) {
+  void handleCardSuccessResponse(
+      {required Response<dynamic> response,
+      required SpotFlowPaymentManager paymentManager,
+      required BuildContext context,
+      required TransactionCallBack transactionCallBack}) {
     if (context.mounted == false) return;
     final paymentResponseBody = PaymentResponseBody.fromJson(response.data);
     if (paymentResponseBody.status == 'successful') {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => SuccessPage(
-            paymentOptionsEnum: PaymentOptionsEnum.card,
-            paymentManager: paymentManager,
-            successMessage: "Card payment successful",
-          ),
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        SpotFlowRouteName.successPage,
+        (route) {
+          return route.isFirst;
+        },
+        arguments: SuccessPageArguments(
+          paymentOptionsEnum: PaymentOptionsEnum.card,
+          paymentResponseBody: paymentResponseBody,
+          successMessage: "Card payment successful",
         ),
       );
     } else if (paymentResponseBody.authorization?.mode == 'pin') {
@@ -79,8 +80,6 @@ class PaymentService {
         MaterialPageRoute(
           builder: (context) => EnterPinPage(
             reference: paymentResponseBody.reference,
-            paymentManager: paymentManager,
-            rate: paymentResponseBody.rate,
           ),
         ),
       );
@@ -89,9 +88,7 @@ class PaymentService {
         MaterialPageRoute(
           builder: (context) => EnterOtpPage(
             message: paymentResponseBody.providerMessage ?? "",
-            paymentManager: paymentManager,
             reference: paymentResponseBody.reference,
-            rate: paymentResponseBody.rate,
           ),
         ),
       );
@@ -117,22 +114,17 @@ class PaymentService {
         settings: settings,
       );
     } else if (paymentResponseBody.authorization?.mode == 'avs') {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => EnterBillingAddressPage(
-            paymentManager: paymentManager,
-            paymentResponseBody: paymentResponseBody,
-          ),
-        ),
+      Navigator.of(context).pushNamed(
+        SpotFlowRouteName.enterBillingAddressPage,
+        arguments: EnterBillingAddressPageArgs(
+            paymentResponseBody: paymentResponseBody),
       );
     } else {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => ErrorPage(
-            paymentManager: paymentManager,
             message: paymentResponseBody.providerMessage ?? "",
             paymentOptionsEnum: PaymentOptionsEnum.card,
-            rate: paymentResponseBody.rate,
           ),
         ),
       );

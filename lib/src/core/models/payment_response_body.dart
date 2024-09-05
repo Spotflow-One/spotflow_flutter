@@ -78,6 +78,14 @@ class Rate {
         to: json['to'] as String,
         rate: json['rate'] as num,
       );
+
+  Rate copyWith({String? from, String? to, num? rate}) {
+    return Rate(
+      from: from ?? this.from,
+      to: to ?? this.to,
+      rate: rate ?? this.rate,
+    );
+  }
 }
 
 class Authorization {

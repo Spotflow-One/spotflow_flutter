@@ -1,10 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:provider/provider.dart';
 import 'package:spotflow/gen/assets.gen.dart';
 import 'package:spotflow/spotflow.dart';
 import 'package:spotflow/src/core/models/authorize_payment_request_body.dart';
 import 'package:spotflow/src/core/services/payment_service.dart';
+import 'package:spotflow/src/ui/app_state_provider.dart';
 import 'package:spotflow/src/ui/utils/spot_flow_route_name.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
@@ -17,34 +19,25 @@ import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 import '../authorization_web_view.dart';
 
 class EnterPinPage extends StatelessWidget {
-  final SpotFlowPaymentManager paymentManager;
-  final double? rate;
   final String reference;
 
   const EnterPinPage({
     super.key,
-    required this.paymentManager,
     required this.reference,
-    this.rate,
   });
 
   @override
   Widget build(BuildContext context) {
     return BaseScaffold(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        appLogo: paymentManager.appLogo,
         children: [
           PaymentOptionsTile(
             text: 'Pay with Card',
             icon: Assets.svg.payWithCardIcon.svg(),
           ),
-          PaymentCard(
-            paymentManager: paymentManager,
-            rate: rate,
-          ),
+          PaymentCard(),
           Expanded(
             child: _EnterPinPageUI(
-              paymentManager: paymentManager,
               reference: reference,
             ),
           ),
@@ -53,13 +46,11 @@ class EnterPinPage extends StatelessWidget {
 }
 
 class _EnterPinPageUI extends StatefulWidget {
-  final SpotFlowPaymentManager paymentManager;
   final String reference;
   final double? rate;
 
   const _EnterPinPageUI({
     super.key,
-    required this.paymentManager,
     required this.reference,
     this.rate,
   });
@@ -72,7 +63,7 @@ class _EnterPinPageUIState extends State<_EnterPinPageUI>
     implements TransactionCallBack {
   @override
   Widget build(BuildContext context) {
-    final paymentManager = widget.paymentManager;
+    final paymentManager = context.read<AppStateProvider>().paymentManager!;
     if (creatingPayment) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -173,6 +164,7 @@ class _EnterPinPageUIState extends State<_EnterPinPageUI>
           transactionCallBack: this);
     } on DioException catch (e) {
       //todo: handle errors
+      debugPrint(e.message);
     }
     setState(() {
       creatingPayment = false;
@@ -184,8 +176,6 @@ class _EnterPinPageUIState extends State<_EnterPinPageUI>
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => CardPaymentStatusCheckPage(
-          paymentManager: widget.paymentManager,
-          rate: widget.rate,
           paymentReference: widget.reference,
         ),
       ),

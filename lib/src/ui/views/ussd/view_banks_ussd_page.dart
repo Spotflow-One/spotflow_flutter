@@ -2,10 +2,11 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:spotflow/gen/assets.gen.dart';
-import 'package:spotflow/spotflow.dart';
 import 'package:spotflow/src/core/models/payment_request_body.dart';
 import 'package:spotflow/src/core/services/payment_service.dart';
+import 'package:spotflow/src/ui/app_state_provider.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/views/card/widgets/bottom_sheet_with_search.dart';
@@ -19,10 +20,12 @@ import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 import '../../widgets/payment_card.dart';
 
 class ViewBanksUssdPage extends StatefulWidget {
-  final SpotFlowPaymentManager paymentManager;
-  final double? rate;
+  final GestureTapCallback close;
 
-  const ViewBanksUssdPage({super.key, required this.paymentManager, this.rate});
+  const ViewBanksUssdPage({
+    super.key,
+    required this.close,
+  });
 
   @override
   State<ViewBanksUssdPage> createState() => _ViewBanksUssdPageState();
@@ -41,10 +44,7 @@ class _ViewBanksUssdPageState extends State<ViewBanksUssdPage> {
           icon: Assets.svg.payWithUsdIcon.svg(),
           text: 'Pay with USSD',
         ),
-        PaymentCard(
-          paymentManager: widget.paymentManager,
-          rate: widget.rate,
-        ),
+        const PaymentCard(),
         const SizedBox(
           height: 70,
         ),
@@ -114,7 +114,7 @@ class _ViewBanksUssdPageState extends State<ViewBanksUssdPage> {
             ),
           ),
           const Spacer(),
-          const Row(
+          Row(
             children: [
               Expanded(
                 child: ChangePaymentButton(),
@@ -123,7 +123,9 @@ class _ViewBanksUssdPageState extends State<ViewBanksUssdPage> {
                 width: 18.0,
               ),
               Expanded(
-                child: CancelPaymentButton(),
+                child: CancelPaymentButton(
+                  close: widget.close,
+                ),
               ),
             ],
           ),
@@ -152,7 +154,8 @@ class _ViewBanksUssdPageState extends State<ViewBanksUssdPage> {
       loading = true;
     });
     try {
-      final paymentService = PaymentService(widget.paymentManager.key);
+      final paymentManager = context.read<AppStateProvider>().paymentManager!;
+      final paymentService = PaymentService(paymentManager.key);
       final banksResponse = await paymentService.getBanks();
       banks = banksResponse.data.map<Bank>((e) => Bank.fromJson(e)).toList();
     } on DioException catch (e) {
@@ -196,9 +199,8 @@ class _ViewBanksUssdPageState extends State<ViewBanksUssdPage> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => CopyUssdPage(
-          paymentManager: widget.paymentManager,
           bank: bank!,
-          rate: widget.rate,
+          close: widget.close,
         ),
       ),
     );

@@ -10,4 +10,10 @@ class SpotFlowRouteName {
   static const enterPinPage = 'spot-flow-enter-pin-page';
 
   static const errorPage = 'spot=flow-error-page';
+
+  static const enterBillingAddressPage = "enter-billing-address-page";
+
+  static const viewBankDetailsPage = "view-bank-details-page";
+
+  static const viewBanksUssdPage = "view-banks-ussd-page";
 }

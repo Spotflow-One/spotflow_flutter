@@ -1,10 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:spotflow/gen/assets.gen.dart';
-import 'package:spotflow/spotflow.dart';
 import 'package:spotflow/src/core/models/payment_request_body.dart';
 import 'package:spotflow/src/core/services/payment_service.dart';
+import 'package:spotflow/src/ui/app_state_provider.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/views/transfer/transfer_status_check_page.dart';
@@ -18,12 +19,14 @@ import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 import '../../../core/models/payment_response_body.dart';
 
 class CopyUssdPage extends StatefulWidget {
-  final SpotFlowPaymentManager paymentManager;
-  final double? rate;
   final Bank bank;
+  final GestureTapCallback close;
 
-  const CopyUssdPage(
-      {super.key, required this.paymentManager, this.rate, required this.bank});
+  const CopyUssdPage({
+    super.key,
+    required this.bank,
+    required this.close,
+  });
 
   @override
   State<CopyUssdPage> createState() => _CopyUssdPageState();
@@ -39,10 +42,7 @@ class _CopyUssdPageState extends State<CopyUssdPage> {
           icon: Assets.svg.payWithUsdIcon.svg(),
           text: 'Pay with USSD',
         ),
-        PaymentCard(
-          paymentManager: widget.paymentManager,
-          rate: widget.rate,
-        ),
+        const PaymentCard(),
         const SizedBox(
           height: 23,
         ),
@@ -139,10 +139,9 @@ class _CopyUssdPageState extends State<CopyUssdPage> {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => TransferStatusCheckPage(
-                    paymentManager: widget.paymentManager,
                     reference: paymentResponseBody?.reference ?? "",
                     paymentResponseBody: paymentResponseBody!,
-                    rate: widget.rate,
+                    close: widget.close,
                   ),
                 ),
               );
@@ -162,7 +161,8 @@ class _CopyUssdPageState extends State<CopyUssdPage> {
             ),
           ),
           const Spacer(),
-          const Row(
+
+          Row(
             children: [
               Expanded(
                 child: ChangePaymentButton(),
@@ -171,7 +171,9 @@ class _CopyUssdPageState extends State<CopyUssdPage> {
                 width: 18.0,
               ),
               Expanded(
-                child: CancelPaymentButton(),
+                child: CancelPaymentButton(
+                  close: widget.close,
+                ),
               ),
             ],
           ),
@@ -200,12 +202,12 @@ class _CopyUssdPageState extends State<CopyUssdPage> {
     setState(() {
       initiatingPayment = true;
     });
-    final paymentManager = widget.paymentManager;
+    final paymentManager = context.read<AppStateProvider>().paymentManager!;
     final paymentService = PaymentService(paymentManager.key);
 
     final paymentRequestBody = PaymentRequestBody(
       customer: paymentManager.customer,
-      currency: paymentManager.fromCurrency,
+      currency: context.read<AppStateProvider>().merchantConfig?.rate.to ?? "",
       amount: paymentManager.amount,
       channel: "ussd",
       bank: widget.bank,

@@ -1,9 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:spotflow/gen/assets.gen.dart';
-import 'package:spotflow/spotflow.dart';
 import 'package:spotflow/src/core/models/validate_payment_request_body.dart';
 import 'package:spotflow/src/core/services/payment_service.dart';
+import 'package:spotflow/src/ui/app_state_provider.dart';
 import 'package:spotflow/src/ui/utils/spot_flow_route_name.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
@@ -18,37 +19,27 @@ import 'card_payment_status_check_page.dart';
 class EnterOtpPage extends StatelessWidget {
   final String message;
   final String reference;
-  final double? rate;
-  final SpotFlowPaymentManager paymentManager;
 
   const EnterOtpPage({
     super.key,
     required this.message,
     required this.reference,
-    required this.paymentManager,
-    this.rate,
   });
 
   @override
   Widget build(BuildContext context) {
     return BaseScaffold(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      appLogo: paymentManager.appLogo,
       children: [
         PaymentOptionsTile(
           text: 'Pay with Card',
           icon: Assets.svg.payWithCardIcon.svg(),
         ),
-        PaymentCard(
-          rate: rate,
-          paymentManager: paymentManager,
-        ),
+        const PaymentCard(),
         Expanded(
           child: _EnterOtpPageUi(
             message: message,
             reference: reference,
-            rate: rate,
-            paymentManager: paymentManager,
           ),
         ),
       ],
@@ -59,15 +50,12 @@ class EnterOtpPage extends StatelessWidget {
 class _EnterOtpPageUi extends StatefulWidget {
   final String message;
   final String reference;
-  final double? rate;
-  final SpotFlowPaymentManager paymentManager;
 
-  const _EnterOtpPageUi(
-      {super.key,
-      required this.message,
-      required this.reference,
-      this.rate,
-      required this.paymentManager});
+  const _EnterOtpPageUi({
+    super.key,
+    required this.message,
+    required this.reference,
+  });
 
   @override
   State<_EnterOtpPageUi> createState() => _EnterOtpPageUiState();
@@ -85,7 +73,6 @@ class _EnterOtpPageUiState extends State<_EnterOtpPageUi>
 
   @override
   Widget build(BuildContext context) {
-    final paymentManager = widget.paymentManager;
     if (creatingPayment) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -145,7 +132,7 @@ class _EnterOtpPageUiState extends State<_EnterOtpPageUi>
           height: 31,
         ),
         InkWell(
-          onTap: () => _authorizePayment(paymentManager),
+          onTap: () => _authorizePayment(),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 70.0),
             child: Container(
@@ -212,7 +199,8 @@ class _EnterOtpPageUiState extends State<_EnterOtpPageUi>
 
   bool creatingPayment = false;
 
-  Future<void> _authorizePayment(SpotFlowPaymentManager paymentManager) async {
+  Future<void> _authorizePayment() async {
+    final paymentManager = context.read<AppStateProvider>().paymentManager!;
     final paymentRequestBody = ValidatePaymentRequestBody(
       merchantId: paymentManager.merchantId,
       reference: widget.reference,
@@ -234,7 +222,7 @@ class _EnterOtpPageUiState extends State<_EnterOtpPageUi>
           context: context,
           transactionCallBack: this);
     } on DioException catch (e) {
-      //todo: handle errors
+      debugPrint(e.message);
     }
     setState(() {
       creatingPayment = false;
@@ -246,8 +234,6 @@ class _EnterOtpPageUiState extends State<_EnterOtpPageUi>
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => CardPaymentStatusCheckPage(
-          paymentManager: widget.paymentManager,
-          rate: widget.rate,
           paymentReference: widget.reference,
         ),
       ),

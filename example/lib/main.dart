@@ -49,12 +49,6 @@ class _MyHomePageState extends State<MyHomePage> {
       paymentManager: SpotFlowPaymentManager(
         merchantId: merchantIdController.text,
         customerEmail: emailController.text,
-        fromCurrency: fromCurrencyController.text.isEmpty
-            ? "USD"
-            : fromCurrencyController.text,
-        toCurrency: toCurrencyController.text.isEmpty
-            ? "NGN"
-            : toCurrencyController.text,
         amount: num.tryParse(amountController.text) ?? 10,
         key: merchantKeyController.text,
         encryptionKey: encryptionKeyController.text,
@@ -69,13 +63,12 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  TextEditingController emailController = TextEditingController(); //
+  TextEditingController emailController =
+      TextEditingController(text: "jon@snow.com"); //
   TextEditingController amountController = TextEditingController(); //
   TextEditingController merchantIdController = TextEditingController(); //
   TextEditingController encryptionKeyController = TextEditingController(); //
   TextEditingController planIdController = TextEditingController(); //
-  TextEditingController fromCurrencyController = TextEditingController();
-  TextEditingController toCurrencyController = TextEditingController();
   TextEditingController merchantKeyController = TextEditingController(); //
   TextEditingController paymentDescriptionController =
       TextEditingController(text: "League Pass");
@@ -197,30 +190,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   height: 16,
                 ),
                 TextField(
-                  controller: fromCurrencyController,
-                  decoration: const InputDecoration(
-                    hintText: 'from currency (optional)',
-                    border: OutlineInputBorder(),
-                    enabledBorder: OutlineInputBorder(),
-                    focusedBorder: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
-                TextField(
-                  controller: toCurrencyController,
-                  decoration: const InputDecoration(
-                    hintText: 'to currency (optional)',
-                    border: OutlineInputBorder(),
-                    enabledBorder: OutlineInputBorder(),
-                    focusedBorder: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
-                TextField(
                   controller: paymentDescriptionController,
                   decoration: const InputDecoration(
                     hintText: 'payment description (optional)',
@@ -234,6 +203,25 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 ElevatedButton(
                   onPressed: () {
+                    if (emailController.text.isEmpty ||
+                        planIdController.text.isEmpty ||
+                        merchantIdController.text.isEmpty ||
+                        merchantKeyController.text.isEmpty ||
+                        encryptionKeyController.text.isEmpty) {
+                      const snackBar = SnackBar(
+                        backgroundColor: Colors.red,
+                        content: Text(
+                          'Please enter all required fields',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                          ),
+                        ),
+                      );
+
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      return;
+                    }
                     _startPayment();
                   },
                   style: ElevatedButton.styleFrom(

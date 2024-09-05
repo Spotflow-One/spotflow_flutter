@@ -6,6 +6,7 @@ import 'package:encrypt/encrypt.dart';
 import 'package:flutter/material.dart' hide Key;
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:pattern_formatter/pattern_formatter.dart' as pf;
+import 'package:provider/provider.dart';
 import 'package:spotflow/gen/assets.gen.dart';
 import 'package:spotflow/src/core/models/payment_options_enum.dart';
 import 'package:spotflow/src/core/models/payment_request_body.dart';
@@ -13,6 +14,7 @@ import 'package:spotflow/src/core/models/payment_response_body.dart';
 import 'package:spotflow/src/core/models/spot_flow_card.dart';
 import 'package:spotflow/src/core/services/payment_service.dart';
 import 'package:spotflow/src/spotflow.dart';
+import 'package:spotflow/src/ui/app_state_provider.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/views/authorization_web_view.dart';
@@ -28,33 +30,26 @@ import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 import 'widgets/card_input_field.dart';
 
 class EnterCardDetailsPage extends StatelessWidget {
-  final SpotFlowPaymentManager paymentManager;
-  final double? rate;
+  final GestureTapCallback close;
 
   const EnterCardDetailsPage({
     super.key,
-    required this.paymentManager,
-    this.rate,
+    required this.close,
   });
 
   @override
   Widget build(BuildContext context) {
     return BaseScaffold(
-      appLogo: paymentManager.appLogo,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         PaymentOptionsTile(
           text: 'Pay with Card',
           icon: Assets.svg.payWithCardIcon.svg(),
         ),
-        PaymentCard(
-          paymentManager: paymentManager,
-          rate: rate,
-        ),
+        const PaymentCard(),
         Expanded(
           child: _CardInputUI(
-            paymentManager: paymentManager,
-            rate: rate,
+            close: close,
           ),
         ),
       ],
@@ -63,13 +58,11 @@ class EnterCardDetailsPage extends StatelessWidget {
 }
 
 class _CardInputUI extends StatefulWidget {
-  final SpotFlowPaymentManager paymentManager;
-  final double? rate;
+  final GestureTapCallback close;
 
   const _CardInputUI({
     super.key,
-    required this.paymentManager,
-    this.rate,
+    required this.close,
   });
 
   @override
@@ -98,14 +91,15 @@ class _CardInputUIState extends State<_CardInputUI>
 
   @override
   Widget build(BuildContext context) {
-    final paymentManager = widget.paymentManager;
+    final merchantConfig = context.watch<AppStateProvider>().merchantConfig;
+    final paymentManager = context.watch<AppStateProvider>().paymentManager!;
     String formattedAmount = "";
-    if (widget.rate != null) {
+    if (merchantConfig?.rate != null) {
       formattedAmount =
-          "${paymentManager.toCurrency} ${(widget.rate! * paymentManager.amount).toStringAsFixed(2)}";
+          "${merchantConfig!.rate.to} ${(merchantConfig.rate.rate * paymentManager.amount).toStringAsFixed(2)}";
     } else {
       formattedAmount =
-          'Pay ${paymentManager.fromCurrency} ${paymentManager.amount.toStringAsFixed(2)}';
+          'Pay ${merchantConfig!.rate.from} ${paymentManager.amount.toStringAsFixed(2)}';
     }
 
     if (creatingPayment) {
@@ -173,7 +167,7 @@ class _CardInputUIState extends State<_CardInputUI>
           ),
           InkWell(
             onTap: () {
-              _createPayment(paymentManager, context);
+              _createPayment(paymentManager, context, merchantConfig.rate.to);
             },
             child: Container(
               padding: const EdgeInsets.symmetric(
@@ -199,16 +193,18 @@ class _CardInputUIState extends State<_CardInputUI>
           const SizedBox(
             height: 60,
           ),
-          const Row(
+          Row(
             children: [
-              Expanded(
+              const Expanded(
                 child: ChangePaymentButton(),
               ),
-              SizedBox(
+              const SizedBox(
                 width: 18.0,
               ),
               Expanded(
-                child: CancelPaymentButton(),
+                child: CancelPaymentButton(
+                  close: widget.close,
+                ),
               ),
             ],
           ),
@@ -222,8 +218,8 @@ class _CardInputUIState extends State<_CardInputUI>
     }
   }
 
-  Future<void> _createPayment(
-      SpotFlowPaymentManager paymentManager, BuildContext context) async {
+  Future<void> _createPayment(SpotFlowPaymentManager paymentManager,
+      BuildContext context, String currency) async {
     setState(() {
       creatingPayment = true;
     });
@@ -241,7 +237,7 @@ class _CardInputUIState extends State<_CardInputUI>
     final encryptedCard = await encryptCard(card, paymentManager.encryptionKey);
     final paymentRequestBody = PaymentRequestBody(
         customer: paymentManager.customer,
-        currency: paymentManager.fromCurrency,
+        currency: currency,
         amount: paymentManager.amount,
         channel: 'card',
         encryptedCard: encryptedCard);
@@ -268,7 +264,6 @@ class _CardInputUIState extends State<_CardInputUI>
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => ErrorPage(
-              paymentManager: paymentManager,
               message: message ?? "Couldn't process your payment",
               paymentOptionsEnum: PaymentOptionsEnum.card),
         ),
@@ -287,8 +282,6 @@ class _CardInputUIState extends State<_CardInputUI>
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => CardPaymentStatusCheckPage(
-          paymentManager: widget.paymentManager,
-          rate: paymentResponseBody!.rate,
           paymentReference: paymentResponseBody!.reference,
         ),
       ),
@@ -357,10 +350,8 @@ class _CardInputUIState extends State<_CardInputUI>
 
   Future<String> encryptCard(SpotFlowCard card, String encryptionKey) async {
     try {
-      print(card.toString());
       return encryptAES256(encryptionKey, card.toString());
     } catch (e) {
-      print(e);
       return "null";
     }
   }

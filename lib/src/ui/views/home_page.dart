@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:spotflow/spotflow.dart';
 import 'package:spotflow/src/core/models/merchant_config_response.dart';
 import 'package:spotflow/src/core/models/payment_options_enum.dart';
 import 'package:spotflow/src/core/services/payment_service.dart';
+import 'package:spotflow/src/ui/app_state_provider.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/views/card/enter_card_details_page.dart';
@@ -15,13 +17,13 @@ import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
 import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 
 class HomePage extends StatefulWidget {
-  final Widget? appLogo;
   final SpotFlowPaymentManager paymentManager;
+  final GestureTapCallback closeSpotFlow;
 
   const HomePage({
     super.key,
-    this.appLogo,
     required this.paymentManager,
+    required this.closeSpotFlow,
   });
 
   @override
@@ -32,7 +34,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return BaseScaffold(
-      appLogo: widget.paymentManager.appLogo,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (fetchingConfig) ...[
@@ -44,8 +45,7 @@ class _HomePageState extends State<HomePage> {
         ] else ...[
           Expanded(
             child: _HomePageUi(
-              paymentManager: widget.paymentManager,
-              merchantConfig: merchantConfig,
+              closeSpotFlow: widget.closeSpotFlow,
             ),
           ),
         ]
@@ -73,20 +73,24 @@ class _HomePageState extends State<HomePage> {
     );
     setState(() {
       merchantConfig = MerchantConfig.fromJson(response.data);
+      context.read<AppStateProvider>().setMerchantConfig(merchantConfig!);
       fetchingConfig = false;
     });
   }
 }
 
 class _HomePageUi extends StatelessWidget {
-  final SpotFlowPaymentManager paymentManager;
-  final MerchantConfig? merchantConfig;
+  final GestureTapCallback closeSpotFlow;
 
-  const _HomePageUi(
-      {super.key, required this.paymentManager, required this.merchantConfig});
+  const _HomePageUi({
+    super.key,
+    required this.closeSpotFlow,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final merchantConfig = context.read<AppStateProvider>().merchantConfig;
+    final paymentManager = context.read<AppStateProvider>().paymentManager!;
     String toFormattedAmount = "";
     final rate = merchantConfig?.rate;
     if (rate != null) {
@@ -100,10 +104,7 @@ class _HomePageUi extends StatelessWidget {
         const SizedBox(
           height: 34,
         ),
-        PaymentCard(
-          paymentManager: paymentManager,
-          rate: rate?.rate.toDouble(),
-        ),
+        const PaymentCard(),
         const SizedBox(
           height: 27,
         ),
@@ -148,7 +149,7 @@ class _HomePageUi extends StatelessWidget {
                 icon: e.icon,
                 text: e.title,
                 onTap: () {
-                  onSelected(e, context, paymentManager, rate?.rate.toDouble());
+                  onSelected(e, context);
                 },
               ),
             );
@@ -157,9 +158,10 @@ class _HomePageUi extends StatelessWidget {
         const SizedBox(
           height: 40,
         ),
-        const Center(
+        Center(
           child: CancelPaymentButton(
             alignment: null,
+            close: closeSpotFlow,
           ),
         ),
         const Spacer(),
@@ -171,15 +173,16 @@ class _HomePageUi extends StatelessWidget {
     );
   }
 
-  void onSelected(PaymentOptionsEnum e, BuildContext context,
-      SpotFlowPaymentManager paymentManager, double? rate) {
+  void onSelected(
+    PaymentOptionsEnum e,
+    BuildContext context,
+  ) {
     switch (e) {
       case PaymentOptionsEnum.card:
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => EnterCardDetailsPage(
-              paymentManager: paymentManager,
-              rate: rate,
+              close: closeSpotFlow,
             ),
           ),
         );
@@ -187,7 +190,7 @@ class _HomePageUi extends StatelessWidget {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => ViewBankDetailsPage(
-              paymentManager: paymentManager,
+              close: closeSpotFlow,
             ),
           ),
         );
@@ -195,8 +198,7 @@ class _HomePageUi extends StatelessWidget {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => ViewBanksUssdPage(
-              paymentManager: paymentManager,
-              rate: rate,
+              close: closeSpotFlow,
             ),
           ),
         );

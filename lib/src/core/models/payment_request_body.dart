@@ -44,10 +44,9 @@ class PaymentRequestBody {
 }
 
 class Bank extends BaseModel {
-  String name;
   String code;
 
-  Bank({required this.name, required this.code}) : super(name: name);
+  Bank({required super.name, required this.code});
 
   factory Bank.fromJson(Map<String, dynamic> json) {
     return Bank(name: json['name'], code: json['code']);

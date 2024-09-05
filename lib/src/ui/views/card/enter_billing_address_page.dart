@@ -3,12 +3,14 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart' hide Key;
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:spotflow/gen/assets.gen.dart';
 import 'package:spotflow/src/core/models/payment_options_enum.dart';
 import 'package:spotflow/src/core/models/payment_response_body.dart';
 import 'package:spotflow/src/core/models/validate_payment_request_body.dart';
 import 'package:spotflow/src/core/services/payment_service.dart';
 import 'package:spotflow/src/spotflow.dart';
+import 'package:spotflow/src/ui/app_state_provider.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/views/authorization_web_view.dart';
@@ -27,33 +29,29 @@ import 'widgets/bottom_sheet_with_search.dart';
 import 'widgets/card_input_field.dart';
 
 class EnterBillingAddressPage extends StatelessWidget {
-  final SpotFlowPaymentManager paymentManager;
   final PaymentResponseBody paymentResponseBody;
+  final GestureTapCallback close;
 
   const EnterBillingAddressPage({
     super.key,
-    required this.paymentManager,
     required this.paymentResponseBody,
+    required this.close,
   });
 
   @override
   Widget build(BuildContext context) {
     return BaseScaffold(
-      appLogo: paymentManager.appLogo,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         PaymentOptionsTile(
           text: 'Pay with Card',
           icon: Assets.svg.payWithCardIcon.svg(),
         ),
-        PaymentCard(
-          paymentManager: paymentManager,
-          rate: paymentResponseBody.rate,
-        ),
+        const PaymentCard(),
         Expanded(
           child: _CardInputUI(
-            paymentManager: paymentManager,
             paymentResponseBody: paymentResponseBody,
+            close: close,
           ),
         ),
       ],
@@ -62,13 +60,13 @@ class EnterBillingAddressPage extends StatelessWidget {
 }
 
 class _CardInputUI extends StatefulWidget {
-  final SpotFlowPaymentManager paymentManager;
   final PaymentResponseBody paymentResponseBody;
+  final GestureTapCallback close;
 
   const _CardInputUI({
     super.key,
-    required this.paymentManager,
     required this.paymentResponseBody,
+    required this.close,
   });
 
   @override
@@ -108,7 +106,7 @@ class _CardInputUIState extends State<_CardInputUI>
 
   @override
   Widget build(BuildContext context) {
-    final paymentManager = widget.paymentManager;
+    final paymentManager = context.read<AppStateProvider>().paymentManager!;
     if (creatingPayment) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -232,16 +230,18 @@ class _CardInputUIState extends State<_CardInputUI>
           const SizedBox(
             height: 60,
           ),
-          const Row(
+          Row(
             children: [
-              Expanded(
+              const Expanded(
                 child: ChangePaymentButton(),
               ),
-              SizedBox(
+              const SizedBox(
                 width: 18.0,
               ),
               Expanded(
-                child: CancelPaymentButton(),
+                child: CancelPaymentButton(
+                  close: widget.close,
+                ),
               ),
             ],
           ),
@@ -274,7 +274,7 @@ class _CardInputUIState extends State<_CardInputUI>
       state: countryState!.name,
       zip: zipCodeController.text,
       reference: widget.paymentResponseBody.reference,
-      merchantId: widget.paymentManager.merchantId,
+      merchantId: paymentManager.merchantId,
     );
     try {
       final response = await paymentService.authorizePayment(
@@ -298,7 +298,6 @@ class _CardInputUIState extends State<_CardInputUI>
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => ErrorPage(
-              paymentManager: paymentManager,
               message: message ?? "Couldn't process your payment",
               paymentOptionsEnum: PaymentOptionsEnum.card),
         ),
@@ -395,11 +394,17 @@ class _CardInputUIState extends State<_CardInputUI>
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => CardPaymentStatusCheckPage(
-          paymentManager: widget.paymentManager,
-          rate: widget.paymentResponseBody.rate,
           paymentReference: widget.paymentResponseBody.reference,
         ),
       ),
     );
   }
+}
+
+class EnterBillingAddressPageArgs {
+  final PaymentResponseBody paymentResponseBody;
+
+  EnterBillingAddressPageArgs({
+    required this.paymentResponseBody,
+  });
 }
