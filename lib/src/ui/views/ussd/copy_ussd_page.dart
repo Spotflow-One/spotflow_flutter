@@ -203,12 +203,13 @@ class _CopyUssdPageState extends State<CopyUssdPage> {
       initiatingPayment = true;
     });
     final paymentManager = context.read<AppStateProvider>().paymentManager!;
+    final amount = context.read<AppStateProvider>().merchantConfig!.plan.amount;
     final paymentService = PaymentService(paymentManager.key);
 
     final paymentRequestBody = PaymentRequestBody(
       customer: paymentManager.customer,
       currency: context.read<AppStateProvider>().merchantConfig?.rate.to ?? "",
-      amount: paymentManager.amount,
+      amount: amount,
       channel: "ussd",
       bank: widget.bank,
     );

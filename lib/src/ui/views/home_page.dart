@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:spotflow/gen/assets.gen.dart';
 import 'package:spotflow/spotflow.dart';
 import 'package:spotflow/src/core/models/merchant_config_response.dart';
 import 'package:spotflow/src/core/models/payment_options_enum.dart';
@@ -42,6 +43,18 @@ class _HomePageState extends State<HomePage> {
               child: CircularProgressIndicator(),
             ),
           )
+        ] else if (merchantConfig == null) ...[
+          Expanded(
+            child: Column(
+              children: [
+                Assets.svg.warning.svg(),
+                const SizedBox(
+                  height: 16,
+                ),
+                Text("Unable to start payment")
+              ],
+            ),
+          )
         ] else ...[
           Expanded(
             child: _HomePageUi(
@@ -67,13 +80,18 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       fetchingConfig = true;
     });
-    final paymentService = PaymentService(widget.paymentManager.key);
-    var response = await paymentService.getMerchantConfig(
-      planId: widget.paymentManager.planId,
-    );
-    setState(() {
+    try {
+      final paymentService = PaymentService(widget.paymentManager.key);
+      var response = await paymentService.getMerchantConfig(
+        planId: widget.paymentManager.planId,
+      );
       merchantConfig = MerchantConfig.fromJson(response.data);
       context.read<AppStateProvider>().setMerchantConfig(merchantConfig!);
+    } on Exception catch (e) {
+      debugPrint(e.toString());
+    }
+
+    setState(() {
       fetchingConfig = false;
     });
   }
@@ -90,12 +108,12 @@ class _HomePageUi extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final merchantConfig = context.read<AppStateProvider>().merchantConfig;
-    final paymentManager = context.read<AppStateProvider>().paymentManager!;
+    final amount = merchantConfig?.plan.amount;
     String toFormattedAmount = "";
     final rate = merchantConfig?.rate;
-    if (rate != null) {
+    if (rate != null && amount != null) {
       toFormattedAmount =
-          "${rate.from}${(rate.rate * paymentManager.amount).toStringAsFixed(2)}";
+          "${rate.from}${(rate.rate * amount).toStringAsFixed(2)}";
     }
 
     return Column(
@@ -139,7 +157,7 @@ class _HomePageUi extends StatelessWidget {
           ),
         ),
         if (merchantConfig?.paymentMethods != null) ...[
-          ...PaymentOptionsEnum.values.map((e) {
+          ...merchantConfig!.paymentMethods.map((e) {
             if (e == null) {
               return const SizedBox();
             }

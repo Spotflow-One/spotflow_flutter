@@ -93,13 +93,14 @@ class _CardInputUIState extends State<_CardInputUI>
   Widget build(BuildContext context) {
     final merchantConfig = context.watch<AppStateProvider>().merchantConfig;
     final paymentManager = context.watch<AppStateProvider>().paymentManager!;
+    final amount = merchantConfig?.plan.amount;
     String formattedAmount = "";
-    if (merchantConfig?.rate != null) {
+    if (merchantConfig?.rate != null && amount != null) {
       formattedAmount =
-          "${merchantConfig!.rate.to} ${(merchantConfig.rate.rate * paymentManager.amount).toStringAsFixed(2)}";
+          "${merchantConfig!.rate.to} ${(merchantConfig.rate.rate * amount).toStringAsFixed(2)}";
     } else {
       formattedAmount =
-          'Pay ${merchantConfig!.rate.from} ${paymentManager.amount.toStringAsFixed(2)}';
+          'Pay ${merchantConfig!.rate.from} ${amount?.toStringAsFixed(2) ?? ""}';
     }
 
     if (creatingPayment) {
@@ -167,7 +168,10 @@ class _CardInputUIState extends State<_CardInputUI>
           ),
           InkWell(
             onTap: () {
-              _createPayment(paymentManager, context, merchantConfig.rate.to);
+              if (amount != null) {
+                _createPayment(
+                    paymentManager, context, merchantConfig.rate.to, amount);
+              }
             },
             child: Container(
               padding: const EdgeInsets.symmetric(
@@ -219,7 +223,7 @@ class _CardInputUIState extends State<_CardInputUI>
   }
 
   Future<void> _createPayment(SpotFlowPaymentManager paymentManager,
-      BuildContext context, String currency) async {
+      BuildContext context, String currency, num amount) async {
     setState(() {
       creatingPayment = true;
     });
@@ -238,7 +242,7 @@ class _CardInputUIState extends State<_CardInputUI>
     final paymentRequestBody = PaymentRequestBody(
         customer: paymentManager.customer,
         currency: currency,
-        amount: paymentManager.amount,
+        amount: amount,
         channel: 'card',
         encryptedCard: encryptedCard);
     final paymentService = PaymentService(paymentManager.key);
@@ -277,7 +281,7 @@ class _CardInputUIState extends State<_CardInputUI>
   PaymentResponseBody? paymentResponseBody;
 
   @override
-  onTransactionComplete(ChargeResponse? chargeResponse) {
+  onTransactionComplete() {
     if (paymentResponseBody == null) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(

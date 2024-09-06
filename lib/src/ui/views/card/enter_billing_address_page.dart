@@ -390,7 +390,7 @@ class _CardInputUIState extends State<_CardInputUI>
   }
 
   @override
-  onTransactionComplete(ChargeResponse? chargeResponse) {
+  onTransactionComplete() {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => CardPaymentStatusCheckPage(

@@ -230,7 +230,7 @@ class _EnterOtpPageUiState extends State<_EnterOtpPageUi>
   }
 
   @override
-  onTransactionComplete(ChargeResponse? chargeResponse) {
+  onTransactionComplete() {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => CardPaymentStatusCheckPage(

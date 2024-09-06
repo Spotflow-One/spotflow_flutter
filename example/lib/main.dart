@@ -49,7 +49,6 @@ class _MyHomePageState extends State<MyHomePage> {
       paymentManager: SpotFlowPaymentManager(
         merchantId: merchantIdController.text,
         customerEmail: emailController.text,
-        amount: num.tryParse(amountController.text) ?? 10,
         key: merchantKeyController.text,
         encryptionKey: encryptionKeyController.text,
         paymentDescription: paymentDescriptionController.text.isEmpty
@@ -65,7 +64,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   TextEditingController emailController =
       TextEditingController(text: "jon@snow.com"); //
-  TextEditingController amountController = TextEditingController(); //
   TextEditingController merchantIdController = TextEditingController(); //
   TextEditingController encryptionKeyController = TextEditingController(); //
   TextEditingController planIdController = TextEditingController(); //
@@ -120,19 +118,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   keyboardType: TextInputType.emailAddress,
                   decoration: const InputDecoration(
                     hintText: "email@sample.com",
-                    border: OutlineInputBorder(),
-                    enabledBorder: OutlineInputBorder(),
-                    focusedBorder: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
-                TextField(
-                  controller: amountController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    hintText: 'amount (optional)',
                     border: OutlineInputBorder(),
                     enabledBorder: OutlineInputBorder(),
                     focusedBorder: OutlineInputBorder(),

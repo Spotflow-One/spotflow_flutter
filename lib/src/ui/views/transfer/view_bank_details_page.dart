@@ -102,17 +102,16 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
 
   @override
   Widget build(BuildContext context) {
-    final paymentManager = context.read<AppStateProvider>().paymentManager!;
     final merchantConfig = context.read<AppStateProvider>().merchantConfig;
     if (initiatingPayment) {
       return const Center(
         child: CircularProgressIndicator(),
       );
     }
-    if (paymentResponseBody == null) {
+    if (paymentResponseBody == null || merchantConfig == null) {
       return Column(
         children: [
-          PaymentCard(),
+          const PaymentCard(),
           const SizedBox(
             height: 20,
           ),
@@ -129,8 +128,9 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
     }
 
     final rate = paymentResponseBody!.rate;
-    final totalAmount = (rate! * paymentManager.amount).toStringAsFixed(2);
-    final formattedAmount = "${merchantConfig?.rate.from} $totalAmount";
+    final amount = merchantConfig.plan.amount;
+    final totalAmount = (rate! * amount).toStringAsFixed(2);
+    final formattedAmount = "${merchantConfig.rate.from} $totalAmount";
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -390,13 +390,16 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
     setState(() {
       initiatingPayment = true;
     });
+
     final paymentManager = context.read<AppStateProvider>().paymentManager!;
+    final amount = context.read<AppStateProvider>().merchantConfig?.plan.amount;
+    if (amount == null) return;
     final paymentService = PaymentService(paymentManager.key);
 
     final paymentRequestBody = PaymentRequestBody(
       customer: paymentManager.customer,
       currency: context.read<AppStateProvider>().merchantConfig?.rate.to ?? "",
-      amount: paymentManager.amount,
+      amount: amount,
       channel: "bank_transfer",
     );
     try {

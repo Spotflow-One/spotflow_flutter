@@ -19,6 +19,7 @@ class PaymentCard extends StatelessWidget {
     String? fromCurrency = merchantConfig?.rate.from;
     String? toCurrency = merchantConfig?.rate.to;
 
+    num? amount = merchantConfig?.plan.amount;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2),
       child: Container(
@@ -87,7 +88,7 @@ class PaymentCard extends StatelessWidget {
                   width: 4,
                 ),
                 Text(
-                  '$toCurrency ${paymentManager.amount.toStringAsFixed(2)}',
+                  '$toCurrency ${amount?.toStringAsFixed(2) ?? ""}',
                   style: SpotFlowTextStyle.body16SemiBold.copyWith(
                     color: SpotFlowColors.kcBaseWhite,
                   ),
@@ -110,7 +111,7 @@ class PaymentCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    "$fromCurrency ${(conversionRate * paymentManager.amount).toStringAsFixed(2)}",
+                    "$fromCurrency ${(conversionRate * amount!).toStringAsFixed(2)}",
                     style: SpotFlowTextStyle.body12Regular.copyWith(
                       color: SpotFlowColors.kcBaseWhite,
                     ),
