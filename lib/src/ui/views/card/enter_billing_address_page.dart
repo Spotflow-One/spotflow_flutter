@@ -49,7 +49,7 @@ class EnterBillingAddressPage extends StatelessWidget {
         ),
         const PaymentCard(),
         Expanded(
-          child: _CardInputUI(
+          child: _AddressInputUI(
             paymentResponseBody: paymentResponseBody,
             close: close,
           ),
@@ -59,21 +59,21 @@ class EnterBillingAddressPage extends StatelessWidget {
   }
 }
 
-class _CardInputUI extends StatefulWidget {
+class _AddressInputUI extends StatefulWidget {
   final PaymentResponseBody paymentResponseBody;
   final GestureTapCallback close;
 
-  const _CardInputUI({
+  const _AddressInputUI({
     super.key,
     required this.paymentResponseBody,
     required this.close,
   });
 
   @override
-  State<_CardInputUI> createState() => _CardInputUIState();
+  State<_AddressInputUI> createState() => _AddressInputUIState();
 }
 
-class _CardInputUIState extends State<_CardInputUI>
+class _AddressInputUIState extends State<_AddressInputUI>
     implements TransactionCallBack {
   TextEditingController addressController = TextEditingController();
 

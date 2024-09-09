@@ -23,7 +23,7 @@ class SpotFlowInAppBrowser extends InAppBrowser {
 
   _processUrl(Uri uri) {
     if (_checkHasAppendedWithResponse(uri)) {
-      _finishWithAppendedResponse(uri);
+      _finish();
     } else {
       _checkHasCompletedProcessing(uri);
     }
@@ -32,9 +32,8 @@ class SpotFlowInAppBrowser extends InAppBrowser {
   _checkHasCompletedProcessing(final Uri uri) {
     final status = uri.queryParameters["status"];
     final txRef = uri.queryParameters["tx_ref"];
-    final id = uri.queryParameters["transaction_id"];
     if (status != null && txRef != null) {
-      _finish(uri);
+      _finish();
     }
   }
 
@@ -49,11 +48,7 @@ class SpotFlowInAppBrowser extends InAppBrowser {
     return false;
   }
 
-  _finishWithAppendedResponse(Uri uri) {
-    _closeTransactionScreen();
-  }
-
-  _finish(final Uri uri) {
+  _finish() {
     _closeTransactionScreen();
     callBack.onTransactionComplete();
   }
