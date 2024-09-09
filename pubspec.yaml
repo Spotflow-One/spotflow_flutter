@@ -1,7 +1,7 @@
 name: spotflow
-description: "A new Flutter project."
-version: 0.0.1
-homepage:
+description: "Spotflow Flutter project."
+version: 0.0.1-beta.1
+homepage: https://spotflow.co
 
 environment:
   sdk: '>=3.4.3 <4.0.0'
@@ -21,6 +21,8 @@ dependencies:
   encrypt: ^5.0.3
   pattern_formatter: ^4.0.0
   provider: ^6.1.2
+  vector_graphics: ^1.1.11+1
+
 
 
 

@@ -161,7 +161,6 @@ class _EnterPinPageUIState extends State<_EnterPinPageUI>
           context: context,
           transactionCallBack: this);
     } on DioException catch (e) {
-      //todo: handle errors
       debugPrint(e.message);
     }
     setState(() {
