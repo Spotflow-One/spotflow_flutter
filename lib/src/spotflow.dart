@@ -102,8 +102,6 @@ class SpotFlowPaymentManager {
 
   String merchantId;
 
-  num amount;
-
   ///auth token
   String key;
 
@@ -124,7 +122,6 @@ class SpotFlowPaymentManager {
 
   SpotFlowPaymentManager({
     required this.merchantId,
-    required this.amount,
     required this.key,
     required this.customerEmail,
     required this.planId,

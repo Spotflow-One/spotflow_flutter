@@ -35,7 +35,7 @@ class EnterPinPage extends StatelessWidget {
             text: 'Pay with Card',
             icon: Assets.svg.payWithCardIcon.svg(),
           ),
-          PaymentCard(),
+          const PaymentCard(),
           Expanded(
             child: _EnterPinPageUI(
               reference: reference,
@@ -47,12 +47,10 @@ class EnterPinPage extends StatelessWidget {
 
 class _EnterPinPageUI extends StatefulWidget {
   final String reference;
-  final double? rate;
 
   const _EnterPinPageUI({
     super.key,
     required this.reference,
-    this.rate,
   });
 
   @override
@@ -172,7 +170,7 @@ class _EnterPinPageUIState extends State<_EnterPinPageUI>
   }
 
   @override
-  onTransactionComplete(ChargeResponse? chargeResponse) {
+  onTransactionComplete() {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => CardPaymentStatusCheckPage(
