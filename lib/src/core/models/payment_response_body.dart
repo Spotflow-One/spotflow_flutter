@@ -10,8 +10,7 @@ class PaymentResponseBody {
   final String status;
   final CustomerInfo customer;
   final String provider;
-  final double?
-      rate; // Made nullable to handle potential absence of "rate" object
+  final num? rate; // Made nullable to handle potential absence of "rate" object
   final Authorization?
       authorization; // Made nullable to handle potential absence of "authorization" object
   final DateTime? createdAt;

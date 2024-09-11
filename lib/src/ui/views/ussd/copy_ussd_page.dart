@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:spotflow/gen/assets.gen.dart';
+import 'package:spotflow/src/core/models/payment_options_enum.dart';
 import 'package:spotflow/src/core/models/payment_request_body.dart';
 import 'package:spotflow/src/core/services/payment_service.dart';
 import 'package:spotflow/src/ui/app_state_provider.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
+import 'package:spotflow/src/ui/views/error_page.dart';
 import 'package:spotflow/src/ui/views/transfer/transfer_status_check_page.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
 import 'package:spotflow/src/ui/widgets/cancel_payment_button.dart';
@@ -131,6 +133,7 @@ class _CopyUssdPageState extends State<CopyUssdPage> {
           const SizedBox(
             height: 60,
           ),
+
           TextButton(
             onPressed: () {
               if (paymentResponseBody == null) {
@@ -161,13 +164,12 @@ class _CopyUssdPageState extends State<CopyUssdPage> {
             ),
           ),
           const Spacer(),
-
           Row(
             children: [
-              Expanded(
+              const Expanded(
                 child: ChangePaymentButton(),
               ),
-              SizedBox(
+              const SizedBox(
                 width: 18.0,
               ),
               Expanded(
@@ -217,6 +219,18 @@ class _CopyUssdPageState extends State<CopyUssdPage> {
       final response = await paymentService.createPayment(paymentRequestBody);
 
       paymentResponseBody = PaymentResponseBody.fromJson(response.data);
+      if (paymentResponseBody?.status == "failed") {
+        if (context.mounted == false) return;
+
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => ErrorPage(
+                message:
+                    paymentResponseBody?.providerMessage ?? "Payment failed",
+                paymentOptionsEnum: PaymentOptionsEnum.ussd),
+          ),
+        );
+      }
     } on DioException catch (e) {
       debugPrint(e.message);
     }
