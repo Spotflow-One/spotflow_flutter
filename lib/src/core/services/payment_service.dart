@@ -1,8 +1,5 @@
-// import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:spotflow/spotflow.dart';
 import 'package:spotflow/src/core/api/api_client.dart';
 import 'package:spotflow/src/core/api/api_route.dart';
@@ -56,11 +53,11 @@ class PaymentService {
         .get(ApiRoute.getUssdBanks, queryParameters: {"ussd": true});
   }
 
-  void handleCardSuccessResponse(
-      {required Response<dynamic> response,
-      required SpotFlowPaymentManager paymentManager,
-      required BuildContext context,
-      required TransactionCallBack transactionCallBack}) {
+  void handleCardSuccessResponse({
+    required Response<dynamic> response,
+    required SpotFlowPaymentManager paymentManager,
+    required BuildContext context,
+  }) {
     if (context.mounted == false) return;
     final paymentResponseBody = PaymentResponseBody.fromJson(response.data);
     if (paymentResponseBody.status == 'successful') {
@@ -95,23 +92,17 @@ class PaymentService {
     } else if (paymentResponseBody.authorization?.mode == '3DS') {
       String? redirectUrl = paymentResponseBody.authorization?.redirectUrl;
 
-      final settings = InAppBrowserClassSettings(
-        browserSettings: InAppBrowserSettings(
-          hideUrlBar: true,
-          hideTitleBar: true,
-        ),
-        webViewSettings: InAppWebViewSettings(
-          javaScriptEnabled: true,
-        ),
-      );
-      final browser = SpotFlowInAppBrowser(callBack: transactionCallBack);
+      if (redirectUrl == null) {
+        return;
+      }
 
-      browser.openUrlRequest(
-        urlRequest: URLRequest(
-            url: WebUri(
-          redirectUrl!,
-        )),
-        settings: settings,
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => SpotFlowInAppBrowser(
+            url: redirectUrl,
+            reference: paymentResponseBody.reference,
+          ),
+        ),
       );
     } else if (paymentResponseBody.authorization?.mode == 'avs') {
       Navigator.of(context).pushNamed(

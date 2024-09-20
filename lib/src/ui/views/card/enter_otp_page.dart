@@ -13,9 +13,6 @@ import 'package:spotflow/src/ui/widgets/payment_card.dart';
 import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
 import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 
-import '../authorization_web_view.dart';
-import 'card_payment_status_check_page.dart';
-
 class EnterOtpPage extends StatelessWidget {
   final String message;
   final String reference;
@@ -61,8 +58,7 @@ class _EnterOtpPageUi extends StatefulWidget {
   State<_EnterOtpPageUi> createState() => _EnterOtpPageUiState();
 }
 
-class _EnterOtpPageUiState extends State<_EnterOtpPageUi>
-    implements TransactionCallBack {
+class _EnterOtpPageUiState extends State<_EnterOtpPageUi> {
   TextEditingController controller = TextEditingController();
 
   @override
@@ -217,26 +213,15 @@ class _EnterOtpPageUiState extends State<_EnterOtpPageUi>
       );
       if (mounted == false) return;
       paymentService.handleCardSuccessResponse(
-          response: response,
-          paymentManager: paymentManager,
-          context: context,
-          transactionCallBack: this);
+        response: response,
+        paymentManager: paymentManager,
+        context: context,
+      );
     } on DioException catch (e) {
       debugPrint(e.message);
     }
     setState(() {
       creatingPayment = false;
     });
-  }
-
-  @override
-  onTransactionComplete() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => CardPaymentStatusCheckPage(
-          paymentReference: widget.reference,
-        ),
-      ),
-    );
   }
 }

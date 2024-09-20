@@ -17,8 +17,6 @@ import 'package:spotflow/src/spotflow.dart';
 import 'package:spotflow/src/ui/app_state_provider.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
-import 'package:spotflow/src/ui/views/authorization_web_view.dart';
-import 'package:spotflow/src/ui/views/card/card_payment_status_check_page.dart';
 import 'package:spotflow/src/ui/views/error_page.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
 import 'package:spotflow/src/ui/widgets/cancel_payment_button.dart';
@@ -69,8 +67,7 @@ class _CardInputUI extends StatefulWidget {
   State<_CardInputUI> createState() => _CardInputUIState();
 }
 
-class _CardInputUIState extends State<_CardInputUI>
-    implements TransactionCallBack {
+class _CardInputUIState extends State<_CardInputUI> {
   TextEditingController cardNumberController = TextEditingController();
 
   TextEditingController expiryController = TextEditingController();
@@ -257,7 +254,6 @@ class _CardInputUIState extends State<_CardInputUI>
         response: response,
         paymentManager: paymentManager,
         context: context,
-        transactionCallBack: this,
       );
     } on DioException catch (e) {
       final data = e.response?.data;
@@ -279,18 +275,6 @@ class _CardInputUIState extends State<_CardInputUI>
   }
 
   PaymentResponseBody? paymentResponseBody;
-
-  @override
-  onTransactionComplete() {
-    if (paymentResponseBody == null) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => CardPaymentStatusCheckPage(
-          paymentReference: paymentResponseBody!.reference,
-        ),
-      ),
-    );
-  }
 
   String? extractExpiryMonth(String expiryString) {
     if (expiryString.isEmpty || expiryString.length != 5) {

@@ -1,24 +1,49 @@
+// import 'dart:convert';
+//
+// import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+//
 import 'dart:convert';
 
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter/material.dart';
+import 'package:spotflow/src/ui/views/card/card_payment_status_check_page.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
-abstract class TransactionCallBack {
-  onTransactionComplete();
-}
+class SpotFlowInAppBrowser extends StatefulWidget {
+  final String url;
+  final String reference;
 
-class SpotFlowInAppBrowser extends InAppBrowser {
-  final TransactionCallBack callBack;
-
-  SpotFlowInAppBrowser({required this.callBack});
+  const SpotFlowInAppBrowser(
+      {super.key, required this.url, required this.reference});
 
   @override
-  Future onLoadStart(url) async {
-    if (url != null) _processUrl(url);
+  State<SpotFlowInAppBrowser> createState() => _SpotFlowInAppBrowserState();
+}
+
+class _SpotFlowInAppBrowserState extends State<SpotFlowInAppBrowser> {
+  late WebViewController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageStarted: (String url) {
+            _processUrl(Uri.parse(url));
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse(widget.url));
   }
 
   @override
-  void onExit() {
-    callBack.onTransactionComplete();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: WebViewWidget(
+        controller: controller,
+      ),
+    );
   }
 
   _processUrl(Uri uri) {
@@ -49,11 +74,12 @@ class SpotFlowInAppBrowser extends InAppBrowser {
   }
 
   _finish() {
-    _closeTransactionScreen();
-    callBack.onTransactionComplete();
-  }
-
-  _closeTransactionScreen() {
-    close();
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => CardPaymentStatusCheckPage(
+          paymentReference: widget.reference,
+        ),
+      ),
+    );
   }
 }

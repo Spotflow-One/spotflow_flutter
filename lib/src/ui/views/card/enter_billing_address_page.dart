@@ -13,7 +13,6 @@ import 'package:spotflow/src/spotflow.dart';
 import 'package:spotflow/src/ui/app_state_provider.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
-import 'package:spotflow/src/ui/views/authorization_web_view.dart';
 import 'package:spotflow/src/ui/views/card/widgets/card_drop_down_widget.dart';
 import 'package:spotflow/src/ui/views/error_page.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
@@ -24,7 +23,6 @@ import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
 import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 
 import '../../../core/models/country.dart';
-import 'card_payment_status_check_page.dart';
 import 'widgets/bottom_sheet_with_search.dart';
 import 'widgets/card_input_field.dart';
 
@@ -73,8 +71,7 @@ class _AddressInputUI extends StatefulWidget {
   State<_AddressInputUI> createState() => _AddressInputUIState();
 }
 
-class _AddressInputUIState extends State<_AddressInputUI>
-    implements TransactionCallBack {
+class _AddressInputUIState extends State<_AddressInputUI> {
   TextEditingController addressController = TextEditingController();
 
   TextEditingController zipCodeController = TextEditingController();
@@ -287,7 +284,6 @@ class _AddressInputUIState extends State<_AddressInputUI>
         response: response,
         paymentManager: paymentManager,
         context: context,
-        transactionCallBack: this,
       );
     } on DioException catch (e) {
       final data = e.response?.data;
@@ -386,17 +382,6 @@ class _AddressInputUIState extends State<_AddressInputUI>
           },
         );
       },
-    );
-  }
-
-  @override
-  onTransactionComplete() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => CardPaymentStatusCheckPage(
-          paymentReference: widget.paymentResponseBody.reference,
-        ),
-      ),
     );
   }
 }

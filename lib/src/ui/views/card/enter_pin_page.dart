@@ -10,13 +10,10 @@ import 'package:spotflow/src/ui/app_state_provider.dart';
 import 'package:spotflow/src/ui/utils/spot_flow_route_name.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
-import 'package:spotflow/src/ui/views/card/card_payment_status_check_page.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
 import 'package:spotflow/src/ui/widgets/payment_card.dart';
 import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
 import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
-
-import '../authorization_web_view.dart';
 
 class EnterPinPage extends StatelessWidget {
   final String reference;
@@ -57,8 +54,7 @@ class _EnterPinPageUI extends StatefulWidget {
   State<_EnterPinPageUI> createState() => _EnterPinPageUIState();
 }
 
-class _EnterPinPageUIState extends State<_EnterPinPageUI>
-    implements TransactionCallBack {
+class _EnterPinPageUIState extends State<_EnterPinPageUI> {
   @override
   Widget build(BuildContext context) {
     final paymentManager = context.read<AppStateProvider>().paymentManager!;
@@ -156,26 +152,15 @@ class _EnterPinPageUIState extends State<_EnterPinPageUI>
       );
       if (mounted == false) return;
       paymentService.handleCardSuccessResponse(
-          response: response,
-          paymentManager: paymentManager,
-          context: context,
-          transactionCallBack: this);
+        response: response,
+        paymentManager: paymentManager,
+        context: context,
+      );
     } on DioException catch (e) {
       debugPrint(e.message);
     }
     setState(() {
       creatingPayment = false;
     });
-  }
-
-  @override
-  onTransactionComplete() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => CardPaymentStatusCheckPage(
-          paymentReference: widget.reference,
-        ),
-      ),
-    );
   }
 }
