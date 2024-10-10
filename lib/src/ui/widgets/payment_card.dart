@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:spotflow/gen/assets.gen.dart';
 import 'package:spotflow/src/ui/app_state_provider.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
@@ -15,9 +14,7 @@ class PaymentCard extends StatelessWidget {
     final merchantConfig = context.watch<AppStateProvider>().merchantConfig;
     final paymentManager = context.watch<AppStateProvider>().paymentManager!;
 
-    num? conversionRate = merchantConfig?.rate.rate;
-    String? fromCurrency = merchantConfig?.rate.from;
-    String? toCurrency = merchantConfig?.rate.to;
+    String? toCurrency = merchantConfig?.rate.to.toUpperCase();
 
     num? amount = merchantConfig?.plan.amount;
     return Padding(
@@ -62,22 +59,14 @@ class PaymentCard extends StatelessWidget {
             const Divider(
               color: SpotFlowColors.tone10,
               thickness: 1,
+              height: 1,
+            ),
+            const SizedBox(
+              height: 8.0,
             ),
             Row(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                if (merchantConfig != null) ...[
-                  Text(
-                    "$toCurrency 1 = $fromCurrency ${conversionRate?.toStringAsFixed(2) ?? ""}",
-                    style: SpotFlowTextStyle.body14Regular.copyWith(
-                      color: SpotFlowColors.kcBaseWhite,
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 3,
-                  ),
-                  Assets.svg.infoCircle.svg(),
-                ],
-                const Spacer(),
                 Text(
                   'Pay',
                   style: SpotFlowTextStyle.body14Regular.copyWith(
@@ -98,27 +87,6 @@ class PaymentCard extends StatelessWidget {
             const SizedBox(
               height: 6.0,
             ),
-            if (conversionRate != null) ...[
-              Align(
-                alignment: Alignment.centerRight,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: SpotFlowColors.greenBase,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    "$fromCurrency ${(conversionRate * amount!).toStringAsFixed(2)}",
-                    style: SpotFlowTextStyle.body12Regular.copyWith(
-                      color: SpotFlowColors.kcBaseWhite,
-                    ),
-                  ),
-                ),
-              )
-            ]
           ],
         ),
       ),
