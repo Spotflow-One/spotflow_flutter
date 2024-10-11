@@ -1,5 +1,5 @@
 class ApiRoute {
-  static const baseUrl = 'https://dev-api.spotflow.one';
+  static const baseUrl = 'https://dev-api.spotflow.co';
   static const validatePayment = '$baseUrl/api/v1/payments/validate';
   static const verifyPayment = '$baseUrl/api/v1/payments/verify';
   static const authorizePayment = '$baseUrl/api/v1/payments/authorize';

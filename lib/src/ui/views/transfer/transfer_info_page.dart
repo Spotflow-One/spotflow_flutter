@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spotflow/gen/assets.gen.dart';
 import 'package:spotflow/src/core/models/payment_response_body.dart';
-import 'package:spotflow/src/ui/utils/spot_flow_route_name.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/views/transfer/transfer_status_check_page.dart';
@@ -113,11 +112,7 @@ class _TransferInfoPageState extends State<TransferInfoPage> {
                   ),
                 ),
                 onPressed: () {
-                  Navigator.of(context).popUntil(
-                    (route) =>
-                        route.settings.name == SpotFlowRouteName.homePage,
-                  );
-                  Navigator.of(context).pop();
+                  widget.close.call();
                 },
                 child: Text(
                   'Close Checkout',

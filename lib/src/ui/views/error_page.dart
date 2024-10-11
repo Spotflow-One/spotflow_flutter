@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:spotflow/gen/assets.gen.dart';
 import 'package:spotflow/src/core/models/payment_options_enum.dart';
+import 'package:spotflow/src/ui/app_state_provider.dart';
 import 'package:spotflow/src/ui/utils/spot_flow_route_name.dart';
 import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
@@ -21,6 +23,8 @@ class ErrorPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final merchantConfig = context.read<AppStateProvider>().merchantConfig;
+
     final buttonStyle = TextButton.styleFrom(
       padding: const EdgeInsets.symmetric(
         vertical: 16,
@@ -58,52 +62,65 @@ class ErrorPage extends StatelessWidget {
         const SizedBox(
           height: 60.0,
         ),
-        TextButton(
-          onPressed: () {
-            Navigator.of(context)
-                .pushReplacementNamed(SpotFlowRouteName.enterCardDetailsPage);
-          },
-          style: buttonStyle,
-          child: Text(
-            'Try again with your card',
-            style: SpotFlowTextStyle.body14Regular.copyWith(
-              color: SpotFlowColors.tone70,
+        if (merchantConfig?.paymentMethods.contains(PaymentOptionsEnum.card) ==
+            true) ...[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context)
+                  .pushReplacementNamed(SpotFlowRouteName.enterCardDetailsPage);
+            },
+            style: buttonStyle,
+            child: Text(
+              'Try again with your card',
+              style: SpotFlowTextStyle.body14Regular.copyWith(
+                color: SpotFlowColors.tone70,
+              ),
             ),
           ),
-        ),
-        const SizedBox(
-          height: 16,
-        ),
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pushReplacementNamed(
-              SpotFlowRouteName.viewBankDetailsPage,
-            );
-          },
-          style: buttonStyle,
-          child: Text(
-            'Try again with transfer',
-            style: SpotFlowTextStyle.body14Regular.copyWith(
-              color: SpotFlowColors.tone70,
+          const SizedBox(
+            height: 16,
+          ),
+        ],
+        if (merchantConfig?.paymentMethods
+                .contains(PaymentOptionsEnum.transfer) ==
+            true) ...[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pushReplacementNamed(
+                SpotFlowRouteName.viewBankDetailsPage,
+              );
+            },
+            style: buttonStyle,
+            child: Text(
+              'Try again with transfer',
+              style: SpotFlowTextStyle.body14Regular.copyWith(
+                color: SpotFlowColors.tone70,
+              ),
             ),
           ),
-        ),
-        const SizedBox(
-          height: 16,
-        ),
-        TextButton(
-          onPressed: () {
-            Navigator.of(context)
-                .pushReplacementNamed(SpotFlowRouteName.viewBanksUssdPage);
-          },
-          style: buttonStyle,
-          child: Text(
-            'Try again with USSD',
-            style: SpotFlowTextStyle.body14Regular.copyWith(
-              color: SpotFlowColors.tone70,
+          const SizedBox(
+            height: 16,
+          ),
+        ],
+        if (merchantConfig?.paymentMethods.contains(PaymentOptionsEnum.ussd) ==
+            true) ...[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context)
+                  .pushReplacementNamed(SpotFlowRouteName.viewBanksUssdPage);
+            },
+            style: buttonStyle,
+            child: Text(
+              'Try again with USSD',
+              style: SpotFlowTextStyle.body14Regular.copyWith(
+                color: SpotFlowColors.tone70,
+              ),
             ),
           ),
-        ),
+          const SizedBox(
+            height: 16,
+          ),
+        ],
         const Spacer(),
         const PciDssIcon(),
         const SizedBox(
