@@ -15,16 +15,19 @@ import 'package:spotflow/src/ui/views/success_page.dart';
 
 class PaymentService {
   final String authToken;
+  final bool isDebugMode;
 
-  PaymentService(this.authToken);
+  PaymentService(this.authToken, {this.isDebugMode = true});
 
   ApiClient get apiClient => ApiClient(authToken);
+
+  ApiRoute get apiRoute => ApiRoute(isDebugMode: isDebugMode);
 
   Future<Response> createPayment(
     PaymentRequestBody paymentRequestBody,
   ) {
     return apiClient.post(
-      ApiRoute.createPayment,
+      apiRoute.createPayment,
       data: paymentRequestBody.toJson(),
     );
   }
@@ -33,7 +36,7 @@ class PaymentService {
     Map<String, dynamic> body,
   ) {
     return apiClient.post(
-      ApiRoute.authorizePayment,
+      apiRoute.authorizePayment,
       data: body,
     );
   }
@@ -42,7 +45,7 @@ class PaymentService {
     required String reference,
     required String merchantId,
   }) {
-    return apiClient.get(ApiRoute.verifyPayment, queryParameters: {
+    return apiClient.get(apiRoute.verifyPayment, queryParameters: {
       "merchantId": merchantId,
       "reference": reference,
     });
@@ -50,7 +53,7 @@ class PaymentService {
 
   Future<Response> getBanks() {
     return apiClient
-        .get(ApiRoute.getUssdBanks, queryParameters: {"ussd": true});
+        .get(apiRoute.getUssdBanks, queryParameters: {"ussd": true});
   }
 
   void handleCardSuccessResponse({
@@ -124,7 +127,7 @@ class PaymentService {
 
   Future<Response> getMerchantConfig({required String planId}) async {
     final response = await apiClient
-        .get(ApiRoute.getMerchantConfig, queryParameters: {"planId": planId});
+        .get(apiRoute.getMerchantConfig, queryParameters: {"planId": planId});
 
     return response;
   }
