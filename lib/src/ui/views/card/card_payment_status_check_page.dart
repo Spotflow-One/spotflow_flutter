@@ -65,55 +65,56 @@ class _CardPaymentStatusCheckPageState
   Future<void> _verifyPayment() async {
     try {
       final paymentManager = context.read<AppStateProvider>().paymentManager!;
-      final paymentService = PaymentService(paymentManager.key);
+      final paymentService =
+          PaymentService(paymentManager.key, paymentManager.debugMode);
       final response = await paymentService.verifyPayment(
         reference: widget.paymentReference,
         merchantId: paymentManager.merchantId,
       );
       final body = PaymentResponseBody.fromJson(response.data);
       if (body.status == 'successful') {
-        if (context.mounted == false) {
-          return;
+        if (mounted) {
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            SpotFlowRouteName.successPage,
+            (route) {
+              return route.isFirst;
+            },
+            arguments: SuccessPageArguments(
+              paymentOptionsEnum: PaymentOptionsEnum.card,
+              successMessage: "Card payment successful",
+              paymentResponseBody: body,
+            ),
+          );
         }
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          SpotFlowRouteName.successPage,
-          (route) {
-            return route.isFirst;
-          },
-          arguments: SuccessPageArguments(
-            paymentOptionsEnum: PaymentOptionsEnum.card,
-            successMessage: "Card payment successful",
-            paymentResponseBody: body,
-          ),
-        );
       } else if (body.status == "failed") {
-        if (context.mounted == false) {
-          return;
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              settings: const RouteSettings(
+                name: SpotFlowRouteName.errorPage,
+              ),
+              builder: (context) => ErrorPage(
+                paymentOptionsEnum: PaymentOptionsEnum.transfer,
+                message: body.providerMessage ?? "Payment failed",
+              ),
+            ),
+          );
         }
+      }
+    } on DioException catch (_) {
+      if (mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             settings: const RouteSettings(
               name: SpotFlowRouteName.errorPage,
             ),
-            builder: (context) => ErrorPage(
+            builder: (context) => const ErrorPage(
               paymentOptionsEnum: PaymentOptionsEnum.transfer,
-              message: body.providerMessage ?? "Payment failed",
+              message: "Payment failed",
             ),
           ),
         );
       }
-    } on DioException catch (_) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          settings: const RouteSettings(
-            name: SpotFlowRouteName.errorPage,
-          ),
-          builder: (context) => const ErrorPage(
-            paymentOptionsEnum: PaymentOptionsEnum.transfer,
-            message: "Payment failed",
-          ),
-        ),
-      );
     }
   }
 }

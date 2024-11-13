@@ -7,7 +7,7 @@ import 'package:spotflow/gen/assets.gen.dart';
 import 'package:spotflow/src/core/models/payment_request_body.dart';
 import 'package:spotflow/src/core/services/payment_service.dart';
 import 'package:spotflow/src/ui/app_state_provider.dart';
-import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
+import 'package:spotflow/src/ui/utils/spotflow_colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/views/card/widgets/bottom_sheet_with_search.dart';
 import 'package:spotflow/src/ui/views/ussd/copy_ussd_page.dart';
@@ -116,10 +116,10 @@ class _ViewBanksUssdPageState extends State<ViewBanksUssdPage> {
           const Spacer(),
           Row(
             children: [
-              Expanded(
+              const Expanded(
                 child: ChangePaymentButton(),
               ),
-              SizedBox(
+              const SizedBox(
                 width: 18.0,
               ),
               Expanded(
@@ -155,7 +155,8 @@ class _ViewBanksUssdPageState extends State<ViewBanksUssdPage> {
     });
     try {
       final paymentManager = context.read<AppStateProvider>().paymentManager!;
-      final paymentService = PaymentService(paymentManager.key);
+      final paymentService =
+          PaymentService(paymentManager.key, paymentManager.debugMode);
       final banksResponse = await paymentService.getBanks();
       banks = banksResponse.data.map<Bank>((e) => Bank.fromJson(e)).toList();
     } on DioException catch (e) {

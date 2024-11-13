@@ -9,7 +9,7 @@ import 'package:spotflow/src/core/models/payment_response_body.dart';
 import 'package:spotflow/src/core/services/payment_service.dart';
 import 'package:spotflow/src/ui/app_state_provider.dart';
 import 'package:spotflow/src/ui/utils/spot_flow_route_name.dart';
-import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
+import 'package:spotflow/src/ui/utils/spotflow_colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/views/error_page.dart';
 import 'package:spotflow/src/ui/views/success_page.dart';
@@ -24,7 +24,7 @@ import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 class TransferStatusCheckPage extends StatefulWidget {
   final String reference;
   final GestureTapCallback close;
-
+  final PaymentOptionsEnum paymentOptionsEnum;
   final PaymentResponseBody paymentResponseBody;
 
   const TransferStatusCheckPage({
@@ -32,6 +32,7 @@ class TransferStatusCheckPage extends StatefulWidget {
     required this.reference,
     required this.close,
     required this.paymentResponseBody,
+    required this.paymentOptionsEnum,
   });
 
   @override
@@ -92,17 +93,17 @@ class _TransferStatusCheckPageState extends State<TransferStatusCheckPage>
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           PaymentOptionsTile(
-            icon: Assets.svg.payWithTransferIcon.svg(),
-            text: 'Pay with transfer',
+            icon: widget.paymentOptionsEnum.icon,
+            text: widget.paymentOptionsEnum.title,
           ),
           const PaymentCard(),
           const SizedBox(
             height: 70,
           ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 30.0),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30.0),
             child: Text(
-              'We’re waiting to confirm your transfer. This can take a few minutes',
+              'We’re waiting to confirm your ${widget.paymentOptionsEnum.name} ${widget.paymentOptionsEnum != PaymentOptionsEnum.transfer ? "payment" : ""}. This can take a few minutes',
               textAlign: TextAlign.center,
             ),
           ),
@@ -197,33 +198,35 @@ class _TransferStatusCheckPageState extends State<TransferStatusCheckPage>
           const SizedBox(
             height: 16.0,
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: TextButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => ViewBankDetailsPage(
-                      paymentResponseBody: widget.paymentResponseBody,
-                      close: widget.close,
+          if (widget.paymentOptionsEnum == PaymentOptionsEnum.transfer) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: TextButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => ViewBankDetailsPage(
+                        paymentResponseBody: widget.paymentResponseBody,
+                        close: widget.close,
+                      ),
                     ),
+                  );
+                },
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                );
-              },
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
                 ),
-              ),
-              child: Text(
-                "Show account number",
-                style: SpotFlowTextStyle.body14Regular.copyWith(
-                  color: SpotFlowColors.tone70,
+                child: Text(
+                  "Show account number",
+                  style: SpotFlowTextStyle.body14Regular.copyWith(
+                    color: SpotFlowColors.tone70,
+                  ),
                 ),
               ),
             ),
-          ),
+          ],
           const Spacer(),
           Row(
             children: [
@@ -260,54 +263,54 @@ class _TransferStatusCheckPageState extends State<TransferStatusCheckPage>
     try {
       final paymentManager = context.read<AppStateProvider>().paymentManager!;
 
-      final paymentService = PaymentService(paymentManager.key);
+      final paymentService =
+          PaymentService(paymentManager.key, paymentManager.debugMode);
       final response = await paymentService.verifyPayment(
         reference: widget.paymentResponseBody.reference,
         merchantId: paymentManager.merchantId,
       );
       final body = PaymentResponseBody.fromJson(response.data);
       if (body.status == 'successful') {
-        if (context.mounted == false) {
-          return;
+        if (mounted) {
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            SpotFlowRouteName.successPage,
+            (route) {
+              return route.isFirst;
+            },
+            arguments: SuccessPageArguments(
+              paymentOptionsEnum: widget.paymentOptionsEnum,
+              paymentResponseBody: widget.paymentResponseBody,
+              successMessage:
+                  "${paymentManager.paymentDescription} payment successful",
+            ),
+          );
         }
-
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          SpotFlowRouteName.successPage,
-          (route) {
-            return route.isFirst;
-          },
-          arguments: SuccessPageArguments(
-            paymentOptionsEnum: PaymentOptionsEnum.transfer,
-            paymentResponseBody: widget.paymentResponseBody,
-            successMessage:
-                "${paymentManager.paymentDescription} payment successful",
-          ),
-        );
       } else if (body.status == "failed") {
-        if (context.mounted == false) {
-          return;
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => ErrorPage(
+                paymentOptionsEnum: widget.paymentOptionsEnum,
+                message: body.providerMessage ?? "Payment failed",
+              ),
+            ),
+          );
         }
+      }
+    } on DioException catch (_) {
+      if (mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
+            settings: const RouteSettings(
+              name: SpotFlowRouteName.errorPage,
+            ),
             builder: (context) => ErrorPage(
-              paymentOptionsEnum: PaymentOptionsEnum.transfer,
-              message: body.providerMessage ?? "Payment failed",
+              paymentOptionsEnum: widget.paymentOptionsEnum,
+              message: "Payment failed",
             ),
           ),
         );
       }
-    } on DioException catch (_) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          settings: const RouteSettings(
-            name: SpotFlowRouteName.errorPage,
-          ),
-          builder: (context) => const ErrorPage(
-            paymentOptionsEnum: PaymentOptionsEnum.transfer,
-            message: "Payment failed",
-          ),
-        ),
-      );
     }
   }
 }

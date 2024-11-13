@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:spotflow/gen/assets.gen.dart';
+import 'package:spotflow/src/core/models/payment_options_enum.dart';
 import 'package:spotflow/src/core/models/payment_response_body.dart';
-import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
+import 'package:spotflow/src/ui/utils/spotflow_colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/views/transfer/transfer_status_check_page.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
@@ -135,6 +136,7 @@ class _TransferInfoPageState extends State<TransferInfoPage> {
                         reference: widget.paymentResponseBody.reference,
                         paymentResponseBody: widget.paymentResponseBody,
                         close: widget.close,
+                        paymentOptionsEnum: PaymentOptionsEnum.transfer,
                       ),
                     ),
                   );

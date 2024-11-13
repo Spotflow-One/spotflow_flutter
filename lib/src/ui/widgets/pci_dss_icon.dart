@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spotflow/gen/assets.gen.dart';
-import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
+import 'package:spotflow/src/ui/utils/spotflow_colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 
 class PciDssIcon extends StatelessWidget {

@@ -11,7 +11,8 @@ import 'package:spotflow/src/core/models/validate_payment_request_body.dart';
 import 'package:spotflow/src/core/services/payment_service.dart';
 import 'package:spotflow/src/spotflow.dart';
 import 'package:spotflow/src/ui/app_state_provider.dart';
-import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
+import 'package:spotflow/src/ui/utils/cards_navigation.dart';
+import 'package:spotflow/src/ui/utils/spotflow_colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/views/card/widgets/card_drop_down_widget.dart';
 import 'package:spotflow/src/ui/views/error_page.dart';
@@ -71,7 +72,7 @@ class _AddressInputUI extends StatefulWidget {
   State<_AddressInputUI> createState() => _AddressInputUIState();
 }
 
-class _AddressInputUIState extends State<_AddressInputUI> {
+class _AddressInputUIState extends State<_AddressInputUI> with CardsNavigation {
   TextEditingController addressController = TextEditingController();
 
   TextEditingController zipCodeController = TextEditingController();
@@ -201,7 +202,7 @@ class _AddressInputUIState extends State<_AddressInputUI> {
           ),
           InkWell(
             onTap: () {
-              _createPayment(paymentManager, context);
+              _createPayment(paymentManager);
             },
             child: Container(
               padding: const EdgeInsets.symmetric(
@@ -252,8 +253,7 @@ class _AddressInputUIState extends State<_AddressInputUI> {
     }
   }
 
-  Future<void> _createPayment(
-      SpotFlowPaymentManager paymentManager, BuildContext context) async {
+  Future<void> _createPayment(SpotFlowPaymentManager paymentManager) async {
     setState(() {
       creatingPayment = true;
     });
@@ -262,7 +262,8 @@ class _AddressInputUIState extends State<_AddressInputUI> {
       return;
     }
 
-    final paymentService = PaymentService(paymentManager.key);
+    final paymentService =
+        PaymentService(paymentManager.key, paymentManager.debugMode);
 
     final avsPaymentRequest = AvsPaymentRequestBody(
       city: city!.name,
@@ -278,26 +279,28 @@ class _AddressInputUIState extends State<_AddressInputUI> {
         avsPaymentRequest.toJson(),
       );
 
-      if (mounted == false) return;
-
-      paymentService.handleCardSuccessResponse(
-        response: response,
-        paymentManager: paymentManager,
-        context: context,
-      );
+      if (mounted) {
+        handleCardSuccessResponse(
+          response: response,
+          paymentManager: paymentManager,
+          context: context,
+        );
+      }
     } on DioException catch (e) {
       final data = e.response?.data;
       String? message;
       if (data is Map) {
         message = data['message'];
       }
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => ErrorPage(
-              message: message ?? "Couldn't process your payment",
-              paymentOptionsEnum: PaymentOptionsEnum.card),
-        ),
-      );
+      if (mounted) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ErrorPage(
+                message: message ?? "Couldn't process your payment",
+                paymentOptionsEnum: PaymentOptionsEnum.card),
+          ),
+        );
+      }
     }
     setState(() {
       creatingPayment = false;

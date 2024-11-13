@@ -111,6 +111,8 @@ class SpotFlowPaymentManager {
 
   String planId;
 
+  bool debugMode;
+
   CustomerInfo get customer {
     return CustomerInfo(
       email: customerEmail,
@@ -132,5 +134,6 @@ class SpotFlowPaymentManager {
     this.paymentDescription,
     this.appLogo,
     this.appName,
+    this.debugMode = true,
   });
 }

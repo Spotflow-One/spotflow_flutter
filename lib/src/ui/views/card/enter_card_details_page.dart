@@ -15,7 +15,8 @@ import 'package:spotflow/src/core/models/spot_flow_card.dart';
 import 'package:spotflow/src/core/services/payment_service.dart';
 import 'package:spotflow/src/spotflow.dart';
 import 'package:spotflow/src/ui/app_state_provider.dart';
-import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
+import 'package:spotflow/src/ui/utils/cards_navigation.dart';
+import 'package:spotflow/src/ui/utils/spotflow_colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/views/error_page.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
@@ -67,7 +68,7 @@ class _CardInputUI extends StatefulWidget {
   State<_CardInputUI> createState() => _CardInputUIState();
 }
 
-class _CardInputUIState extends State<_CardInputUI> {
+class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
   TextEditingController cardNumberController = TextEditingController();
 
   TextEditingController expiryController = TextEditingController();
@@ -166,8 +167,7 @@ class _CardInputUIState extends State<_CardInputUI> {
           InkWell(
             onTap: () {
               if (amount != null) {
-                _createPayment(
-                    paymentManager, context, merchantConfig.rate.to, amount);
+                _createPayment(paymentManager, merchantConfig.rate.to, amount);
               }
             },
             child: Container(
@@ -220,7 +220,7 @@ class _CardInputUIState extends State<_CardInputUI> {
   }
 
   Future<void> _createPayment(SpotFlowPaymentManager paymentManager,
-      BuildContext context, String currency, num amount) async {
+      String currency, num amount) async {
     setState(() {
       creatingPayment = true;
     });
@@ -242,32 +242,36 @@ class _CardInputUIState extends State<_CardInputUI> {
         amount: amount,
         channel: 'card',
         encryptedCard: encryptedCard);
-    final paymentService = PaymentService(paymentManager.key);
+    final paymentService =
+        PaymentService(paymentManager.key, paymentManager.debugMode);
     try {
       final response = await paymentService.createPayment(
         paymentRequestBody,
       );
       paymentResponseBody = PaymentResponseBody.fromJson(response.data);
 
-      if (mounted == false) return;
-      paymentService.handleCardSuccessResponse(
-        response: response,
-        paymentManager: paymentManager,
-        context: context,
-      );
+      if (mounted) {
+        handleCardSuccessResponse(
+          response: response,
+          paymentManager: paymentManager,
+          context: context,
+        );
+      }
     } on DioException catch (e) {
       final data = e.response?.data;
       String? message;
       if (data is Map) {
         message = data['message'];
       }
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => ErrorPage(
-              message: message ?? "Couldn't process your payment",
-              paymentOptionsEnum: PaymentOptionsEnum.card),
-        ),
-      );
+      if (mounted) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ErrorPage(
+                message: message ?? "Couldn't process your payment",
+                paymentOptionsEnum: PaymentOptionsEnum.card),
+          ),
+        );
+      }
     }
     setState(() {
       creatingPayment = false;

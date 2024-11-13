@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:spotflow/gen/assets.gen.dart';
 import 'package:spotflow/spotflow.dart';
 import 'package:spotflow/src/core/models/payment_response_body.dart';
-import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
+import 'package:spotflow/src/ui/utils/spotflow_colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/views/transfer/transfer_info_page.dart';
 import 'package:spotflow/src/ui/views/transfer/view_bank_details_page.dart';

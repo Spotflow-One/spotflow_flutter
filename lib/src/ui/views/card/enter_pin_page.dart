@@ -7,8 +7,9 @@ import 'package:spotflow/spotflow.dart';
 import 'package:spotflow/src/core/models/authorize_payment_request_body.dart';
 import 'package:spotflow/src/core/services/payment_service.dart';
 import 'package:spotflow/src/ui/app_state_provider.dart';
+import 'package:spotflow/src/ui/utils/cards_navigation.dart';
 import 'package:spotflow/src/ui/utils/spot_flow_route_name.dart';
-import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
+import 'package:spotflow/src/ui/utils/spotflow_colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
 import 'package:spotflow/src/ui/widgets/payment_card.dart';
@@ -54,7 +55,7 @@ class _EnterPinPageUI extends StatefulWidget {
   State<_EnterPinPageUI> createState() => _EnterPinPageUIState();
 }
 
-class _EnterPinPageUIState extends State<_EnterPinPageUI> {
+class _EnterPinPageUIState extends State<_EnterPinPageUI> with CardsNavigation {
   @override
   Widget build(BuildContext context) {
     final paymentManager = context.read<AppStateProvider>().paymentManager!;
@@ -145,17 +146,19 @@ class _EnterPinPageUIState extends State<_EnterPinPageUI> {
       creatingPayment = true;
     });
 
-    final paymentService = PaymentService(paymentManager.key);
+    final paymentService =
+        PaymentService(paymentManager.key, paymentManager.debugMode);
     try {
       final response = await paymentService.authorizePayment(
         paymentRequestBody.toJson(),
       );
-      if (mounted == false) return;
-      paymentService.handleCardSuccessResponse(
-        response: response,
-        paymentManager: paymentManager,
-        context: context,
-      );
+      if (mounted) {
+        handleCardSuccessResponse(
+          response: response,
+          paymentManager: paymentManager,
+          context: context,
+        );
+      }
     } on DioException catch (e) {
       debugPrint(e.message);
     }

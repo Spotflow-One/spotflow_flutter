@@ -3,7 +3,7 @@ import 'package:simple_ripple_animation/simple_ripple_animation.dart';
 import 'package:spotflow/src/core/models/payment_options_enum.dart';
 import 'package:spotflow/src/core/models/payment_response_body.dart';
 import 'package:spotflow/src/ui/utils/spot_flow_route_name.dart';
-import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
+import 'package:spotflow/src/ui/utils/spotflow_colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
 import 'package:spotflow/src/ui/widgets/payment_card.dart';
@@ -108,9 +108,11 @@ class _SuccessPageState extends State<SuccessPage> {
 
   Future<void> _close() async {
     await Future.delayed(const Duration(seconds: 2));
-    if (mounted == false) return;
-    Navigator.of(context)
-        .popUntil((route) => route.settings.name == SpotFlowRouteName.homePage);
+    if (mounted) {
+      Navigator.of(context).popUntil(
+          (route) => route.settings.name == SpotFlowRouteName.homePage);
+    }
+
     widget.close.call();
     widget.onComplete?.call();
   }

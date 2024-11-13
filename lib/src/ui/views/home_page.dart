@@ -6,7 +6,7 @@ import 'package:spotflow/src/core/models/merchant_config_response.dart';
 import 'package:spotflow/src/core/models/payment_options_enum.dart';
 import 'package:spotflow/src/core/services/payment_service.dart';
 import 'package:spotflow/src/ui/app_state_provider.dart';
-import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
+import 'package:spotflow/src/ui/utils/spotflow_colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/views/card/enter_card_details_page.dart';
 import 'package:spotflow/src/ui/views/transfer/view_bank_details_page.dart';
@@ -51,7 +51,7 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(
                   height: 16,
                 ),
-                Text("Unable to start payment")
+                const Text("Unable to start payment")
               ],
             ),
           )
@@ -81,12 +81,15 @@ class _HomePageState extends State<HomePage> {
       fetchingConfig = true;
     });
     try {
-      final paymentService = PaymentService(widget.paymentManager.key);
+      final paymentService = PaymentService(
+          widget.paymentManager.key, widget.paymentManager.debugMode);
       var response = await paymentService.getMerchantConfig(
         planId: widget.paymentManager.planId,
       );
       merchantConfig = MerchantConfig.fromJson(response.data);
-      context.read<AppStateProvider>().setMerchantConfig(merchantConfig!);
+      if (mounted) {
+        context.read<AppStateProvider>().setMerchantConfig(merchantConfig!);
+      }
     } on Exception catch (e) {
       debugPrint(e.toString());
     }

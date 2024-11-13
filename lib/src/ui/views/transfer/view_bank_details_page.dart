@@ -8,7 +8,7 @@ import 'package:spotflow/src/core/models/payment_request_body.dart';
 import 'package:spotflow/src/core/models/payment_response_body.dart';
 import 'package:spotflow/src/core/services/payment_service.dart';
 import 'package:spotflow/src/ui/app_state_provider.dart';
-import 'package:spotflow/src/ui/utils/spotflow-colors.dart';
+import 'package:spotflow/src/ui/utils/spotflow_colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/views/error_page.dart';
 import 'package:spotflow/src/ui/views/transfer/transfer_error_page.dart';
@@ -396,7 +396,8 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
     final paymentManager = context.read<AppStateProvider>().paymentManager!;
     final amount = context.read<AppStateProvider>().merchantConfig?.plan.amount;
     if (amount == null) return;
-    final paymentService = PaymentService(paymentManager.key);
+    final paymentService =
+        PaymentService(paymentManager.key, paymentManager.debugMode);
 
     final paymentRequestBody = PaymentRequestBody(
       customer: paymentManager.customer,
@@ -410,15 +411,16 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
       paymentResponseBody = PaymentResponseBody.fromJson(response.data);
 
       if (paymentResponseBody?.status == "failed") {
-        if (context.mounted == false) return;
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => ErrorPage(
-                message:
-                    paymentResponseBody?.providerMessage ?? "Payment failed",
-                paymentOptionsEnum: PaymentOptionsEnum.transfer),
-          ),
-        );
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => ErrorPage(
+                  message:
+                      paymentResponseBody?.providerMessage ?? "Payment failed",
+                  paymentOptionsEnum: PaymentOptionsEnum.transfer),
+            ),
+          );
+        }
       } else {
         final expiresAt = paymentResponseBody?.bankDetails?.expiresAt ??
             DateTime.now().add(const Duration(minutes: 30));
