@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:spotflow/spotflow.dart';
 import 'package:spotflow/src/core/models/merchant_config_response.dart';
 
-// Step 1: Create a class extending InheritedWidget with multiple data fields
 class AppStateProvider extends ChangeNotifier {
   MerchantConfig? merchantConfig;
   final SpotFlowPaymentManager? paymentManager;

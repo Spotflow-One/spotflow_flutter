@@ -130,9 +130,13 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
     }
 
     final rate = paymentResponseBody!.rate;
-    final amount = merchantConfig.plan.amount;
-    final totalAmount = (rate! * amount).toStringAsFixed(2);
-    final formattedAmount = "${merchantConfig.rate.from} $totalAmount";
+    final amount = paymentResponseBody?.amount;
+    String? formattedAmount;
+    String? totalAmount;
+    if (amount != null) {
+      totalAmount = (rate! * amount).toStringAsFixed(2);
+      formattedAmount = "${merchantConfig.rate.from} $totalAmount";
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -142,7 +146,7 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
         ),
         Center(
           child: Text(
-            'Transfer $formattedAmount to the details below',
+            'Transfer ${formattedAmount ?? ""} to the details below',
             style: SpotFlowTextStyle.body16SemiBold.copyWith(
               color: SpotFlowColors.tone70,
             ),
@@ -239,7 +243,7 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
                         ),
                       ),
                       Text(
-                        formattedAmount,
+                        formattedAmount ?? "",
                         style: SpotFlowTextStyle.body14Regular.copyWith(
                           color: SpotFlowColors.tone80,
                         ),
@@ -251,7 +255,7 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
                     onTap: () {
                       Clipboard.setData(
                         ClipboardData(
-                          text: totalAmount,
+                          text: totalAmount ?? "",
                         ),
                       );
                     },
@@ -394,7 +398,9 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
     });
 
     final paymentManager = context.read<AppStateProvider>().paymentManager!;
-    final amount = context.read<AppStateProvider>().merchantConfig?.plan.amount;
+    final amount =
+        context.read<AppStateProvider>().merchantConfig?.plan?.amount ??
+            paymentManager.amount;
     if (amount == null) return;
     final paymentService =
         PaymentService(paymentManager.key, paymentManager.debugMode);

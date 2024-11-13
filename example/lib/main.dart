@@ -53,6 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
         encryptionKey: encryptionKeyController.text,
         paymentDescription: paymentDescriptionController.text,
         planId: planIdController.text,
+        amount: num.tryParse(amountController.text) ?? 5,
         appLogo: Image.asset(
           'assets/images/nba-logo.png',
         ),
@@ -71,6 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
       TextEditingController(text: ""); //
   TextEditingController paymentDescriptionController =
       TextEditingController(text: "League Pass");
+  TextEditingController amountController = TextEditingController(text: "5");
 
   @override
   Widget build(BuildContext context) {
@@ -163,6 +165,19 @@ class _MyHomePageState extends State<MyHomePage> {
                   height: 16,
                 ),
                 TextField(
+                  controller: amountController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    hintText: 'amount',
+                    border: OutlineInputBorder(),
+                    enabledBorder: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                TextField(
                   controller: paymentDescriptionController,
                   decoration: const InputDecoration(
                     hintText: 'payment description (optional)',
@@ -177,7 +192,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 ElevatedButton(
                   onPressed: () {
                     if (emailController.text.isEmpty ||
-                        planIdController.text.isEmpty ||
                         merchantIdController.text.isEmpty ||
                         merchantKeyController.text.isEmpty ||
                         encryptionKeyController.text.isEmpty) {
@@ -191,10 +205,25 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                         ),
                       );
-
                       ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       return;
                     }
+                    if (amountController.text.isEmpty &&
+                        planIdController.text.isEmpty) {
+                      const snackBar = SnackBar(
+                        backgroundColor: Colors.red,
+                        content: Text(
+                          'please add either an amount or a plan id',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                          ),
+                        ),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      return;
+                    }
+
                     _startPayment();
                   },
                   style: ElevatedButton.styleFrom(

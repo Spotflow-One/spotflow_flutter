@@ -16,7 +16,8 @@ class PaymentCard extends StatelessWidget {
 
     String? toCurrency = merchantConfig?.rate.to.toUpperCase();
 
-    num? amount = merchantConfig?.plan.amount;
+    num? amount = merchantConfig?.plan?.amount ?? paymentManager.amount;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2),
       child: Container(

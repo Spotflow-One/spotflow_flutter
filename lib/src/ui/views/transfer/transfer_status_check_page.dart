@@ -254,7 +254,7 @@ class _TransferStatusCheckPageState extends State<TransferStatusCheckPage>
   }
 
   void _startPolling() {
-    _timer = Timer.periodic(const Duration(seconds: 60), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
       _verifyPayment();
     });
   }

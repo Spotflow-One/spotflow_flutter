@@ -124,7 +124,7 @@ class BankDetails {
 
 class UssdResponse {
   String code;
-  String paymentCode;
+  String? paymentCode;
 
   UssdResponse({required this.code, required this.paymentCode});
 

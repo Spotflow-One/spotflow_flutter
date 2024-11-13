@@ -17,6 +17,9 @@ class Spotflow {
     required SpotFlowPaymentManager paymentManager,
     void Function(PaymentResponseBody paymentResponseBody)? onComplete,
   }) {
+    if (paymentManager.amount == null && paymentManager.planId == null) {
+      throw Exception('Please provide an amount or a plan id');
+    }
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => ChangeNotifierProvider(
               builder: (context, child) {
@@ -109,9 +112,11 @@ class SpotFlowPaymentManager {
 
   String? paymentDescription;
 
-  String planId;
+  String? planId;
 
   bool debugMode;
+
+  num? amount;
 
   CustomerInfo get customer {
     return CustomerInfo(
@@ -126,7 +131,7 @@ class SpotFlowPaymentManager {
     required this.merchantId,
     required this.key,
     required this.customerEmail,
-    required this.planId,
+    this.planId,
     required this.encryptionKey,
     this.customerName,
     this.customerPhoneNumber,
@@ -135,5 +140,6 @@ class SpotFlowPaymentManager {
     this.appLogo,
     this.appName,
     this.debugMode = true,
+    this.amount,
   });
 }

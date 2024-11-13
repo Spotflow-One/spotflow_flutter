@@ -206,10 +206,22 @@ class _CopyUssdPageState extends State<CopyUssdPage> {
       initiatingPayment = true;
     });
     final paymentManager = context.read<AppStateProvider>().paymentManager!;
-    final amount = context.read<AppStateProvider>().merchantConfig!.plan.amount;
+    final amount =
+        context.read<AppStateProvider>().merchantConfig!.plan?.amount ??
+            paymentManager.amount;
     final paymentService =
         PaymentService(paymentManager.key, paymentManager.debugMode);
 
+    if (amount == null) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => const ErrorPage(
+              message: "Please provide an amount",
+              paymentOptionsEnum: PaymentOptionsEnum.ussd),
+        ),
+      );
+      return;
+    }
     final paymentRequestBody = PaymentRequestBody(
       customer: paymentManager.customer,
       currency: context.read<AppStateProvider>().merchantConfig?.rate.to ?? "",

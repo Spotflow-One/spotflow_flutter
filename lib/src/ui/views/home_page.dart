@@ -111,9 +111,11 @@ class _HomePageUi extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final merchantConfig = context.read<AppStateProvider>().merchantConfig;
-    final amount = merchantConfig?.plan.amount;
+    final paymentManager = context.read<AppStateProvider>().paymentManager;
+    final amount = merchantConfig?.plan?.amount ?? paymentManager?.amount;
     String toFormattedAmount = "";
     final rate = merchantConfig?.rate;
+
     if (rate != null && amount != null) {
       toFormattedAmount =
           "${rate.from}${(rate.rate * amount).toStringAsFixed(2)}";

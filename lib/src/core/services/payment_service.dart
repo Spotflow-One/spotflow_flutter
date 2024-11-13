@@ -46,9 +46,15 @@ class PaymentService {
         .get(apiRoute.getUssdBanks, queryParameters: {"ussd": true});
   }
 
-  Future<Response> getMerchantConfig({required String planId}) async {
-    final response = await apiClient
-        .get(apiRoute.getMerchantConfig, queryParameters: {"planId": planId});
+  Future<Response> getMerchantConfig({required String? planId}) async {
+    final response = await apiClient.get(
+      apiRoute.getMerchantConfig,
+      queryParameters: planId == null
+          ? {}
+          : {
+              "planId": planId,
+            },
+    );
 
     return response;
   }

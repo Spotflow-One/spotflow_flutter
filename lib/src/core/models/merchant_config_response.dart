@@ -9,7 +9,7 @@ class MerchantConfig {
 
   List<PaymentOptionsEnum?> paymentMethods;
 
-  SpotFlowPlan plan;
+  SpotFlowPlan? plan;
 
   Rate rate;
 
@@ -28,7 +28,7 @@ class MerchantConfig {
       paymentMethods: (json['paymentMethods'] as List)
           .map<PaymentOptionsEnum?>((e) => PaymentOptionsEnum.fromString(e))
           .toList(),
-      plan: SpotFlowPlan.fromJson(json['plan']),
+      plan: json['plan'] == null ? null : SpotFlowPlan.fromJson(json['plan']),
       rate: Rate.fromJson(
         json['rate'],
       ),

@@ -91,7 +91,7 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
   Widget build(BuildContext context) {
     final merchantConfig = context.watch<AppStateProvider>().merchantConfig;
     final paymentManager = context.watch<AppStateProvider>().paymentManager!;
-    final amount = merchantConfig?.plan.amount;
+    final amount = merchantConfig?.plan?.amount ?? paymentManager.amount;
     String formattedAmount = "";
     if (merchantConfig?.rate != null && amount != null) {
       formattedAmount =
