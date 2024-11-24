@@ -166,7 +166,7 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
           ),
           InkWell(
             onTap: () {
-              if (amount != null) {
+              if (amount != null && buttonEnabled) {
                 _createPayment(paymentManager, merchantConfig.rate.to, amount);
               }
             },
