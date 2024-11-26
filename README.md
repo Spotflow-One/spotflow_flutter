@@ -39,7 +39,6 @@ Spotflow().start( context: context,
   customerName: "John Snow", //optional
   customerPhoneNumber: "000-000-000", //optional
   customerId: "unique_id" //optional
-  merchantId: "unique_id" 
   planId: "plan_id",
   amount: 10,
   key: "your_api_key",
@@ -62,7 +61,6 @@ Spotflow().start( context: context,
 
 The `SpotFlowPaymentManager` class requires the following parameters:
 
-- **merchantId**: The unique identifier for the merchant.
 - **customerEmail**: The email address of the customer.
 - **amount**: The amount to be paid.
 - **key**: The API key for the payment provider.
