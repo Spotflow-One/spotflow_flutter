@@ -272,7 +272,6 @@ class _AddressInputUIState extends State<_AddressInputUI> with CardsNavigation {
       state: countryState!.name,
       zip: zipCodeController.text,
       reference: widget.paymentResponseBody.reference,
-      merchantId: paymentManager.merchantId,
     );
     try {
       final response = await paymentService.authorizePayment(

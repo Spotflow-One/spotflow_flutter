@@ -199,7 +199,6 @@ class _EnterOtpPageUiState extends State<_EnterOtpPageUi> with CardsNavigation {
   Future<void> _authorizePayment() async {
     final paymentManager = context.read<AppStateProvider>().paymentManager!;
     final paymentRequestBody = ValidatePaymentRequestBody(
-      merchantId: paymentManager.merchantId,
       reference: widget.reference,
       otp: controller.text,
     );

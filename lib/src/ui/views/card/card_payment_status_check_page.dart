@@ -69,7 +69,6 @@ class _CardPaymentStatusCheckPageState
           PaymentService(paymentManager.key, paymentManager.debugMode);
       final response = await paymentService.verifyPayment(
         reference: widget.paymentReference,
-        merchantId: paymentManager.merchantId,
       );
       final body = PaymentResponseBody.fromJson(response.data);
       if (body.status == 'successful') {

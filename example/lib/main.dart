@@ -47,7 +47,6 @@ class _MyHomePageState extends State<MyHomePage> {
     Spotflow().start(
       context: context,
       paymentManager: SpotFlowPaymentManager(
-        merchantId: merchantIdController.text,
         customerEmail: emailController.text,
         key: merchantKeyController.text,
         encryptionKey: encryptionKeyController.text,
@@ -63,8 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   TextEditingController emailController =
       TextEditingController(text: "jon@snow.com"); //
-  TextEditingController merchantIdController =
-      TextEditingController(text: ""); //
+
   TextEditingController encryptionKeyController =
       TextEditingController(text: ""); //
   TextEditingController planIdController = TextEditingController(text: ""); //
@@ -129,18 +127,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   height: 16,
                 ),
                 TextField(
-                  controller: merchantIdController,
-                  decoration: const InputDecoration(
-                    hintText: 'merchant id',
-                    border: OutlineInputBorder(),
-                    enabledBorder: OutlineInputBorder(),
-                    focusedBorder: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
-                TextField(
                   controller: merchantKeyController,
                   decoration: const InputDecoration(
                     hintText: 'merchant key',
@@ -192,7 +178,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 ElevatedButton(
                   onPressed: () {
                     if (emailController.text.isEmpty ||
-                        merchantIdController.text.isEmpty ||
                         merchantKeyController.text.isEmpty ||
                         encryptionKeyController.text.isEmpty) {
                       const snackBar = SnackBar(

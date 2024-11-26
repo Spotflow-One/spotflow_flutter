@@ -33,10 +33,8 @@ class PaymentService {
 
   Future<Response> verifyPayment({
     required String reference,
-    required String merchantId,
   }) {
     return apiClient.get(apiRoute.verifyPayment, queryParameters: {
-      "merchantId": merchantId,
       "reference": reference,
     });
   }

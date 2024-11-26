@@ -138,7 +138,6 @@ class _EnterPinPageUIState extends State<_EnterPinPageUI> with CardsNavigation {
   Future<void> _authorizePayment(
       SpotFlowPaymentManager paymentManager, String pin) async {
     final paymentRequestBody = AuthorizePaymentRequestBody(
-      merchantId: paymentManager.merchantId,
       reference: widget.reference,
       pin: pin,
     );

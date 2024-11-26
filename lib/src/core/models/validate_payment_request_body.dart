@@ -1,10 +1,8 @@
 class ValidatePaymentRequestBody {
   String otp;
   String reference;
-  String merchantId;
 
   ValidatePaymentRequestBody({
-    required this.merchantId,
     required this.reference,
     required this.otp,
   });
@@ -13,7 +11,6 @@ class ValidatePaymentRequestBody {
     return {
       "reference": reference,
       "authorization": {"otp": otp},
-      "merchantId": merchantId
     };
   }
 }
@@ -31,8 +28,6 @@ class AvsPaymentRequestBody {
 
   String zip;
 
-  String merchantId;
-
   AvsPaymentRequestBody({
     required this.city,
     required this.country,
@@ -40,7 +35,6 @@ class AvsPaymentRequestBody {
     required this.state,
     required this.zip,
     required this.reference,
-    required this.merchantId,
   });
 
   Map<String, dynamic> toJson() {
@@ -55,7 +49,6 @@ class AvsPaymentRequestBody {
           "country": country
         }
       },
-      "merchantId": merchantId
     };
   }
 }

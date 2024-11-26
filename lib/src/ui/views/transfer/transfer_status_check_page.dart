@@ -267,7 +267,6 @@ class _TransferStatusCheckPageState extends State<TransferStatusCheckPage>
           PaymentService(paymentManager.key, paymentManager.debugMode);
       final response = await paymentService.verifyPayment(
         reference: widget.paymentResponseBody.reference,
-        merchantId: paymentManager.merchantId,
       );
       final body = PaymentResponseBody.fromJson(response.data);
       if (body.status == 'successful') {
