@@ -77,7 +77,10 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
 
   bool creatingPayment = false;
 
-  bool buttonEnabled = false;
+  bool get validCard =>
+      _validCvv == true &&
+      _validExpiryDate == true &&
+      _validCreditCardNumber == true;
 
   @override
   void dispose() {
@@ -125,8 +128,8 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
           CardInputField(
             labelText: 'CARD NUMBER',
             hintText: '0000 0000 0000 0000',
+            validCard: _validCreditCardNumber,
             textEditingController: cardNumberController,
-            onChanged: onCardNumberChanged,
             inputFormatters: [pf.CreditCardFormatter()],
           ),
           const SizedBox(
@@ -138,8 +141,8 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
                 child: CardInputField(
                   labelText: 'CARD EXPIRY',
                   hintText: 'MM/YY',
+                  validCard: _validExpiryDate,
                   textEditingController: expiryController,
-                  onChanged: onExpiryDateChanged,
                   inputFormatters: [
                     CreditCardExpirationDateFormatter(),
                   ],
@@ -153,7 +156,7 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
                   labelText: 'CVV',
                   hintText: '123',
                   textEditingController: cvvController,
-                  onChanged: onCvvChanged,
+                  validCard: _validCvv,
                   inputFormatters: [
                     CreditCardCvcInputFormatter(),
                   ],
@@ -166,8 +169,13 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
           ),
           InkWell(
             onTap: () {
-              if (amount != null && buttonEnabled) {
-                _createPayment(paymentManager, merchantConfig.rate.to, amount);
+              if (amount != null) {
+                if (validCard) {
+                  _createPayment(
+                      paymentManager, merchantConfig.rate.to, amount);
+                } else {
+                  _validateCreditCard();
+                }
               }
             },
             child: Container(
@@ -176,18 +184,13 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
               ),
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: buttonEnabled
-                    ? SpotFlowColors.primaryBase
-                    : SpotFlowColors.primary5,
+                color: SpotFlowColors.primaryBase,
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
-                formattedAmount,
-                style: SpotFlowTextStyle.body14SemiBold.copyWith(
-                  color: buttonEnabled
-                      ? SpotFlowColors.kcBaseWhite
-                      : SpotFlowColors.primary20,
-                ),
+                validCard != true ? "Validate Card" : 'Pay $formattedAmount',
+                style: SpotFlowTextStyle.body14SemiBold
+                    .copyWith(color: SpotFlowColors.kcBaseWhite),
               ),
             ),
           ),
@@ -314,19 +317,11 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
     return year.toString().padLeft(2, '0');
   }
 
-  void onExpiryDateChanged(String? value) {
-    _validateCreditCard();
-  }
-
-  void onCvvChanged(String? value) {
-    _validateCreditCard();
-  }
-
-  void onCardNumberChanged(String? value) {
-    _validateCreditCard();
-  }
-
   final _ccValidator = CreditCardValidator();
+
+  bool? _validCvv;
+  bool? _validExpiryDate;
+  bool? _validCreditCardNumber;
 
   _validateCreditCard() {
     final ccNumResults = _ccValidator.validateCCNum(cardNumberController.text);
@@ -334,9 +329,9 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
     final cvvResults =
         _ccValidator.validateCVV(cvvController.text, ccNumResults.ccType);
     setState(() {
-      buttonEnabled = ccNumResults.isPotentiallyValid &&
-          expDateResults.isPotentiallyValid &&
-          cvvResults.isValid;
+      _validCvv = cvvResults.isValid;
+      _validExpiryDate = expDateResults.isPotentiallyValid;
+      _validCreditCardNumber = ccNumResults.isPotentiallyValid;
     });
   }
 

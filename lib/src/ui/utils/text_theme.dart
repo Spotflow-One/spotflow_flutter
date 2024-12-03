@@ -24,6 +24,10 @@ class SpotFlowTextStyle {
     fontSize: 16,
     fontWeight: FontWeight.w600,
   );
+  static TextStyle body16Regular = const TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+  );
 
   // static TextStyle body14Regular = const TextStyle(
   //   fontSize: 16,

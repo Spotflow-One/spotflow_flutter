@@ -340,8 +340,7 @@ class _AddressInputUIState extends State<_AddressInputUI> with CardsNavigation {
   }
 
   Future<void> _initJson() async {
-    final jsonString =
-        await rootBundle.loadString(Assets.json.countriesStatesCities);
+    final jsonString = await rootBundle.loadString(Assets.json.location);
     final jsonBody = jsonDecode(jsonString) as List<dynamic>;
 
     countries = jsonBody
