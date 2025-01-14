@@ -86,6 +86,8 @@ class _CopyUssdPageState extends State<CopyUssdPage> {
             padding: const EdgeInsets.symmetric(horizontal: 40.0),
             child: TextButton(
               onPressed: () {
+                context.read<AppStateProvider>().trackEvent('copy_ussdCode');
+
                 Clipboard.setData(
                   ClipboardData(
                     text: paymentResponseBody?.ussd?.code ?? "",
@@ -224,7 +226,8 @@ class _CopyUssdPageState extends State<CopyUssdPage> {
     }
     final paymentRequestBody = PaymentRequestBody(
       customer: paymentManager.customer,
-      currency: context.read<AppStateProvider>().merchantConfig?.rate.to ?? "",
+      currency:
+          context.read<AppStateProvider>().merchantConfig?.rate.from ?? "",
       amount: amount,
       channel: "ussd",
       bank: widget.bank,

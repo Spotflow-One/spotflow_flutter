@@ -203,6 +203,11 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_web_plugins:
+    dependency: transitive
+    description: flutter
+    source: sdk
+    version: "0.0.0"
   google_fonts:
     dependency: "direct main"
     description:
@@ -307,6 +312,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.11.0"
+  mixpanel_flutter:
+    dependency: transitive
+    description:
+      name: mixpanel_flutter
+      sha256: c1e35c54d8cfc1c50d35d2e8cc11416295efc45bb6dcaa88aec8f82219274833
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.3"
   nested:
     dependency: transitive
     description:

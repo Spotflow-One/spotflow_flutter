@@ -145,6 +145,8 @@ class _EnterPinPageUIState extends State<_EnterPinPageUI> with CardsNavigation {
       creatingPayment = true;
     });
 
+    context.read<AppStateProvider>().trackEvent('input_cardPin');
+
     final paymentService =
         PaymentService(paymentManager.key, paymentManager.debugMode);
     try {

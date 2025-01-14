@@ -206,6 +206,8 @@ class _EnterOtpPageUiState extends State<_EnterOtpPageUi> with CardsNavigation {
       creatingPayment = true;
     });
 
+    context.read<AppStateProvider>().trackEvent('input_cardOtp');
+
     final paymentService =
         PaymentService(paymentManager.key, paymentManager.debugMode);
     try {

@@ -9,6 +9,7 @@ import 'package:spotflow/src/ui/app_state_provider.dart';
 import 'package:spotflow/src/ui/utils/spotflow_colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/views/card/enter_card_details_page.dart';
+import 'package:spotflow/src/ui/views/mobile/enter_mobile_money_details.dart';
 import 'package:spotflow/src/ui/views/transfer/view_bank_details_page.dart';
 import 'package:spotflow/src/ui/views/ussd/view_banks_ussd_page.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
@@ -46,6 +47,7 @@ class _HomePageState extends State<HomePage> {
         ] else if (merchantConfig == null) ...[
           Expanded(
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Assets.svg.warning.svg(),
                 const SizedBox(
@@ -69,6 +71,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    context.read<AppStateProvider>().trackEvent('checkout_opens');
     _fetchRate();
   }
 
@@ -162,7 +165,7 @@ class _HomePageUi extends StatelessWidget {
           ),
         ),
         if (merchantConfig?.paymentMethods != null) ...[
-          ...merchantConfig!.paymentMethods.map((e) {
+          ...PaymentOptionsEnum.values.map((e) {
             if (e == null) {
               return const SizedBox();
             }
@@ -172,6 +175,24 @@ class _HomePageUi extends StatelessWidget {
                 icon: e.icon,
                 text: e.title,
                 onTap: () {
+                  switch (e) {
+                    case PaymentOptionsEnum.card:
+                      context.read<AppStateProvider>().trackEvent('card_opens');
+                      break;
+                    case PaymentOptionsEnum.transfer:
+                      context
+                          .read<AppStateProvider>()
+                          .trackEvent('transfer_opens');
+                      break;
+                    case PaymentOptionsEnum.ussd:
+                      context.read<AppStateProvider>().trackEvent('ussd_opens');
+                      break;
+                    case PaymentOptionsEnum.mobileMoney:
+                      context
+                          .read<AppStateProvider>()
+                          .trackEvent('mobile_money_opens');
+                      break;
+                  }
                   onSelected(e, context);
                 },
               ),
@@ -221,6 +242,14 @@ class _HomePageUi extends StatelessWidget {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => ViewBanksUssdPage(
+              close: closeSpotFlow,
+            ),
+          ),
+        );
+      case PaymentOptionsEnum.mobileMoney:
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => EnterMobileMoneyDetails(
               close: closeSpotFlow,
             ),
           ),

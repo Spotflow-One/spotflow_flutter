@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:spotflow/spotflow.dart';
 import 'package:spotflow/src/core/models/payment_options_enum.dart';
+import 'package:spotflow/src/ui/app_state_provider.dart';
 import 'package:spotflow/src/ui/views/authorization_web_view.dart';
 import 'package:spotflow/src/ui/views/card/enter_billing_address_page.dart';
 import 'package:spotflow/src/ui/views/card/enter_otp_page.dart';
@@ -53,6 +55,8 @@ mixin CardsNavigation {
       if (redirectUrl == null) {
         return;
       }
+
+      context.read<AppStateProvider>().trackEvent('auth_redirect');
 
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(

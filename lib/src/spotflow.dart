@@ -32,7 +32,7 @@ class Spotflow {
                         builder = (_) => HomePage(
                               paymentManager: paymentManager,
                               closeSpotFlow: () {
-                                Navigator.of(context).pop();
+                                _cancelPayment(context);
                               },
                             );
                       case SpotFlowRouteName.enterCardDetailsPage:
@@ -46,20 +46,20 @@ class Spotflow {
                             settings.arguments as EnterBillingAddressPageArgs;
                         builder = (_) => EnterBillingAddressPage(
                               close: () {
-                                Navigator.of(context).pop();
+                                _cancelPayment(context);
                               },
                               paymentResponseBody: args.paymentResponseBody,
                             );
                       case SpotFlowRouteName.viewBankDetailsPage:
                         builder = (_) => ViewBankDetailsPage(
                               close: () {
-                                Navigator.of(context).pop();
+                                _cancelPayment(context);
                               },
                             );
                       case SpotFlowRouteName.viewBanksUssdPage:
                         builder = (_) => ViewBanksUssdPage(
                               close: () {
-                                Navigator.of(context).pop();
+                                _cancelPayment(context);
                               },
                             );
                       case SpotFlowRouteName.successPage:
@@ -68,7 +68,7 @@ class Spotflow {
                               successMessage: args.successMessage,
                               paymentOptionsEnum: args.paymentOptionsEnum,
                               close: () {
-                                Navigator.of(context).pop();
+                                _cancelPayment(context);
                               },
                               onComplete: () {
                                 onComplete?.call(args.paymentResponseBody);
@@ -87,6 +87,12 @@ class Spotflow {
                 paymentManager: paymentManager,
               ),
             )));
+  }
+
+  void _cancelPayment(BuildContext context) {
+    context.read<AppStateProvider>().trackEvent('cancel_payment');
+
+    Navigator.of(context).pop();
   }
 }
 

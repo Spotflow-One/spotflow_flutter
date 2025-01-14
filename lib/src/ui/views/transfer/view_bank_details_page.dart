@@ -217,6 +217,10 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
                                   "",
                         ),
                       );
+
+                      context
+                          .read<AppStateProvider>()
+                          .trackEvent('copy_transferBank');
                     },
                     child: Assets.svg.copyIcon.svg(
                       colorFilter: const ColorFilter.mode(
@@ -253,6 +257,9 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
                   const Spacer(),
                   InkWell(
                     onTap: () {
+                      context
+                          .read<AppStateProvider>()
+                          .trackEvent('copy_transferAmount');
                       Clipboard.setData(
                         ClipboardData(
                           text: totalAmount ?? "",
@@ -407,7 +414,8 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
 
     final paymentRequestBody = PaymentRequestBody(
       customer: paymentManager.customer,
-      currency: context.read<AppStateProvider>().merchantConfig?.rate.to ?? "",
+      currency:
+          context.read<AppStateProvider>().merchantConfig?.rate.from ?? "",
       amount: amount,
       channel: "bank_transfer",
     );

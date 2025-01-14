@@ -179,6 +179,7 @@ class _ViewBanksUssdPageState extends State<ViewBanksUssdPage> {
         return BottomSheetWithSearch(
           items: banks,
           onSelect: (bank) {
+            context.read<AppStateProvider>().trackEvent('select_bank');
             setState(() {
               this.bank = bank as Bank;
             });

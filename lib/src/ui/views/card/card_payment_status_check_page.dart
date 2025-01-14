@@ -60,6 +60,8 @@ class _CardPaymentStatusCheckPageState
         loading = false;
       });
     });
+
+    context.read<AppStateProvider>().trackEvent('verify_cardPayment');
   }
 
   Future<void> _verifyPayment() async {

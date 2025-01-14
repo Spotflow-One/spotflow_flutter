@@ -7,7 +7,7 @@ class ApiRoute {
     if (isDebugMode) {
       return 'https://dev-api.spotflow.co';
     }
-    return 'https://dev-api.spotflow.co';
+    return 'https://api.spotflow.co';
   }
 
   String get validatePayment => '$baseUrl/api/v1/payments/validate';

@@ -44,6 +44,9 @@ class $AssetsSvgGen {
   /// File path: assets/svg/info-circle.svg
   SvgGenImage get infoCircle => const SvgGenImage('assets/svg/info-circle.svg');
 
+  /// File path: assets/svg/mobile.svg
+  SvgGenImage get mobile => const SvgGenImage('assets/svg/mobile.svg');
+
   /// File path: assets/svg/pay-with-card-icon.svg
   SvgGenImage get payWithCardIcon =>
       const SvgGenImage('assets/svg/pay-with-card-icon.svg');
@@ -73,6 +76,7 @@ class $AssetsSvgGen {
         dottedCircle,
         greenCheckIcon,
         infoCircle,
+        mobile,
         payWithCardIcon,
         payWithTransferIcon,
         payWithUsdIcon,

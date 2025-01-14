@@ -90,6 +90,24 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
     super.dispose();
   }
 
+  onCardNumberChanged(_) {
+    setState(() {
+      _validCreditCardNumber = null;
+    });
+  }
+
+  onCardCvvChanged(_) {
+    setState(() {
+      _validCvv = null;
+    });
+  }
+
+  onCardExpiryChanged(_) {
+    setState(() {
+      _validExpiryDate = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final merchantConfig = context.watch<AppStateProvider>().merchantConfig;
@@ -98,7 +116,7 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
     String formattedAmount = "";
     if (merchantConfig?.rate != null && amount != null) {
       formattedAmount =
-          "${merchantConfig!.rate.to} ${(merchantConfig.rate.rate * amount).toStringAsFixed(2)}";
+          "${merchantConfig!.rate.from} ${(merchantConfig.rate.rate * amount).toStringAsFixed(2)}";
     } else {
       formattedAmount =
           'Pay ${merchantConfig!.rate.from} ${amount?.toStringAsFixed(2) ?? ""}';
@@ -129,6 +147,7 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
             labelText: 'CARD NUMBER',
             hintText: '0000 0000 0000 0000',
             validCard: _validCreditCardNumber,
+            onChanged: onCardNumberChanged,
             textEditingController: cardNumberController,
             inputFormatters: [pf.CreditCardFormatter()],
           ),
@@ -142,6 +161,7 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
                   labelText: 'CARD EXPIRY',
                   hintText: 'MM/YY',
                   validCard: _validExpiryDate,
+                  onChanged: onCardExpiryChanged,
                   textEditingController: expiryController,
                   inputFormatters: [
                     CreditCardExpirationDateFormatter(),
@@ -156,6 +176,7 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
                   labelText: 'CVV',
                   hintText: '123',
                   textEditingController: cvvController,
+                  onChanged: onCardCvvChanged,
                   validCard: _validCvv,
                   inputFormatters: [
                     CreditCardCvcInputFormatter(),
@@ -169,10 +190,11 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
           ),
           InkWell(
             onTap: () {
+              context.read<AppStateProvider>().trackEvent('input_cardDetails');
               if (amount != null) {
                 if (validCard) {
                   _createPayment(
-                      paymentManager, merchantConfig.rate.to, amount);
+                      paymentManager, merchantConfig.rate.from, amount);
                 } else {
                   _validateCreditCard();
                 }

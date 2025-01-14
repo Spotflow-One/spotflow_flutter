@@ -11,7 +11,7 @@ import 'package:spotflow/src/ui/widgets/payment_card.dart';
 import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
 import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 
-class ErrorPage extends StatelessWidget {
+class ErrorPage extends StatefulWidget {
   final String message;
   final PaymentOptionsEnum paymentOptionsEnum;
 
@@ -21,6 +21,11 @@ class ErrorPage extends StatelessWidget {
     required this.paymentOptionsEnum,
   });
 
+  @override
+  State<ErrorPage> createState() => _ErrorPageState();
+}
+
+class _ErrorPageState extends State<ErrorPage> {
   @override
   Widget build(BuildContext context) {
     final merchantConfig = context.read<AppStateProvider>().merchantConfig;
@@ -41,8 +46,8 @@ class ErrorPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         PaymentOptionsTile(
-          text: paymentOptionsEnum.title,
-          icon: paymentOptionsEnum.icon,
+          text: widget.paymentOptionsEnum.title,
+          icon: widget.paymentOptionsEnum.icon,
         ),
         const PaymentCard(),
         const SizedBox(
@@ -53,7 +58,7 @@ class ErrorPage extends StatelessWidget {
           height: 6,
         ),
         Text(
-          message,
+          widget.message,
           textAlign: TextAlign.center,
           style: SpotFlowTextStyle.body14SemiBold.copyWith(
             color: SpotFlowColors.tone70,
@@ -68,6 +73,7 @@ class ErrorPage extends StatelessWidget {
             onPressed: () {
               Navigator.of(context)
                   .pushReplacementNamed(SpotFlowRouteName.enterCardDetailsPage);
+              context.read<AppStateProvider>().trackEvent('payment_retry');
             },
             style: buttonStyle,
             child: Text(
@@ -89,6 +95,7 @@ class ErrorPage extends StatelessWidget {
               Navigator.of(context).pushReplacementNamed(
                 SpotFlowRouteName.viewBankDetailsPage,
               );
+              context.read<AppStateProvider>().trackEvent('payment_retry');
             },
             style: buttonStyle,
             child: Text(
@@ -106,6 +113,8 @@ class ErrorPage extends StatelessWidget {
             true) ...[
           TextButton(
             onPressed: () {
+              context.read<AppStateProvider>().trackEvent('payment_retry');
+
               Navigator.of(context)
                   .pushReplacementNamed(SpotFlowRouteName.viewBanksUssdPage);
             },
@@ -128,5 +137,11 @@ class ErrorPage extends StatelessWidget {
         )
       ],
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<AppStateProvider>().trackEvent('payment_failed');
   }
 }
