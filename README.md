@@ -1,10 +1,10 @@
 ## **Flutter SDK**
 
-Our Flutter SDK provides a rich set of pre-built UI components and APIs to seamlessly integrate payment functionalities within your Flutter application.
+Our Flutter SDK provides a rich set of pre-built UI components and APIs to integrate payment functionalities within your Flutter application seamlessly.
 
 ### **Introduction**
 
-The `Spotflow Flutter SDK` package allows developers to effortlessly integrate seamless payment functionalities into their Flutter applications. It supports both Android and iOS platforms, making it versatile for mobile app development.
+The `Spotflow Flutter SDK` package allows developers to integrate seamless payment functionalities into their Flutter applications effortlessly. It supports both Android and iOS platforms, making it versatile for mobile app development.
 
 ### **Installation**
 
@@ -12,7 +12,7 @@ To use the `Spotflow Flutter SDK` package, add the following dependency to you
 
 ```yaml
 dependencies:
-  spotflow: ^1.0.0
+  spotflow: ^0.1.0-beta.1
 ```
 
 Then run `flutter pub get` to fetch the package.
@@ -40,7 +40,7 @@ Spotflow().start( context: context,
   customerPhoneNumber: "000-000-000", //optional
   customerId: "unique_id" //optional
   planId: "plan_id",
-  amount: 10,
+  amount: "amount",
   key: "your_api_key",
   encryptionKey: "encryption_key",
   paymentDescription: "Product purchase",
@@ -75,7 +75,7 @@ The `SpotFlowPaymentManager` class requires the following parameters:
 
 ### **Testing Your Implementation**
 
-Use test cards provided by your payment provider to test your implementation.
+Test cards can be found [here](https://docs.spotflow.one/testing-payment).
 
 ### **Running the Example Project**
 
