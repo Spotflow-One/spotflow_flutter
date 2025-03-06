@@ -33,7 +33,7 @@ mixin CardsNavigation {
         ),
       );
     } else if (paymentResponseBody.authorization?.mode == 'pin') {
-      Navigator.of(context).push(
+      Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => EnterPinPage(
             reference: paymentResponseBody.reference,
@@ -41,7 +41,7 @@ mixin CardsNavigation {
         ),
       );
     } else if (paymentResponseBody.authorization?.mode == 'otp') {
-      Navigator.of(context).push(
+      Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => EnterOtpPage(
             message: paymentResponseBody.providerMessage ?? "",
@@ -67,7 +67,7 @@ mixin CardsNavigation {
         ),
       );
     } else if (paymentResponseBody.authorization?.mode == 'avs') {
-      Navigator.of(context).pushNamed(
+      Navigator.of(context).pushReplacementNamed(
         SpotFlowRouteName.enterBillingAddressPage,
         arguments: EnterBillingAddressPageArgs(
             paymentResponseBody: paymentResponseBody),

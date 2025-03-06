@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:spotflow/gen/assets.gen.dart';
 import 'package:spotflow/src/core/models/validate_payment_request_body.dart';
 import 'package:spotflow/src/core/services/payment_service.dart';
 import 'package:spotflow/src/ui/app_state_provider.dart';
@@ -10,9 +9,10 @@ import 'package:spotflow/src/ui/utils/spot_flow_route_name.dart';
 import 'package:spotflow/src/ui/utils/spotflow_colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
+import 'package:spotflow/src/ui/widgets/dismissible_app_logo.dart';
 import 'package:spotflow/src/ui/widgets/payment_card.dart';
-import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
 import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
+import 'package:spotflow/src/ui/widgets/primary_button.dart';
 
 class EnterOtpPage extends StatelessWidget {
   final String message;
@@ -29,11 +29,6 @@ class EnterOtpPage extends StatelessWidget {
     return BaseScaffold(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        PaymentOptionsTile(
-          text: 'Pay with Card',
-          icon: Assets.svg.payWithCardIcon.svg(),
-        ),
-        const PaymentCard(),
         Expanded(
           child: _EnterOtpPageUi(
             message: message,
@@ -76,117 +71,122 @@ class _EnterOtpPageUiState extends State<_EnterOtpPageUi> with CardsNavigation {
       );
     }
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(
-          height: 47.0,
+          height: 28,
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 19.0),
-          child: Center(
-            child: Text(
-              widget.message,
-              textAlign: TextAlign.center,
-              style: SpotFlowTextStyle.body14SemiBold.copyWith(
-                color: SpotFlowColors.tone70,
+        const DismissibleAppLogo(),
+        const SizedBox(
+          height: 32,
+        ),
+        const PaymentCard(),
+        const SizedBox(
+          height: 24,
+        ),
+        const Divider(
+          color: Color(0xFFF7F7F8),
+          height: 1,
+          thickness: 1,
+        ),
+        const SizedBox(
+          height: 24,
+        ),
+        Text(
+          widget.message,
+          textAlign: TextAlign.start,
+          style: SpotFlowTextStyle.body16Regular.copyWith(
+            color: Colors.black,
+          ),
+        ),
+        const SizedBox(
+          height: 16,
+        ),
+        TextField(
+          keyboardType: TextInputType.number,
+          textAlign: TextAlign.center,
+          controller: controller,
+          obscureText: true,
+          obscuringCharacter: "*",
+          style: const TextStyle(
+              fontSize: 28, color: Colors.black, letterSpacing: 8),
+          showCursor: true,
+          decoration: InputDecoration(
+            contentPadding:
+                const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(
+                color: SpotFlowColors.tone90,
+              ),
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(
+                color: SpotFlowColors.tone90,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(
+                color: SpotFlowColors.tone90,
               ),
             ),
           ),
         ),
         const SizedBox(
-          height: 34,
+          height: 8,
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 18.5,
-          ),
-          child: TextField(
-            keyboardType: TextInputType.number,
-            textAlign: TextAlign.center,
-            controller: controller,
-            decoration: InputDecoration(
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(
-                  color: SpotFlowColors.tone20,
-                ),
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(
-                  color: SpotFlowColors.tone20,
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(
-                  color: SpotFlowColors.tone20,
-                ),
-              ),
+        RichText(
+          text: const TextSpan(
+            text: "Didn't get code? ",
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              color: SpotFlowColors.tone100,
             ),
+            children: [
+              TextSpan(
+                text: "Try again",
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: SpotFlowColors.tone100,
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(
-          height: 31,
+          height: 16,
         ),
-        InkWell(
+        PrimaryButton(
           onTap: () => _authorizePayment(),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 70.0),
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                vertical: 18.0,
-              ),
-              decoration: BoxDecoration(
-                color: SpotFlowColors.greenBase,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Center(
-                child: Text(
-                  'Authorize',
-                  style: SpotFlowTextStyle.body14SemiBold.copyWith(
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ),
+          text: 'Authorize payment',
         ),
         const SizedBox(
-          height: 44.0,
+          height: 16.0,
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 40.0),
-          child: Center(
+        Center(
+          child: TextButton(
+            onPressed: () {
+              Navigator.of(context).popUntil(
+                  (route) => route.settings.name == SpotFlowRouteName.homePage);
+              Navigator.of(context).pop();
+            },
+            style: TextButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4))),
             child: Text(
-              "A token should be sent to you within 6 minutes",
-              textAlign: TextAlign.center,
-              style: SpotFlowTextStyle.body14Regular.copyWith(
-                color: SpotFlowColors.tone60,
+              'Cancel payment',
+              style: SpotFlowTextStyle.body14SemiBold.copyWith(
+                color: SpotFlowColors.tone80,
               ),
-            ),
-          ),
-        ),
-        const SizedBox(
-          height: 29.0,
-        ),
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).popUntil(
-                (route) => route.settings.name == SpotFlowRouteName.homePage);
-            Navigator.of(context).pop();
-          },
-          style: TextButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(4))),
-          child: Text(
-            'Cancel',
-            style: SpotFlowTextStyle.body14SemiBold.copyWith(
-              color: SpotFlowColors.tone80,
             ),
           ),
         ),
         const Spacer(),
-        const PciDssIcon(),
+        const PoweredBySpotflowTag(),
         const SizedBox(
           height: 42.0,
         )

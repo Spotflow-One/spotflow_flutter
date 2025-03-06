@@ -7,6 +7,8 @@ class SpotFlowColors {
 
   static const tone50 = Color(0xFF86838A);
 
+  static const tone90 = Color(0xFF251F2D);
+
   SpotFlowColors._();
 
   static const primary5 = Color(0xFFF4F4FF);
@@ -30,6 +32,8 @@ class SpotFlowColors {
   static const tone60 = Color(0xFF6D6A73);
 
   static const tone80 = Color(0xFF3D3844);
+
+  static const tone100 = Color(0xFF0D0716);
 
   static const kcBaseWhite = Color(0xFFFFFFFF);
 

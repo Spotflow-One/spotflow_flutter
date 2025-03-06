@@ -3,8 +3,8 @@ import 'package:spotflow/gen/assets.gen.dart';
 import 'package:spotflow/src/ui/utils/spotflow_colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 
-class PciDssIcon extends StatelessWidget {
-  const PciDssIcon({super.key});
+class PciDssTag extends StatelessWidget {
+  const PciDssTag({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +22,34 @@ class PciDssIcon extends StatelessWidget {
           ),
         )
       ],
+    );
+  }
+}
+
+class PoweredBySpotflowTag extends StatelessWidget {
+  const PoweredBySpotflowTag({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: RichText(
+          textAlign: TextAlign.center,
+          text: const TextSpan(
+              text: 'Powered by ',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w400,
+                color: SpotFlowColors.tone60,
+              ),
+              children: [
+                TextSpan(
+                    text: 'Spotflow',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: SpotFlowColors.tone60,
+                    ))
+              ])),
     );
   }
 }

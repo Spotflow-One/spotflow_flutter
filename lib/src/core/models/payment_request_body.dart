@@ -13,6 +13,7 @@ class PaymentRequestBody {
   String? planId;
   CustomerInfo customer;
   Bank? bank;
+  MobileMoney? mobileMoney;
 
   PaymentRequestBody({
     required this.customer,
@@ -22,6 +23,7 @@ class PaymentRequestBody {
     this.planId,
     this.encryptedCard,
     this.bank,
+    this.mobileMoney,
   }) : reference = _generateReference();
 
   Map<String, dynamic> toJson() {
@@ -30,16 +32,19 @@ class PaymentRequestBody {
       'amount': amount,
       'currency': currency,
       'channel': channel,
+      'callbackUrl':"",
       if (encryptedCard != null) 'encryptedCard': encryptedCard,
       if (planId != null) 'planId': planId,
       'customer': customer.toJson(),
-      if (bank != null) "bank": bank!.toJson()
+      'metadata': {},
+      if (bank != null) "bank": bank!.toJson(),
+      if (mobileMoney != null) "mobileMoney": mobileMoney!.toJson(),
     };
   }
 
   static String _generateReference() {
     const uuid = Uuid();
-    return "ref-${uuid.v4()}";
+    return "ref-${uuid.v4().toUpperCase()}";
   }
 }
 
@@ -54,5 +59,22 @@ class Bank extends BaseModel {
 
   Map<String, dynamic> toJson() {
     return {"code": code};
+  }
+}
+
+class MobileMoney {
+  String phoneNumber;
+  String code;
+
+  MobileMoney({
+    required this.code,
+    required this.phoneNumber,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      "code": code,
+      "phoneNumber": phoneNumber,
+    };
   }
 }

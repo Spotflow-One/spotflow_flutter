@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spotflow/gen/assets.gen.dart';
 import 'package:spotflow/src/ui/utils/spotflow_colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 
@@ -25,12 +26,13 @@ class CardDropdownWidget extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: 16.0,
+          vertical: 8,
         ),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
-            color: SpotFlowColors.tone10,
-            width: 0.5,
+            color: SpotFlowColors.tone40,
+            width: 1,
           ),
         ),
         child: Row(
@@ -76,9 +78,11 @@ class CardDropdownWidget extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(
-              Icons.keyboard_arrow_down_rounded,
-              color: enabled ? Colors.black : Colors.grey,
+            Assets.svg.chevronDown.svg(
+              colorFilter: ColorFilter.mode(
+                enabled ? Colors.black : Colors.grey,
+                BlendMode.srcIn,
+              ),
             )
           ],
         ),

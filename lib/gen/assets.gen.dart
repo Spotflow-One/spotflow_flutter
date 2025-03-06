@@ -24,8 +24,25 @@ class $AssetsJsonGen {
 class $AssetsSvgGen {
   const $AssetsSvgGen();
 
+  /// File path: assets/svg/arrow-left.svg
+  SvgGenImage get arrowLeft => const SvgGenImage('assets/svg/arrow-left.svg');
+
+  /// File path: assets/svg/bank-card-fill.svg
+  SvgGenImage get bankCardFill =>
+      const SvgGenImage('assets/svg/bank-card-fill.svg');
+
+  /// File path: assets/svg/bank.svg
+  SvgGenImage get bank => const SvgGenImage('assets/svg/bank.svg');
+
+  /// File path: assets/svg/card.svg
+  SvgGenImage get card => const SvgGenImage('assets/svg/card.svg');
+
   /// File path: assets/svg/check-icon.svg
   SvgGenImage get checkIcon => const SvgGenImage('assets/svg/check-icon.svg');
+
+  /// File path: assets/svg/chevron-down.svg
+  SvgGenImage get chevronDown =>
+      const SvgGenImage('assets/svg/chevron-down.svg');
 
   /// File path: assets/svg/close-icon.svg
   SvgGenImage get closeIcon => const SvgGenImage('assets/svg/close-icon.svg');
@@ -41,19 +58,18 @@ class $AssetsSvgGen {
   SvgGenImage get greenCheckIcon =>
       const SvgGenImage('assets/svg/green-check-icon.svg');
 
+  /// File path: assets/svg/hashtag.svg
+  SvgGenImage get hashtag => const SvgGenImage('assets/svg/hashtag.svg');
+
+  /// File path: assets/svg/info-circle-black.svg
+  SvgGenImage get infoCircleBlack =>
+      const SvgGenImage('assets/svg/info-circle-black.svg');
+
   /// File path: assets/svg/info-circle.svg
   SvgGenImage get infoCircle => const SvgGenImage('assets/svg/info-circle.svg');
 
   /// File path: assets/svg/mobile.svg
   SvgGenImage get mobile => const SvgGenImage('assets/svg/mobile.svg');
-
-  /// File path: assets/svg/pay-with-card-icon.svg
-  SvgGenImage get payWithCardIcon =>
-      const SvgGenImage('assets/svg/pay-with-card-icon.svg');
-
-  /// File path: assets/svg/pay-with-transfer-icon.svg
-  SvgGenImage get payWithTransferIcon =>
-      const SvgGenImage('assets/svg/pay-with-transfer-icon.svg');
 
   /// File path: assets/svg/pay-with-usd-icon.svg
   SvgGenImage get payWithUsdIcon =>
@@ -62,27 +78,32 @@ class $AssetsSvgGen {
   /// File path: assets/svg/shield.svg
   SvgGenImage get shield => const SvgGenImage('assets/svg/shield.svg');
 
-  /// File path: assets/svg/ussd-icon.svg
-  SvgGenImage get ussdIcon => const SvgGenImage('assets/svg/ussd-icon.svg');
-
   /// File path: assets/svg/warning.svg
   SvgGenImage get warning => const SvgGenImage('assets/svg/warning.svg');
 
+  /// File path: assets/svg/x-close.svg
+  SvgGenImage get xClose => const SvgGenImage('assets/svg/x-close.svg');
+
   /// List of all assets
   List<SvgGenImage> get values => [
+        arrowLeft,
+        bankCardFill,
+        bank,
+        card,
         checkIcon,
+        chevronDown,
         closeIcon,
         copyIcon,
         dottedCircle,
         greenCheckIcon,
+        hashtag,
+        infoCircleBlack,
         infoCircle,
         mobile,
-        payWithCardIcon,
-        payWithTransferIcon,
         payWithUsdIcon,
         shield,
-        ussdIcon,
-        warning
+        warning,
+        xClose
       ];
 }
 

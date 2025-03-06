@@ -25,9 +25,11 @@ class MerchantConfig {
     return MerchantConfig(
       merchantLogo: json['merchantLogo'],
       merchantName: json['merchantName'],
-      paymentMethods: (json['paymentMethods'] as List)
-          .map<PaymentOptionsEnum?>((e) => PaymentOptionsEnum.fromString(e))
-          .toList(),
+      paymentMethods: (json['paymentMethods'] as List?)
+              ?.map<PaymentOptionsEnum?>(
+                  (e) => PaymentOptionsEnum.fromString(e))
+              .toList() ??
+          PaymentOptionsEnum.values,
       plan: json['plan'] == null ? null : SpotFlowPlan.fromJson(json['plan']),
       rate: Rate.fromJson(
         json['rate'],

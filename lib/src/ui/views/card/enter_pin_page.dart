@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
-import 'package:spotflow/gen/assets.gen.dart';
 import 'package:spotflow/spotflow.dart';
 import 'package:spotflow/src/core/models/authorize_payment_request_body.dart';
 import 'package:spotflow/src/core/services/payment_service.dart';
@@ -12,8 +11,8 @@ import 'package:spotflow/src/ui/utils/spot_flow_route_name.dart';
 import 'package:spotflow/src/ui/utils/spotflow_colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
+import 'package:spotflow/src/ui/widgets/dismissible_app_logo.dart';
 import 'package:spotflow/src/ui/widgets/payment_card.dart';
-import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
 import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 
 class EnterPinPage extends StatelessWidget {
@@ -29,11 +28,6 @@ class EnterPinPage extends StatelessWidget {
     return BaseScaffold(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          PaymentOptionsTile(
-            text: 'Pay with Card',
-            icon: Assets.svg.payWithCardIcon.svg(),
-          ),
-          const PaymentCard(),
           Expanded(
             child: _EnterPinPageUI(
               reference: reference,
@@ -65,36 +59,54 @@ class _EnterPinPageUIState extends State<_EnterPinPageUI> with CardsNavigation {
       );
     }
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 34.0,
-            vertical: 24,
+        const SizedBox(
+          height: 28,
+        ),
+        const DismissibleAppLogo(),
+        const SizedBox(
+          height: 32,
+        ),
+        const PaymentCard(),
+        const SizedBox(
+          height: 24,
+        ),
+        const Divider(
+          color: Color(0xFFF7F7F8),
+          height: 1,
+          thickness: 1,
+        ),
+        const SizedBox(
+          height: 24,
+        ),
+        Text(
+          "Please enter your 4-digit card pin to authorize this payment",
+          textAlign: TextAlign.start,
+          style: SpotFlowTextStyle.body16Regular.copyWith(
+            color: Colors.black,
           ),
-          child: Text(
-            "Please enter your 4-digit card pin to authorize this payment",
-            textAlign: TextAlign.center,
-            style: SpotFlowTextStyle.body14SemiBold.copyWith(
-              color: SpotFlowColors.tone70,
-            ),
-          ),
+        ),
+        const SizedBox(
+          height: 24,
         ),
         PinCodeTextField(
           appContext: context,
           length: 4,
+          obscureText: true,
           pinTheme: PinTheme(
             shape: PinCodeFieldShape.box,
-            borderRadius: BorderRadius.circular(4),
-            selectedBorderWidth: 0.5,
-            inactiveBorderWidth: 0.5,
-            activeBorderWidth: 0.5,
-            borderWidth: 0.5,
+            borderRadius: BorderRadius.circular(8),
+            selectedBorderWidth: 1,
+            inactiveBorderWidth: 1,
+            activeBorderWidth: 1,
+            borderWidth: 1,
             fieldHeight: 50,
             fieldWidth: 56,
             fieldOuterPadding: const EdgeInsets.all(9),
-            activeColor: SpotFlowColors.tone40,
-            inactiveColor: SpotFlowColors.tone10,
-            selectedColor: SpotFlowColors.tone40,
+            activeColor: SpotFlowColors.tone90,
+            inactiveColor: SpotFlowColors.tone90,
+            selectedColor: SpotFlowColors.tone90,
           ),
           onCompleted: (value) {
             _authorizePayment(paymentManager, value);
@@ -102,30 +114,32 @@ class _EnterPinPageUIState extends State<_EnterPinPageUI> with CardsNavigation {
           mainAxisAlignment: MainAxisAlignment.center,
           keyboardType: TextInputType.number,
         ),
-        const Spacer(),
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).popUntil(
-              (route) =>
-                  route.settings.name?.toLowerCase() ==
-                  SpotFlowRouteName.homePage,
-            );
-            Navigator.of(context).pop();
-          },
-          style: TextButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(4))),
-          child: Text(
-            'Cancel',
-            style: SpotFlowTextStyle.body14SemiBold.copyWith(
-              color: SpotFlowColors.tone80,
+        const SizedBox(
+          height: 36.5,
+        ),
+        Center(
+          child: TextButton(
+            onPressed: () {
+              Navigator.of(context).popUntil(
+                (route) =>
+                    route.settings.name?.toLowerCase() ==
+                    SpotFlowRouteName.homePage,
+              );
+              Navigator.of(context).pop();
+            },
+            style: TextButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4))),
+            child: Text(
+              'Cancel payment',
+              style: SpotFlowTextStyle.body14SemiBold.copyWith(
+                color: SpotFlowColors.tone80,
+              ),
             ),
           ),
         ),
-        const SizedBox(
-          height: 64,
-        ),
-        const PciDssIcon(),
+        const Spacer(),
+        const PoweredBySpotflowTag(),
         const SizedBox(
           height: 64,
         ),

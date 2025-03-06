@@ -39,7 +39,7 @@ class PaymentResponseBody {
   factory PaymentResponseBody.fromJson(Map<String, dynamic> json) =>
       PaymentResponseBody(
         id: json['id'] as String,
-        reference: json['reference'] as String,
+        reference: json['reference'],
         spotflowReference: json['spotflowReference'] as String,
         amount: json['amount'] as num,
         currency: json['currency'] as String,

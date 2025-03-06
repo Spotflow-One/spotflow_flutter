@@ -39,6 +39,7 @@ dependencies:
   spotflow:
     path: "../"
   country: ^4.1.8
+  webview_flutter: ^4.10.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

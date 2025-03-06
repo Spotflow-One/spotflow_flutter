@@ -34,9 +34,9 @@ class PaymentService {
   Future<Response> verifyPayment({
     required String reference,
   }) {
-    return apiClient.get(apiRoute.verifyPayment, queryParameters: {
-      "reference": reference,
-    });
+    return apiClient.get(
+      'https://dev-api.spotflow.co/api/v1/payments/verify?reference=$reference',
+    );
   }
 
   Future<Response> getBanks() {
@@ -44,16 +44,28 @@ class PaymentService {
         .get(apiRoute.getUssdBanks, queryParameters: {"ussd": true});
   }
 
-  Future<Response> getMerchantConfig({required String? planId}) async {
-    final response = await apiClient.get(
-      apiRoute.getMerchantConfig,
-      queryParameters: planId == null
-          ? {}
-          : {
-              "planId": planId,
-            },
-    );
+  Future<Response> getMobileMoneyProviders() {
+    return apiClient.get(apiRoute.mobileMoneyProviders);
+  }
 
+  Future<Response> getMerchantConfig(
+      {required String? planId, required String? currency}) async {
+    Map<String, dynamic> queryParams = {};
+    if (planId != null) {
+      queryParams['planId'] = planId;
+    }
+    if (currency != null) {
+      queryParams['currency'] = currency;
+    }
+    final response = await apiClient.get(apiRoute.getMerchantConfig,
+        queryParameters: queryParams);
+
+    return response;
+  }
+
+  Future<Response> getRate({required String from, required String to}) async {
+    final response = await apiClient
+        .get(apiRoute.fetchRate, queryParameters: {"from": from, "to": to});
     return response;
   }
 }

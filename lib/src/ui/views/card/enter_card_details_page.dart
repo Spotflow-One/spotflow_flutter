@@ -4,6 +4,7 @@ import 'package:credit_card_validator/credit_card_validator.dart';
 import 'package:dio/dio.dart';
 import 'package:encrypt/encrypt.dart';
 import 'package:flutter/material.dart' hide Key;
+import 'package:flutter/services.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:pattern_formatter/pattern_formatter.dart' as pf;
 import 'package:provider/provider.dart';
@@ -20,13 +21,12 @@ import 'package:spotflow/src/ui/utils/spotflow_colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/views/error_page.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
-import 'package:spotflow/src/ui/widgets/cancel_payment_button.dart';
-import 'package:spotflow/src/ui/widgets/change_payment_button.dart';
-import 'package:spotflow/src/ui/widgets/payment_card.dart';
+import 'package:spotflow/src/ui/widgets/dismissible_app_logo.dart';
 import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
 import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
+import 'package:spotflow/src/ui/widgets/primary_button.dart';
 
-import 'widgets/card_input_field.dart';
+import '../../widgets/payment_card.dart';
 
 class EnterCardDetailsPage extends StatelessWidget {
   final GestureTapCallback close;
@@ -41,11 +41,6 @@ class EnterCardDetailsPage extends StatelessWidget {
     return BaseScaffold(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        PaymentOptionsTile(
-          text: 'Pay with Card',
-          icon: Assets.svg.payWithCardIcon.svg(),
-        ),
-        const PaymentCard(),
         Expanded(
           child: _CardInputUI(
             close: close,
@@ -77,10 +72,16 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
 
   bool creatingPayment = false;
 
-  bool get validCard =>
-      _validCvv == true &&
-      _validExpiryDate == true &&
-      _validCreditCardNumber == true;
+  bool? get validCard {
+    if (_validCvv == null ||
+        _validExpiryDate == null ||
+        _validCreditCardNumber == null) {
+      return null;
+    }
+    return _validCvv == true &&
+        _validExpiryDate == true &&
+        _validCreditCardNumber == true;
+  }
 
   @override
   void dispose() {
@@ -113,14 +114,6 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
     final merchantConfig = context.watch<AppStateProvider>().merchantConfig;
     final paymentManager = context.watch<AppStateProvider>().paymentManager!;
     final amount = merchantConfig?.plan?.amount ?? paymentManager.amount;
-    String formattedAmount = "";
-    if (merchantConfig?.rate != null && amount != null) {
-      formattedAmount =
-          "${merchantConfig!.rate.from} ${(merchantConfig.rate.rate * amount).toStringAsFixed(2)}";
-    } else {
-      formattedAmount =
-          'Pay ${merchantConfig!.rate.from} ${amount?.toStringAsFixed(2) ?? ""}';
-    }
 
     if (creatingPayment) {
       return const Center(
@@ -128,114 +121,159 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
       );
     } else {
       return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(
-            height: 34.0,
-          ),
-          Center(
-            child: Text(
-              'Enter your card details to pay',
-              style: SpotFlowTextStyle.body16SemiBold.copyWith(
-                color: SpotFlowColors.tone70,
-              ),
-            ),
-          ),
-          const SizedBox(
-            height: 34,
-          ),
-          CardInputField(
-            labelText: 'CARD NUMBER',
-            hintText: '0000 0000 0000 0000',
-            validCard: _validCreditCardNumber,
-            onChanged: onCardNumberChanged,
-            textEditingController: cardNumberController,
-            inputFormatters: [pf.CreditCardFormatter()],
-          ),
           const SizedBox(
             height: 28,
           ),
-          Row(
-            children: [
-              Expanded(
-                child: CardInputField(
-                  labelText: 'CARD EXPIRY',
-                  hintText: 'MM/YY',
-                  validCard: _validExpiryDate,
-                  onChanged: onCardExpiryChanged,
-                  textEditingController: expiryController,
-                  inputFormatters: [
-                    CreditCardExpirationDateFormatter(),
-                  ],
-                ),
-              ),
-              const SizedBox(
-                width: 18.0,
-              ),
-              Expanded(
-                child: CardInputField(
-                  labelText: 'CVV',
-                  hintText: '123',
-                  textEditingController: cvvController,
-                  onChanged: onCardCvvChanged,
-                  validCard: _validCvv,
-                  inputFormatters: [
-                    CreditCardCvcInputFormatter(),
-                  ],
-                ),
-              ),
-            ],
+          const DismissibleAppLogo(),
+          const SizedBox(
+            height: 32,
+          ),
+          const PaymentCard(),
+          const SizedBox(
+            height: 24,
+          ),
+          const Divider(
+            color: Color(0xFFF7F7F8),
+            height: 1,
+            thickness: 1,
           ),
           const SizedBox(
-            height: 28.0,
+            height: 24,
           ),
-          InkWell(
+          Text(
+            'Selected payment method',
+            style: SpotFlowTextStyle.body14SemiBold.copyWith(
+              color: SpotFlowColors.tone70,
+            ),
+          ),
+          const SizedBox(
+            height: 12,
+          ),
+          PaymentOptionsTile(
+            icon: PaymentOptionsEnum.card.icon,
+            text: PaymentOptionsEnum.card.title,
+            onTap: () {},
+          ),
+          const SizedBox(
+            height: 16.0,
+          ),
+          const Divider(
+            color: Color(0xFFF7F7F8),
+            height: 1,
+            thickness: 1,
+          ),
+          const SizedBox(
+            height: 32,
+          ),
+          Text(
+            'Enter your card details to pay',
+            style: SpotFlowTextStyle.body14SemiBold.copyWith(
+              color: SpotFlowColors.tone70,
+            ),
+          ),
+          const SizedBox(
+            height: 12,
+          ),
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 13, 16, 17),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: validCard == false
+                    ? const Color(0xFFD62020)
+                    : SpotFlowColors.tone40,
+                width: 1,
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 4.0, right: 8),
+                  child: Assets.svg.bankCardFill.svg(),
+                ),
+                Expanded(
+                  flex: 5,
+                  child: InputField(
+                    hintText: 'Card number',
+                    validInput: _validCreditCardNumber,
+                    onChanged: onCardNumberChanged,
+                    textEditingController: cardNumberController,
+                    inputFormatters: [pf.CreditCardFormatter()],
+                  ),
+                ),
+                const SizedBox(
+                  width: 16,
+                ),
+                Expanded(
+                  flex: 2,
+                  child: InputField(
+                    hintText: 'MM/YY',
+                    validInput: _validExpiryDate,
+                    onChanged: onCardExpiryChanged,
+                    textEditingController: expiryController,
+                    inputFormatters: [
+                      CreditCardExpirationDateFormatter(),
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  width: 16,
+                ),
+                Expanded(
+                  flex: 1,
+                  child: InputField(
+                    hintText: 'CVV',
+                    textEditingController: cvvController,
+                    onChanged: onCardCvvChanged,
+                    validInput: _validCvv,
+                    inputFormatters: [
+                      CreditCardCvcInputFormatter(),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(
+            height: 16,
+          ),
+          PrimaryButton(
             onTap: () {
               context.read<AppStateProvider>().trackEvent('input_cardDetails');
               if (amount != null) {
-                if (validCard) {
+                if (validCard == true) {
                   _createPayment(
-                      paymentManager, merchantConfig.rate.from, amount);
+                      paymentManager, merchantConfig!.rate.from, amount);
                 } else {
                   _validateCreditCard();
                 }
               }
             },
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                vertical: 13,
-              ),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: SpotFlowColors.primaryBase,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                validCard != true ? "Validate Card" : 'Pay $formattedAmount',
-                style: SpotFlowTextStyle.body14SemiBold
-                    .copyWith(color: SpotFlowColors.kcBaseWhite),
-              ),
-            ),
+            text: 'Continue',
           ),
           const SizedBox(
-            height: 60,
+            height: 16,
           ),
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Expanded(
-                child: ChangePaymentButton(),
-              ),
+              Assets.svg.shield.svg(),
               const SizedBox(
-                width: 18.0,
+                width: 2,
               ),
-              Expanded(
-                child: CancelPaymentButton(
-                  close: widget.close,
+              Text(
+                "PCI DSS Certified",
+                style: SpotFlowTextStyle.body10Regular.copyWith(
+                  color: SpotFlowColors.tone40,
                 ),
-              ),
+              )
             ],
           ),
           const Spacer(),
-          const PciDssIcon(),
+          const PoweredBySpotflowTag(),
           const SizedBox(
             height: 32,
           )
@@ -289,7 +327,7 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
         message = data['message'];
       }
       if (mounted) {
-        Navigator.of(context).push(
+        Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (context) => ErrorPage(
                 message: message ?? "Couldn't process your payment",
@@ -389,5 +427,53 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
     final authTagBase64 = base64.encode(authTag);
 
     return '$ivBase64$encryptedBase64$authTagBase64';
+  }
+}
+
+class InputField extends StatelessWidget {
+  final String? hintText;
+  final List<TextInputFormatter>? inputFormatters;
+  final TextEditingController? textEditingController;
+  final ValueChanged<String>? onChanged;
+  final TextInputType? textInputType;
+  final bool? validInput;
+
+  const InputField({
+    super.key,
+    this.hintText,
+    this.inputFormatters,
+    this.textEditingController,
+    this.onChanged,
+    this.textInputType,
+    this.validInput,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      inputFormatters: inputFormatters,
+      controller: textEditingController,
+      onChanged: onChanged,
+      maxLines: 1,
+      keyboardType: textInputType,
+      style: SpotFlowTextStyle.body14SemiBold.copyWith(
+        color: validInput == false
+            ? const Color(0xFFD62020)
+            : SpotFlowColors.tone100,
+      ),
+      decoration: InputDecoration(
+        hintText: hintText,
+        isCollapsed: true,
+        hintStyle: SpotFlowTextStyle.body14SemiBold.copyWith(
+          color: SpotFlowColors.tone100,
+        ),
+        fillColor: Colors.transparent,
+        filled: true,
+        contentPadding: EdgeInsets.zero,
+        focusedBorder: InputBorder.none,
+        enabledBorder: InputBorder.none,
+        border: InputBorder.none,
+      ),
+    );
   }
 }

@@ -53,8 +53,9 @@ class _MyHomePageState extends State<MyHomePage> {
         paymentDescription: paymentDescriptionController.text,
         planId: planIdController.text,
         amount: num.tryParse(amountController.text) ?? 5,
+        currency: currencyController.text,
         appLogo: Image.asset(
-          'assets/images/nba-logo.png',
+          'assets/images/audiomack-logo.png',
         ),
       ),
     );
@@ -64,13 +65,16 @@ class _MyHomePageState extends State<MyHomePage> {
       TextEditingController(text: "jon@snow.com"); //
 
   TextEditingController encryptionKeyController =
-      TextEditingController(text: ""); //
+      TextEditingController(text: "Q/9fnIMSas3xdWRSBtCreOS23zR2VbNki7yM5RJe43I=");
+  TextEditingController currencyController =
+      TextEditingController(text: "NGN");
+
   TextEditingController planIdController = TextEditingController(text: ""); //
   TextEditingController merchantKeyController =
-      TextEditingController(text: ""); //
+      TextEditingController(text: "sk_test_4539c64329d54fbc967230869373bfe0"); //
   TextEditingController paymentDescriptionController =
-      TextEditingController(text: "League Pass");
-  TextEditingController amountController = TextEditingController(text: "5");
+      TextEditingController(text: "Audiomack Premium Subscription");
+  TextEditingController amountController = TextEditingController(text: "1000");
 
   @override
   Widget build(BuildContext context) {
@@ -139,6 +143,18 @@ class _MyHomePageState extends State<MyHomePage> {
                   height: 16,
                 ),
                 TextField(
+                  controller: currencyController,
+                  decoration: const InputDecoration(
+                    hintText: 'currency',
+                    border: OutlineInputBorder(),
+                    enabledBorder: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                TextField(
                   controller: encryptionKeyController,
                   decoration: const InputDecoration(
                     hintText: 'encryption key',
@@ -177,37 +193,37 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    if (emailController.text.isEmpty ||
-                        merchantKeyController.text.isEmpty ||
-                        encryptionKeyController.text.isEmpty) {
-                      const snackBar = SnackBar(
-                        backgroundColor: Colors.red,
-                        content: Text(
-                          'Please enter all required fields',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                          ),
-                        ),
-                      );
-                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                      return;
-                    }
-                    if (amountController.text.isEmpty &&
-                        planIdController.text.isEmpty) {
-                      const snackBar = SnackBar(
-                        backgroundColor: Colors.red,
-                        content: Text(
-                          'please add either an amount or a plan id',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                          ),
-                        ),
-                      );
-                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                      return;
-                    }
+                    // if (emailController.text.isEmpty ||
+                    //     merchantKeyController.text.isEmpty ||
+                    //     encryptionKeyController.text.isEmpty) {
+                    //   const snackBar = SnackBar(
+                    //     backgroundColor: Colors.red,
+                    //     content: Text(
+                    //       'Please enter all required fields',
+                    //       style: TextStyle(
+                    //         color: Colors.white,
+                    //         fontSize: 15,
+                    //       ),
+                    //     ),
+                    //   );
+                    //   ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    //   return;
+                    // }
+                    // if (amountController.text.isEmpty &&
+                    //     planIdController.text.isEmpty) {
+                    //   const snackBar = SnackBar(
+                    //     backgroundColor: Colors.red,
+                    //     content: Text(
+                    //       'please add either an amount or a plan id',
+                    //       style: TextStyle(
+                    //         color: Colors.white,
+                    //         fontSize: 15,
+                    //       ),
+                    //     ),
+                    //   );
+                    //   ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    //   return;
+                    // }
 
                     _startPayment();
                   },

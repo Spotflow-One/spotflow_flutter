@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spotflow/gen/assets.gen.dart';
+import 'package:spotflow/src/core/models/payment_options_enum.dart';
 import 'package:spotflow/src/core/models/payment_request_body.dart';
 import 'package:spotflow/src/core/services/payment_service.dart';
 import 'package:spotflow/src/ui/app_state_provider.dart';
@@ -12,10 +13,11 @@ import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/views/card/widgets/bottom_sheet_with_search.dart';
 import 'package:spotflow/src/ui/views/ussd/copy_ussd_page.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
-import 'package:spotflow/src/ui/widgets/cancel_payment_button.dart';
-import 'package:spotflow/src/ui/widgets/change_payment_button.dart';
+import 'package:spotflow/src/ui/widgets/dismissible_app_logo.dart';
 import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
 import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
+import 'package:spotflow/src/ui/widgets/primary_button.dart';
+import 'package:spotflow/src/ui/widgets/user_and_rate_information_card.dart';
 
 import '../../widgets/payment_card.dart';
 
@@ -39,18 +41,55 @@ class _ViewBanksUssdPageState extends State<ViewBanksUssdPage> {
   @override
   Widget build(BuildContext context) {
     return BaseScaffold(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        PaymentOptionsTile(
-          icon: Assets.svg.payWithUsdIcon.svg(),
-          text: 'Pay with USSD',
+        const SizedBox(
+          height: 28,
+        ),
+        const DismissibleAppLogo(),
+        const SizedBox(
+          height: 24,
+        ),
+        const UserAndRateInformationCard(),
+        const SizedBox(
+          height: 32,
         ),
         const PaymentCard(),
         const SizedBox(
-          height: 70,
+          height: 24,
         ),
-        Assets.svg.ussdIcon.svg(),
+        const Divider(
+          color: Color(0xFFF7F7F8),
+          height: 1,
+          thickness: 1,
+        ),
         const SizedBox(
-          height: 9.0,
+          height: 24,
+        ),
+        Text(
+          'Selected payment method',
+          style: SpotFlowTextStyle.body14SemiBold.copyWith(
+            color: SpotFlowColors.tone70,
+          ),
+        ),
+        const SizedBox(
+          height: 12,
+        ),
+        PaymentOptionsTile(
+          icon: PaymentOptionsEnum.ussd.icon,
+          text: PaymentOptionsEnum.ussd.title,
+          onTap: () {},
+        ),
+        const SizedBox(
+          height: 16.0,
+        ),
+        const Divider(
+          color: Color(0xFFF7F7F8),
+          height: 1,
+          thickness: 1,
+        ),
+        const SizedBox(
+          height: 32.0,
         ),
         if (loading) ...[
           const Expanded(
@@ -60,11 +99,14 @@ class _ViewBanksUssdPageState extends State<ViewBanksUssdPage> {
           )
         ] else ...[
           Text(
-            'Choose your bank to start the payment',
-            style: SpotFlowTextStyle.body16SemiBold,
+            'Please choose your bank to begin payment',
+            style: SpotFlowTextStyle.body16SemiBold.copyWith(
+              fontWeight: FontWeight.w700,
+              color: SpotFlowColors.tone70,
+            ),
           ),
           const SizedBox(
-            height: 70,
+            height: 16,
           ),
           InkWell(
             onTap: () {
@@ -73,7 +115,7 @@ class _ViewBanksUssdPageState extends State<ViewBanksUssdPage> {
             child: Container(
               padding: const EdgeInsets.symmetric(
                 horizontal: 16.0,
-                vertical: 15.0,
+                vertical: 8.0,
               ),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8.0),
@@ -84,55 +126,44 @@ class _ViewBanksUssdPageState extends State<ViewBanksUssdPage> {
               ),
               child: Row(
                 children: [
-                  Text(
-                    bank?.name ?? "Select bank",
-                    style: SpotFlowTextStyle.body14SemiBold.copyWith(
-                      color: bank == null
-                          ? SpotFlowColors.tone40
-                          : SpotFlowColors.tone70,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Bank",
+                          style: SpotFlowTextStyle.body12Regular
+                              .copyWith(color: SpotFlowColors.tone40),
+                        ),
+                        const SizedBox(
+                          height: 4,
+                        ),
+                        Text(
+                          bank?.name ?? "Select your bank",
+                          style: SpotFlowTextStyle.body14Regular.copyWith(
+                            color: bank == null
+                                ? SpotFlowColors.tone40
+                                : SpotFlowColors.tone70,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const Spacer(),
-                  // Container(
-                  //   padding: const EdgeInsets.symmetric(
-                  //     horizontal: 7.0,
-                  //     vertical: 2.0,
-                  //   ),
-                  //   decoration: BoxDecoration(
-                  //     color: const Color(0xFFCCCCE8),
-                  //     borderRadius: BorderRadius.circular(6),
-                  //   ),
-                  //   child: Text(
-                  //     '*329#',
-                  //     style: SpotFlowTextStyle.body14SemiBold.copyWith(
-                  //       color: SpotFlowColors.tone60,
-                  //     ),
-                  //   ),
-                  // )
+                  Assets.svg.chevronDown.svg(),
                 ],
               ),
             ),
           ),
-          const Spacer(),
-          Row(
-            children: [
-              const Expanded(
-                child: ChangePaymentButton(),
-              ),
-              const SizedBox(
-                width: 18.0,
-              ),
-              Expanded(
-                child: CancelPaymentButton(
-                  close: widget.close,
-                ),
-              ),
-            ],
-          ),
           const SizedBox(
-            height: 32,
+            height: 16,
           ),
-          const PciDssIcon(),
+          PrimaryButton(
+              text: 'Pay',
+              onTap: () {
+                _toCopyPage();
+              }),
+          const Spacer(),
+          const PoweredBySpotflowTag(),
           const SizedBox(
             height: 38,
           )
@@ -183,11 +214,6 @@ class _ViewBanksUssdPageState extends State<ViewBanksUssdPage> {
             setState(() {
               this.bank = bank as Bank;
             });
-            timer?.cancel();
-            timer = Timer(
-              const Duration(seconds: 1),
-              _toCopyPage,
-            );
           },
         );
       },
@@ -198,7 +224,7 @@ class _ViewBanksUssdPageState extends State<ViewBanksUssdPage> {
     if (mounted == false || bank == null) {
       return;
     }
-    Navigator.of(context).push(
+    Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => CopyUssdPage(
           bank: bank!,

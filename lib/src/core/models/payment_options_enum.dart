@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:spotflow/gen/assets.gen.dart';
+import 'package:spotflow/src/ui/utils/spotflow_colors.dart';
 
 enum PaymentOptionsEnum {
   card,
@@ -25,13 +26,15 @@ extension Helpers on PaymentOptionsEnum {
   Widget get icon {
     switch (this) {
       case PaymentOptionsEnum.card:
-        return Assets.svg.payWithCardIcon.svg();
+        return Assets.svg.card.svg();
       case PaymentOptionsEnum.transfer:
-        return Assets.svg.payWithTransferIcon.svg();
+        return Assets.svg.bank.svg();
       case PaymentOptionsEnum.ussd:
-        return Assets.svg.payWithTransferIcon.svg();
+        return Assets.svg.hashtag.svg();
       case PaymentOptionsEnum.mobileMoney:
-        return Assets.svg.mobile.svg();
+        return Assets.svg.mobile.svg(
+            colorFilter: const ColorFilter.mode(
+                SpotFlowColors.tone100, BlendMode.srcIn));
     }
   }
 

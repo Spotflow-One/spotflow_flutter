@@ -7,9 +7,10 @@ import 'package:spotflow/src/ui/utils/spot_flow_route_name.dart';
 import 'package:spotflow/src/ui/utils/spotflow_colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
+import 'package:spotflow/src/ui/widgets/dismissible_app_logo.dart';
 import 'package:spotflow/src/ui/widgets/payment_card.dart';
-import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
 import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
+import 'package:spotflow/src/ui/widgets/primary_button.dart';
 
 class ErrorPage extends StatefulWidget {
   final String message;
@@ -28,34 +29,31 @@ class ErrorPage extends StatefulWidget {
 class _ErrorPageState extends State<ErrorPage> {
   @override
   Widget build(BuildContext context) {
-    final merchantConfig = context.read<AppStateProvider>().merchantConfig;
-
-    final buttonStyle = TextButton.styleFrom(
-      padding: const EdgeInsets.symmetric(
-        vertical: 16,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: const BorderSide(
-          color: Color(0xFFC0B5CF),
-          width: 1.0,
-        ),
-      ),
-    );
     return BaseScaffold(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        PaymentOptionsTile(
-          text: widget.paymentOptionsEnum.title,
-          icon: widget.paymentOptionsEnum.icon,
+        const SizedBox(
+          height: 28,
+        ),
+        const DismissibleAppLogo(),
+        const SizedBox(
+          height: 32,
         ),
         const PaymentCard(),
         const SizedBox(
-          height: 49,
+          height: 24,
         ),
-        Assets.svg.warning.svg(),
+        const Divider(
+          color: Color(0xFFF7F7F8),
+          height: 1,
+          thickness: 1,
+        ),
+        Assets.svg.closeIcon.svg(
+          height: 34,
+          width: 34,
+        ),
         const SizedBox(
-          height: 6,
+          height: 24,
         ),
         Text(
           widget.message,
@@ -65,73 +63,65 @@ class _ErrorPageState extends State<ErrorPage> {
           ),
         ),
         const SizedBox(
-          height: 60.0,
+          height: 32.0,
         ),
-        if (merchantConfig?.paymentMethods.contains(PaymentOptionsEnum.card) ==
-            true) ...[
-          TextButton(
-            onPressed: () {
-              Navigator.of(context)
-                  .pushReplacementNamed(SpotFlowRouteName.enterCardDetailsPage);
-              context.read<AppStateProvider>().trackEvent('payment_retry');
-            },
-            style: buttonStyle,
-            child: Text(
-              'Try again with your card',
-              style: SpotFlowTextStyle.body14Regular.copyWith(
-                color: SpotFlowColors.tone70,
-              ),
+        if (widget.paymentOptionsEnum == PaymentOptionsEnum.card) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 90.0),
+            child: PrimaryButton(
+              onTap: () {
+                Navigator.of(context).pushReplacementNamed(
+                    SpotFlowRouteName.enterCardDetailsPage);
+                context.read<AppStateProvider>().trackEvent('payment_retry');
+              },
+              text: 'Try another card',
             ),
           ),
           const SizedBox(
             height: 16,
           ),
-        ],
-        if (merchantConfig?.paymentMethods
-                .contains(PaymentOptionsEnum.transfer) ==
-            true) ...[
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pushReplacementNamed(
-                SpotFlowRouteName.viewBankDetailsPage,
-              );
-              context.read<AppStateProvider>().trackEvent('payment_retry');
-            },
-            style: buttonStyle,
-            child: Text(
-              'Try again with transfer',
-              style: SpotFlowTextStyle.body14Regular.copyWith(
-                color: SpotFlowColors.tone70,
-              ),
-            ),
-          ),
-          const SizedBox(
-            height: 16,
-          ),
-        ],
-        if (merchantConfig?.paymentMethods.contains(PaymentOptionsEnum.ussd) ==
-            true) ...[
-          TextButton(
-            onPressed: () {
-              context.read<AppStateProvider>().trackEvent('payment_retry');
+        ] else if (widget.paymentOptionsEnum ==
+            PaymentOptionsEnum.transfer) ...[
 
-              Navigator.of(context)
-                  .pushReplacementNamed(SpotFlowRouteName.viewBanksUssdPage);
-            },
-            style: buttonStyle,
-            child: Text(
-              'Try again with USSD',
-              style: SpotFlowTextStyle.body14Regular.copyWith(
-                color: SpotFlowColors.tone70,
-              ),
+
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 90.0),
+            child: PrimaryButton(
+              onTap: () {
+                Navigator.of(context).pop();
+                context.read<AppStateProvider>().trackEvent('payment_retry');
+              },
+              text: 'Try again',
             ),
           ),
-          const SizedBox(
-            height: 16,
+        ] else if (widget.paymentOptionsEnum == PaymentOptionsEnum.ussd) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 90.0),
+            child: PrimaryButton(
+              onTap: () {
+                context.read<AppStateProvider>().trackEvent('payment_retry');
+
+                Navigator.of(context)
+                    .pushReplacementNamed(SpotFlowRouteName.viewBanksUssdPage);
+              },
+              text: 'Try again',
+            ),
+          ),
+        ] else ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 90.0),
+            child: PrimaryButton(
+              onTap: () {
+                context.read<AppStateProvider>().trackEvent('payment_retry');
+
+                Navigator.of(context).pop();
+              },
+              text: 'Try again',
+            ),
           ),
         ],
         const Spacer(),
-        const PciDssIcon(),
+        const PoweredBySpotflowTag(),
         const SizedBox(
           height: 32,
         )

@@ -15,14 +15,13 @@ dependencies:
   flutter_multi_formatter: ^2.12.8
   flutter_svg: ^2.0.10+1
   pin_code_fields: ^8.0.1
-  simple_ripple_animation: ^0.0.9
   uuid: ^4.4.2
   encrypt: ^5.0.3
   pattern_formatter: ^4.0.0
   provider: ^6.1.2
   vector_graphics: ^1.1.11+1
   webview_flutter: ^4.8.0
-  mixpanel_flutter: ^2.3.3
+#  mixpanel_flutter: ^2.3.3
 
 
 

@@ -13,10 +13,10 @@ import 'package:spotflow/src/ui/views/mobile/enter_mobile_money_details.dart';
 import 'package:spotflow/src/ui/views/transfer/view_bank_details_page.dart';
 import 'package:spotflow/src/ui/views/ussd/view_banks_ussd_page.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
-import 'package:spotflow/src/ui/widgets/cancel_payment_button.dart';
+import 'package:spotflow/src/ui/widgets/dismissible_app_logo.dart';
 import 'package:spotflow/src/ui/widgets/payment_card.dart';
 import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
-import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
+import 'package:spotflow/src/ui/widgets/user_and_rate_information_card.dart';
 
 class HomePage extends StatefulWidget {
   final SpotFlowPaymentManager paymentManager;
@@ -37,6 +37,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return BaseScaffold(
       crossAxisAlignment: CrossAxisAlignment.start,
+      onClose: widget.closeSpotFlow,
       children: [
         if (fetchingConfig) ...[
           const Expanded(
@@ -85,11 +86,21 @@ class _HomePageState extends State<HomePage> {
     });
     try {
       final paymentService = PaymentService(
-          widget.paymentManager.key, widget.paymentManager.debugMode);
-      var response = await paymentService.getMerchantConfig(
-        planId: widget.paymentManager.planId,
+        widget.paymentManager.key,
+        widget.paymentManager.debugMode,
       );
+      final futures = await Future.wait([
+        paymentService.getMerchantConfig(
+          planId: widget.paymentManager.planId,
+          currency: widget.paymentManager.currency,
+        ),
+        paymentService.getRate(to: 'USD', from: widget.paymentManager.currency)
+      ]);
+      var response = futures.first;
+
+      final rate = Rate.fromJson(futures[1].data);
       merchantConfig = MerchantConfig.fromJson(response.data);
+      merchantConfig?.rate = rate;
       if (mounted) {
         context.read<AppStateProvider>().setMerchantConfig(merchantConfig!);
       }
@@ -114,65 +125,46 @@ class _HomePageUi extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final merchantConfig = context.read<AppStateProvider>().merchantConfig;
-    final paymentManager = context.read<AppStateProvider>().paymentManager;
-    final amount = merchantConfig?.plan?.amount ?? paymentManager?.amount;
-    String toFormattedAmount = "";
-    final rate = merchantConfig?.rate;
-
-    if (rate != null && amount != null) {
-      toFormattedAmount =
-          "${rate.from}${(rate.rate * amount).toStringAsFixed(2)}";
-    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(
-          height: 34,
+          height: 28,
+        ),
+        const DismissibleAppLogo(),
+        const SizedBox(
+          height: 24,
+        ),
+        const UserAndRateInformationCard(),
+        const SizedBox(
+          height: 32,
         ),
         const PaymentCard(),
         const SizedBox(
-          height: 27,
+          height: 24,
         ),
-        if (rate != null) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5.0),
-            child: Text(
-              'Use one of the payment methods below to pay $toFormattedAmount to Spotflow',
-              style: SpotFlowTextStyle.body12Regular.copyWith(
-                color: SpotFlowColors.tone40,
-              ),
-            ),
-          ),
-        ],
-        Padding(
-          padding: const EdgeInsets.only(left: 22.0, top: 60.0),
-          child: Text(
-            'PAYMENT OPTIONS',
-            style: SpotFlowTextStyle.body16SemiBold.copyWith(
-              color: SpotFlowColors.tone60,
-            ),
+        const Divider(
+          color: Color(0xFFF7F7F8),
+        ),
+        const SizedBox(
+          height: 24,
+        ),
+        Text(
+          'Select your preferred payment method',
+          style: SpotFlowTextStyle.body14SemiBold.copyWith(
+            color: SpotFlowColors.tone70,
           ),
         ),
         const SizedBox(
-          height: 10.5,
-        ),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 4.0),
-          child: Divider(
-            thickness: 0.5,
-            color: SpotFlowColors.tone10,
-          ),
+          height: 8,
         ),
         if (merchantConfig?.paymentMethods != null) ...[
-          ...PaymentOptionsEnum.values.map((e) {
-            if (e == null) {
-              return const SizedBox();
-            }
+          ...merchantConfig!.paymentMethods.map((e) {
             return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 3.0),
-              child: PaymentOptionsTile(
-                icon: e.icon,
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: HomePaymentOptionsTile(
+                icon: e!.icon,
                 text: e.title,
                 onTap: () {
                   switch (e) {
@@ -200,18 +192,10 @@ class _HomePageUi extends StatelessWidget {
           }),
         ],
         const SizedBox(
-          height: 40,
+          height: 8,
         ),
-        Center(
-          child: CancelPaymentButton(
-            alignment: null,
-            close: closeSpotFlow,
-          ),
-        ),
-        const Spacer(),
-        const PciDssIcon(),
-        const SizedBox(
-          height: 32,
+        const Divider(
+          color: Color(0xFFF7F7F8),
         )
       ],
     );

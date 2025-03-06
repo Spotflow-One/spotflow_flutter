@@ -11,15 +11,15 @@ import 'package:spotflow/src/ui/app_state_provider.dart';
 import 'package:spotflow/src/ui/utils/spotflow_colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/views/error_page.dart';
-import 'package:spotflow/src/ui/views/transfer/transfer_error_page.dart';
-import 'package:spotflow/src/ui/views/transfer/transfer_info_page.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
-import 'package:spotflow/src/ui/widgets/cancel_payment_button.dart';
-import 'package:spotflow/src/ui/widgets/change_payment_button.dart';
+import 'package:spotflow/src/ui/widgets/dismissible_app_logo.dart';
 import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
 import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
+import 'package:spotflow/src/ui/widgets/primary_button.dart';
+import 'package:spotflow/src/ui/widgets/user_and_rate_information_card.dart';
 
 import '../../widgets/payment_card.dart';
+import 'transfer_status_check_page.dart';
 
 class ViewBankDetailsPage extends StatelessWidget {
   final PaymentResponseBody? paymentResponseBody;
@@ -39,10 +39,6 @@ class ViewBankDetailsPage extends StatelessWidget {
           right: 23,
         ),
         children: [
-          PaymentOptionsTile(
-            icon: Assets.svg.payWithTransferIcon.svg(),
-            text: 'Pay with transfer',
-          ),
           Expanded(
             child: _ViewBankDetailsUi(
               paymentResponseBody: paymentResponseBody,
@@ -105,6 +101,7 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
   @override
   Widget build(BuildContext context) {
     final merchantConfig = context.read<AppStateProvider>().merchantConfig;
+
     if (initiatingPayment) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -129,271 +126,264 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
       );
     }
 
-    final rate = paymentResponseBody!.rate;
     final amount = paymentResponseBody?.amount;
     String? formattedAmount;
     String? totalAmount;
     if (amount != null) {
-      totalAmount = (rate! * amount).toStringAsFixed(2);
+      totalAmount = (amount).toStringAsFixed(2);
       formattedAmount = "${merchantConfig.rate.from} $totalAmount";
     }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const PaymentCard(),
-        const SizedBox(
-          height: 20,
-        ),
-        Center(
-          child: Text(
-            'Transfer ${formattedAmount ?? ""} to the details below',
-            style: SpotFlowTextStyle.body16SemiBold.copyWith(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(
+            height: 28,
+          ),
+          const DismissibleAppLogo(),
+          const SizedBox(
+            height: 24,
+          ),
+          const UserAndRateInformationCard(),
+          const SizedBox(
+            height: 32,
+          ),
+          const PaymentCard(),
+          const SizedBox(
+            height: 24,
+          ),
+          const Divider(
+            color: Color(0xFFF7F7F8),
+            height: 1,
+            thickness: 1,
+          ),
+          const SizedBox(
+            height: 24,
+          ),
+          Text(
+            'Selected payment method',
+            style: SpotFlowTextStyle.body14SemiBold.copyWith(
               color: SpotFlowColors.tone70,
             ),
           ),
-        ),
-        const SizedBox(
-          height: 20,
-        ),
-        Container(
-          padding: const EdgeInsets.fromLTRB(25, 20, 25, 27),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF4F4FF),
-            borderRadius: BorderRadius.circular(6),
+          const SizedBox(
+            height: 12,
           ),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "BANK NAME",
-                        style: SpotFlowTextStyle.body10Regular.copyWith(
-                          color: SpotFlowColors.tone60,
-                        ),
-                      ),
-                      Text(
-                        paymentResponseBody!.bankDetails?.name ?? "",
-                        style: SpotFlowTextStyle.body14Regular.copyWith(
-                          color: SpotFlowColors.tone80,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "ACCOUNT NUMBER",
-                        style: SpotFlowTextStyle.body10Regular.copyWith(
-                          color: SpotFlowColors.tone60,
-                        ),
-                      ),
-                      Text(
-                        paymentResponseBody?.bankDetails?.accountNumber ?? "",
-                        style: SpotFlowTextStyle.body14Regular.copyWith(
-                          color: SpotFlowColors.tone80,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Spacer(),
-                  InkWell(
-                    onTap: () {
-                      Clipboard.setData(
-                        ClipboardData(
-                          text:
-                              paymentResponseBody?.bankDetails?.accountNumber ??
-                                  "",
-                        ),
-                      );
-
-                      context
-                          .read<AppStateProvider>()
-                          .trackEvent('copy_transferBank');
-                    },
-                    child: Assets.svg.copyIcon.svg(
-                      colorFilter: const ColorFilter.mode(
-                        SpotFlowColors.primary50,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                  )
-                ],
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "AMOUNT",
-                        style: SpotFlowTextStyle.body10Regular.copyWith(
-                          color: SpotFlowColors.tone60,
-                        ),
-                      ),
-                      Text(
-                        formattedAmount ?? "",
-                        style: SpotFlowTextStyle.body14Regular.copyWith(
-                          color: SpotFlowColors.tone80,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Spacer(),
-                  InkWell(
-                    onTap: () {
-                      context
-                          .read<AppStateProvider>()
-                          .trackEvent('copy_transferAmount');
-                      Clipboard.setData(
-                        ClipboardData(
-                          text: totalAmount ?? "",
-                        ),
-                      );
-                    },
-                    child: Assets.svg.copyIcon.svg(
-                      colorFilter: const ColorFilter.mode(
-                        SpotFlowColors.primary50,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                  )
-                ],
-              ),
-            ],
+          PaymentOptionsTile(
+            icon: PaymentOptionsEnum.transfer.icon,
+            text: PaymentOptionsEnum.transfer.title,
+            onTap: () {},
           ),
-        ),
-        const SizedBox(
-          height: 18,
-        ),
-        Center(
-          child: SizedBox.square(
-            dimension: 50,
-            child: Stack(
-              alignment: Alignment.center,
-              fit: StackFit.expand,
-              children: [
-                CircularProgressIndicator(
-                  value: _animation.value,
-                  backgroundColor: const Color(0xFFE1E0F1),
-                  valueColor: const AlwaysStoppedAnimation<Color>(
-                      SpotFlowColors.primaryBase),
-                  strokeCap: StrokeCap.round,
-                ),
-                Center(
-                  child: Assets.svg.payWithTransferIcon.svg(
-                    height: 22,
-                    width: 22,
-                    colorFilter: const ColorFilter.mode(
-                      SpotFlowColors.greenBase,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+          const SizedBox(
+            height: 16.0,
           ),
-        ),
-        const SizedBox(
-          height: 12,
-        ),
-        Center(
-          child: RichText(
-            text: TextSpan(
-              text: 'Expires in ',
-              style: SpotFlowTextStyle.body14Regular.copyWith(
-                color: SpotFlowColors.tone30,
-              ),
-              children: [
-                TextSpan(
-                  text: _remainingTime,
-                  style: SpotFlowTextStyle.body14Regular.copyWith(
-                    color: SpotFlowColors.greenBase,
-                  ),
-                ),
-              ],
-            ),
+          const Divider(
+            color: Color(0xFFF7F7F8),
+            height: 1,
+            thickness: 1,
           ),
-        ),
-        const Spacer(),
-        const SizedBox(
-          height: 16,
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 0.0),
-          child: TextButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => TransferInfoPage(
-                    paymentResponseBody: paymentResponseBody!,
-                    close: widget.close,
-                  ),
-                ),
-              );
-            },
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-                side: const BorderSide(
-                  color: Color(0xFFC0B5CF),
-                  width: 1,
-                ),
-              ),
-            ),
+          const SizedBox(
+            height: 32.0,
+          ),
+          Center(
             child: Text(
-              "I've sent the money",
+              'Make a single bank transfer from your bank to this account before it expires.',
+              textAlign: TextAlign.center,
               style: SpotFlowTextStyle.body14SemiBold.copyWith(
-                color: SpotFlowColors.tone70,
+                color: SpotFlowColors.tone100,
               ),
             ),
           ),
-        ),
-        const SizedBox(
-          height: 32,
-        ),
-        Row(
-          children: [
-            const Expanded(
-              flex: 3,
-              child: ChangePaymentButton(),
-            ),
-            const SizedBox(
-              width: 18.0,
-            ),
-            Expanded(
-              flex: 2,
-              child: CancelPaymentButton(
-                close: widget.close,
+          const SizedBox(
+            height: 16,
+          ),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: SpotFlowColors.tone40,
+                width: 1,
               ),
             ),
-          ],
-        ),
-        const Spacer(),
-        const SizedBox(
-          height: 16,
-        ),
-        const PciDssIcon(),
-        const SizedBox(
-          height: 32,
-        )
-      ],
+            child: Column(
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      "Amount",
+                      style: SpotFlowTextStyle.body14Regular.copyWith(
+                        color: Colors.black,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      formattedAmount ?? "",
+                      style: SpotFlowTextStyle.body14Regular.copyWith(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        context
+                            .read<AppStateProvider>()
+                            .trackEvent('copy_transferAmount');
+                        Clipboard.setData(
+                          ClipboardData(
+                            text: totalAmount ?? "",
+                          ),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 3.0, left: 8),
+                        child: Assets.svg.copyIcon.svg(),
+                      ),
+                    )
+                  ],
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      "Account number",
+                      style: SpotFlowTextStyle.body14Regular.copyWith(
+                        color: Colors.black,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      paymentResponseBody?.bankDetails?.accountNumber ?? "",
+                      style: SpotFlowTextStyle.body14Regular.copyWith(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        Clipboard.setData(
+                          ClipboardData(
+                            text: paymentResponseBody
+                                    ?.bankDetails?.accountNumber ??
+                                "",
+                          ),
+                        );
+
+                        context
+                            .read<AppStateProvider>()
+                            .trackEvent('copy_transferBank');
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 3.0, left: 8),
+                        child: Assets.svg.copyIcon.svg(),
+                      ),
+                    )
+                  ],
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                Row(
+                  children: [
+                    Text(
+                      "Bank name",
+                      style: SpotFlowTextStyle.body14Regular.copyWith(
+                        color: Colors.black,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      paymentResponseBody!.bankDetails?.name ?? "",
+                      style: SpotFlowTextStyle.body14SemiBold.copyWith(
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(
+            height: 32,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                vertical: 10,
+                horizontal: 16,
+              ),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFEF7ED),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                    text:
+                        "This account is for this transaction only and expires in ",
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xFF4F3B23),
+                    ),
+                    children: [
+                      TextSpan(
+                        text: _remainingTime,
+                        style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF4F3B23)),
+                      ),
+                    ]),
+              ),
+            ),
+          ),
+          const SizedBox(
+            height: 32,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 0.0),
+            child: PrimaryButton(
+              onTap: () {
+                if (paymentResponseBody == null) {
+                  return;
+                }
+                context
+                    .read<AppStateProvider>()
+                    .trackEvent('verify_transferPayment');
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (context) => TransferStatusCheckPage(
+                      reference: paymentResponseBody!.reference,
+                      paymentResponseBody: paymentResponseBody!,
+                      close: widget.close,
+                      paymentOptionsEnum: PaymentOptionsEnum.transfer,
+                    ),
+                  ),
+                );
+              },
+              text: "I've sent the money",
+            ),
+          ),
+          const SizedBox(
+            height: 32,
+          ),
+          const Spacer(),
+          const SizedBox(
+            height: 16,
+          ),
+          const PoweredBySpotflowTag(),
+          const SizedBox(
+            height: 32,
+          )
+        ],
+      ),
     );
   }
 
@@ -417,6 +407,7 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
       currency:
           context.read<AppStateProvider>().merchantConfig?.rate.from ?? "",
       amount: amount,
+
       channel: "bank_transfer",
     );
     try {
@@ -431,6 +422,17 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
               builder: (context) => ErrorPage(
                   message:
                       paymentResponseBody?.providerMessage ?? "Payment failed",
+                  paymentOptionsEnum: PaymentOptionsEnum.transfer),
+            ),
+          );
+        }
+      } else if(paymentResponseBody?.bankDetails == null) {
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => ErrorPage(
+                  message:
+                  paymentResponseBody?.providerMessage ?? "Payment failed",
                   paymentOptionsEnum: PaymentOptionsEnum.transfer),
             ),
           );
@@ -461,10 +463,10 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
       if (_animation.value == 0) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (context) => TransferErrorPage(
+            builder: (context) => const ErrorPage(
               message: "Account Expired",
-              paymentResponseBody: paymentResponseBody!,
-              close: widget.close,
+              paymentOptionsEnum: PaymentOptionsEnum.transfer,
+
             ),
           ),
         );

@@ -12,11 +12,12 @@ import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/views/error_page.dart';
 import 'package:spotflow/src/ui/views/transfer/transfer_status_check_page.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
-import 'package:spotflow/src/ui/widgets/cancel_payment_button.dart';
-import 'package:spotflow/src/ui/widgets/change_payment_button.dart';
+import 'package:spotflow/src/ui/widgets/dismissible_app_logo.dart';
 import 'package:spotflow/src/ui/widgets/payment_card.dart';
 import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
 import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
+import 'package:spotflow/src/ui/widgets/primary_button.dart';
+import 'package:spotflow/src/ui/widgets/user_and_rate_information_card.dart';
 
 import '../../../core/models/payment_response_body.dart';
 
@@ -34,114 +35,204 @@ class CopyUssdPage extends StatefulWidget {
   State<CopyUssdPage> createState() => _CopyUssdPageState();
 }
 
-class _CopyUssdPageState extends State<CopyUssdPage> {
+class _CopyUssdPageState extends State<CopyUssdPage>
+    with TickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  String _remainingTime = "30:00";
+
+  String formatTime(int remainingSeconds) {
+    int minutes = remainingSeconds ~/ 60;
+    int seconds = remainingSeconds % 60;
+    return "${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}";
+  }
+
   @override
   Widget build(BuildContext context) {
     return BaseScaffold(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        PaymentOptionsTile(
-          icon: Assets.svg.payWithUsdIcon.svg(),
-          text: 'Pay with USSD',
+        const SizedBox(
+          height: 28,
+        ),
+        const DismissibleAppLogo(),
+        const SizedBox(
+          height: 24,
+        ),
+        const UserAndRateInformationCard(),
+        const SizedBox(
+          height: 32,
         ),
         const PaymentCard(),
         const SizedBox(
-          height: 23,
+          height: 24,
+        ),
+        const Divider(
+          color: Color(0xFFF7F7F8),
+          height: 1,
+          thickness: 1,
+        ),
+        const SizedBox(
+          height: 24,
+        ),
+        Text(
+          'Selected payment method',
+          style: SpotFlowTextStyle.body14SemiBold.copyWith(
+            color: SpotFlowColors.tone70,
+          ),
+        ),
+        const SizedBox(
+          height: 12,
+        ),
+        PaymentOptionsTile(
+          icon: PaymentOptionsEnum.ussd.icon,
+          text: PaymentOptionsEnum.ussd.title,
+          onTap: () {},
+        ),
+        const SizedBox(
+          height: 16.0,
+        ),
+        const Divider(
+          color: Color(0xFFF7F7F8),
+          height: 1,
+          thickness: 1,
+        ),
+        const SizedBox(
+          height: 32.0,
         ),
         if (initiatingPayment) ...[
           const Expanded(
             child: Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                color: Colors.black,
+              ),
             ),
           )
         ] else ...[
-          Assets.svg.ussdIcon.svg(),
+          RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(
+              text: 'Dial the ',
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                color: SpotFlowColors.tone70,
+              ),
+              children: [
+                TextSpan(
+                    text: widget.bank.name,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: SpotFlowColors.tone70,
+                      fontWeight: FontWeight.w600,
+                    )),
+                const TextSpan(
+                    text:
+                        ' USSD code below on your mobile phone to complete the payment',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: SpotFlowColors.tone70,
+                      fontWeight: FontWeight.w400,
+                    ))
+              ],
+            ),
+          ),
           const SizedBox(
-            height: 23,
+            height: 16,
           ),
           Text(
-            "Dial the code below to complete this transaction with ${widget.bank.name}",
+            paymentResponseBody?.ussd?.code ?? "",
             textAlign: TextAlign.center,
-            style: SpotFlowTextStyle.body14Regular.copyWith(
-              color: SpotFlowColors.tone70,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+              color: SpotFlowColors.tone100,
             ),
           ),
-          // TextButton(
-          //   onPressed: () {},
-          //   style: TextButton.styleFrom(
-          //       shape: RoundedRectangleBorder(
-          //     borderRadius: BorderRadius.circular(8),
-          //   )),
-          //   child: Text(
-          //     'How to pay with FCMB USSD',
-          //     style: SpotFlowTextStyle.body14Regular.copyWith(
-          //       color: SpotFlowColors.primary40,
-          //     ),
-          //   ),
-          // ),
           const SizedBox(
-            height: 20,
+            height: 8,
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40.0),
-            child: TextButton(
-              onPressed: () {
-                context.read<AppStateProvider>().trackEvent('copy_ussdCode');
-
-                Clipboard.setData(
-                  ClipboardData(
-                    text: paymentResponseBody?.ussd?.code ?? "",
+          InkWell(
+            onTap: (){
+              Clipboard.setData(
+                ClipboardData(
+                  text:   paymentResponseBody?.ussd?.code ?? "",
+                ),
+              );
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  "COPY USSD CODE",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: SpotFlowColors.tone100,
                   ),
-                );
-              },
-              style: TextButton.styleFrom(
-                  backgroundColor: SpotFlowColors.primaryBase,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 10,
+                ),
+                const SizedBox(
+                  width: 8,
+                ),
+                Assets.svg.copyIcon.svg(
+                  colorFilter: const ColorFilter.mode(
+                    Colors.black,
+                    BlendMode.srcIn,
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  )),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    paymentResponseBody?.ussd?.code ?? "",
-                    style: SpotFlowTextStyle.body16SemiBold.copyWith(
-                      color: SpotFlowColors.primary5,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(
+            height: 24,
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(
+              vertical: 8,
+              horizontal: 16,
+            ),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFEF7ED),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                  text: "This code will expire after ",
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xFF4F3B23),
+                  ),
+                  children: [
+                    TextSpan(
+                      text: _remainingTime,
+                      style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF4F3B23)),
                     ),
-                  ),
-                  const SizedBox(
-                    width: 13.0,
-                  ),
-                  if (paymentResponseBody?.ussd != null) ...[
-                    Assets.svg.copyIcon.svg(),
-                  ]
-                ],
-              ),
+                    const TextSpan(
+                      text: ' and can only be used for this transaction.',
+                      style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xFF4F3B23)),
+                    )
+                  ]),
             ),
           ),
           const SizedBox(
-            height: 19,
+            height: 32,
           ),
-          Center(
-            child: Text(
-              "Click to copy",
-              style: SpotFlowTextStyle.body12SemiBold.copyWith(
-                color: SpotFlowColors.tone50,
-              ),
-            ),
-          ),
-          const SizedBox(
-            height: 60,
-          ),
-
-          TextButton(
-            onPressed: () {
+          PrimaryButton(
+            onTap: () {
               if (paymentResponseBody == null) {
                 return;
               }
-              Navigator.of(context).push(
+              Navigator.of(context).pushReplacement(
                 MaterialPageRoute(
                   builder: (context) => TransferStatusCheckPage(
                     reference: paymentResponseBody?.reference ?? "",
@@ -152,40 +243,10 @@ class _CopyUssdPageState extends State<CopyUssdPage> {
                 ),
               );
             },
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-                side: const BorderSide(color: Color(0xFFC0B5CF), width: 1),
-              ),
-            ),
-            child: Text(
-              'I have completed the payment',
-              style: SpotFlowTextStyle.body16SemiBold.copyWith(
-                color: SpotFlowColors.tone60,
-              ),
-            ),
+            text: 'I have made this payment',
           ),
           const Spacer(),
-          Row(
-            children: [
-              const Expanded(
-                child: ChangePaymentButton(),
-              ),
-              const SizedBox(
-                width: 18.0,
-              ),
-              Expanded(
-                child: CancelPaymentButton(
-                  close: widget.close,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(
-            height: 32,
-          ),
-          const PciDssIcon(),
+          const PoweredBySpotflowTag(),
           const SizedBox(
             height: 38,
           )
@@ -198,6 +259,14 @@ class _CopyUssdPageState extends State<CopyUssdPage> {
   void initState() {
     super.initState();
     _createPayment();
+  }
+
+
+  @override
+  void dispose() {
+    _controller.stop();
+    _controller.dispose();
+    super.dispose();
   }
 
   bool initiatingPayment = false;
@@ -247,6 +316,8 @@ class _CopyUssdPageState extends State<CopyUssdPage> {
             ),
           );
         }
+      } else {
+        _initCountDown();
       }
     } on DioException catch (e) {
       debugPrint(e.message);
@@ -255,5 +326,35 @@ class _CopyUssdPageState extends State<CopyUssdPage> {
     setState(() {
       initiatingPayment = false;
     });
+  }
+
+  _initCountDown() {
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(minutes: 5),
+    );
+    _animation = Tween<double>(begin: 1.0, end: 0.0).animate(_controller);
+
+    _controller.addListener(() {
+      if (_animation.value == 0) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const ErrorPage(
+              message: "Account Expired",
+              paymentOptionsEnum: PaymentOptionsEnum.ussd,
+            ),
+          ),
+        );
+      } else {
+        setState(() {
+          double remainingSeconds =
+              (_controller.duration!.inMilliseconds * _animation.value)
+                      .round() /
+                  1000;
+          _remainingTime = formatTime(remainingSeconds.toInt());
+        });
+      }
+    });
+    _controller.forward();
   }
 }

@@ -37,7 +37,7 @@ class _CardPaymentStatusCheckPageState
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           PaymentOptionsTile(
-            icon: Assets.svg.payWithCardIcon.svg(),
+            icon: Assets.svg.card.svg(),
             text: 'Pay with Card',
           ),
           const PaymentCard(),

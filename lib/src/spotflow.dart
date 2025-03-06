@@ -20,6 +20,7 @@ class Spotflow {
     if (paymentManager.amount == null && paymentManager.planId == null) {
       throw Exception('Please provide an amount or a plan id');
     }
+
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => ChangeNotifierProvider(
               builder: (context, child) {
@@ -107,6 +108,8 @@ class SpotFlowPaymentManager {
 
   String customerEmail;
 
+  String currency;
+
   String? customerPhoneNumber;
 
   ///auth token
@@ -144,5 +147,6 @@ class SpotFlowPaymentManager {
     this.appName,
     this.debugMode = true,
     this.amount,
+    required this.currency,
   });
 }

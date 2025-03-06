@@ -17,11 +17,10 @@ import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/views/card/widgets/card_drop_down_widget.dart';
 import 'package:spotflow/src/ui/views/error_page.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
-import 'package:spotflow/src/ui/widgets/cancel_payment_button.dart';
-import 'package:spotflow/src/ui/widgets/change_payment_button.dart';
+import 'package:spotflow/src/ui/widgets/dismissible_app_logo.dart';
 import 'package:spotflow/src/ui/widgets/payment_card.dart';
-import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
 import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
+import 'package:spotflow/src/ui/widgets/primary_button.dart';
 
 import '../../../core/models/country.dart';
 import 'widgets/bottom_sheet_with_search.dart';
@@ -42,11 +41,6 @@ class EnterBillingAddressPage extends StatelessWidget {
     return BaseScaffold(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        PaymentOptionsTile(
-          text: 'Pay with Card',
-          icon: Assets.svg.payWithCardIcon.svg(),
-        ),
-        const PaymentCard(),
         Expanded(
           child: _AddressInputUI(
             paymentResponseBody: paymentResponseBody,
@@ -111,22 +105,29 @@ class _AddressInputUIState extends State<_AddressInputUI> with CardsNavigation {
       );
     } else {
       return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(
-            height: 34.0,
+            height: 28,
           ),
-          Center(
-            child: Text(
-              'Fill in Your Billing Address',
-              style: SpotFlowTextStyle.body16SemiBold.copyWith(
-                color: SpotFlowColors.tone70,
-              ),
+          const DismissibleAppLogo(),
+          const SizedBox(
+            height: 32,
+          ),
+          const PaymentCard(),
+          const SizedBox(
+            height: 40,
+          ),
+          Text(
+            'Billing address',
+            style: SpotFlowTextStyle.body14SemiBold.copyWith(
+              color: SpotFlowColors.tone70,
             ),
           ),
           const SizedBox(
-            height: 34,
+            height: 12,
           ),
-          CardInputField(
+          SpotflowInputField(
             labelText: 'Address',
             hintText: "Osapa London",
             textEditingController: addressController,
@@ -134,117 +135,68 @@ class _AddressInputUIState extends State<_AddressInputUI> with CardsNavigation {
             onChanged: (_) => onAddressChanged(),
           ),
           const SizedBox(
-            height: 28,
+            height: 12,
           ),
-          Row(
-            children: [
-              Expanded(
-                child: CardDropdownWidget(
-                  labelText: "Country",
-                  hintText: "Enter country",
-                  text: country?.name,
-                  enabled: countries.isNotEmpty,
-                  onTap: () {
-                    showCountryDropdown();
-                  },
-                ),
-              ),
-              const SizedBox(
-                width: 18.0,
-              ),
-              Expanded(
-                child: CardDropdownWidget(
-                  labelText: "State",
-                  hintText: "Enter state",
-                  text: countryState?.name,
-                  enabled: country != null,
-                  onTap: () {
-                    showStateDropDown();
-                  },
-                ),
-              ),
-            ],
+          CardDropdownWidget(
+            labelText: "Country",
+            hintText: "Enter country",
+            text: country?.name,
+            enabled: countries.isNotEmpty,
+            onTap: () {
+              showCountryDropdown();
+            },
+          ),
+          const SizedBox(
+            height: 12,
+          ),
+          CardDropdownWidget(
+            labelText: "State",
+            hintText: "Enter state",
+            text: countryState?.name,
+            enabled: country != null,
+            onTap: () {
+              showStateDropDown();
+            },
+          ),
+          const SizedBox(
+            height: 12.0,
+          ),
+          CardDropdownWidget(
+            labelText: "City",
+            hintText: "Enter city",
+            text: city?.name,
+            enabled: countryState != null,
+            onTap: () {
+              showCityDropDown();
+            },
+          ),
+          const SizedBox(
+            height: 12.0,
+          ),
+          SpotflowInputField(
+            labelText: 'Zipcode',
+            hintText: "000 000",
+            textInputType: TextInputType.number,
+            textEditingController: zipCodeController,
+            onChanged: (_) {
+              onAddressChanged();
+            },
           ),
           const SizedBox(
             height: 28.0,
           ),
-          Row(
-            children: [
-              Expanded(
-                child: CardDropdownWidget(
-                  labelText: "City",
-                  hintText: "Enter city",
-                  text: city?.name,
-                  enabled: countryState != null,
-                  onTap: () {
-                    showCityDropDown();
-                  },
-                ),
-              ),
-              const SizedBox(
-                width: 18.0,
-              ),
-              Expanded(
-                child: CardInputField(
-                  labelText: 'Zipcode',
-                  hintText: "000 000",
-                  textInputType: TextInputType.number,
-                  textEditingController: zipCodeController,
-                  onChanged: (_) {
-                    onAddressChanged();
-                  },
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(
-            height: 28.0,
-          ),
-          InkWell(
+          PrimaryButton(
             onTap: () {
               _createPayment(paymentManager);
             },
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                vertical: 13,
-              ),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: buttonEnabled
-                    ? SpotFlowColors.primaryBase
-                    : SpotFlowColors.primary5,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                'Submit',
-                style: SpotFlowTextStyle.body14SemiBold.copyWith(
-                  color: buttonEnabled
-                      ? SpotFlowColors.kcBaseWhite
-                      : SpotFlowColors.primary20,
-                ),
-              ),
-            ),
+            text: 'Continue',
           ),
           const SizedBox(
-            height: 60,
+            height: 16,
           ),
-          Row(
-            children: [
-              const Expanded(
-                child: ChangePaymentButton(),
-              ),
-              const SizedBox(
-                width: 18.0,
-              ),
-              Expanded(
-                child: CancelPaymentButton(
-                  close: widget.close,
-                ),
-              ),
-            ],
-          ),
+          const PciDssTag(),
           const Spacer(),
-          const PciDssIcon(),
+          const PoweredBySpotflowTag(),
           const SizedBox(
             height: 32,
           )
@@ -292,7 +244,7 @@ class _AddressInputUIState extends State<_AddressInputUI> with CardsNavigation {
         message = data['message'];
       }
       if (mounted) {
-        Navigator.of(context).push(
+        Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (context) => ErrorPage(
                 message: message ?? "Couldn't process your payment",

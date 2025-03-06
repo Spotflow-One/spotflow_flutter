@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:spotflow/src/ui/app_state_provider.dart';
+import 'package:spotflow/gen/assets.gen.dart';
 import 'package:spotflow/src/ui/utils/spotflow_colors.dart';
 
 class BaseScaffold extends StatelessWidget {
@@ -9,6 +8,7 @@ class BaseScaffold extends StatelessWidget {
   final MainAxisAlignment mainAxisAlignment;
   final MainAxisSize mainAxisSize;
   final EdgeInsets padding;
+  final GestureTapCallback? onClose;
 
   const BaseScaffold({
     super.key,
@@ -17,20 +17,43 @@ class BaseScaffold extends StatelessWidget {
     this.mainAxisAlignment = MainAxisAlignment.start,
     this.mainAxisSize = MainAxisSize.max,
     this.padding = const EdgeInsets.symmetric(horizontal: 17.0),
+    this.onClose,
   });
 
   @override
   Widget build(BuildContext context) {
-    final appLogo = context.read<AppStateProvider>().paymentManager?.appLogo;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: SpotFlowColors.primary5,
+        backgroundColor: Colors.white,
         toolbarHeight: 56,
-        title: appLogo,
-        centerTitle: false,
-        leading: const SizedBox(),
-        leadingWidth: 0,
+        title: InkWell(
+          onTap: () {
+            if(onClose == null) {
+              Navigator.of(context).pop();
+            } else {
+              onClose!.call();
+            }
+          },
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Assets.svg.arrowLeft.svg(),
+              const SizedBox(
+                width: 2,
+              ),
+              const Text(
+                'Go back',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: SpotFlowColors.tone100,
+                ),
+              ),
+            ],
+          ),
+        ),
+        automaticallyImplyLeading: false,
       ),
       body: LayoutBuilder(builder: (context, constraints) {
         return SingleChildScrollView(

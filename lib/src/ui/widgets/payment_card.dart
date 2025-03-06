@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spotflow/src/ui/app_state_provider.dart';
-import 'package:spotflow/src/ui/utils/spotflow_colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
+
+import '../utils/spotflow_colors.dart';
 
 class PaymentCard extends StatelessWidget {
   const PaymentCard({
@@ -14,83 +15,59 @@ class PaymentCard extends StatelessWidget {
     final merchantConfig = context.watch<AppStateProvider>().merchantConfig;
     final paymentManager = context.watch<AppStateProvider>().paymentManager!;
 
-    String? toCurrency = merchantConfig?.rate.to.toUpperCase();
+    String toCurrency = merchantConfig?.rate.to.toUpperCase() ?? "";
+    String fromCurrency = merchantConfig?.rate.from.toUpperCase() ?? "";
 
     num? amount = merchantConfig?.plan?.amount ?? paymentManager.amount;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 2),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(
-          14,
-          48,
-          14,
-          32,
-        ),
-        decoration: BoxDecoration(
-          color: SpotFlowColors.primaryBase,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: SpotFlowColors.primary5,
-            width: 1.0,
+    num? convertedAmount;
+    if (amount != null && merchantConfig?.rate.rate != null && merchantConfig!.rate.rate > 0 ) {
+      convertedAmount = amount / merchantConfig.rate.rate;
+    }
+
+    String paymentDescription = paymentManager.paymentDescription ?? "";
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          paymentDescription,
+          style: SpotFlowTextStyle.body16SemiBold.copyWith(
+            color: SpotFlowColors.tone100,
           ),
         ),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  paymentManager.customerEmail,
-                  style: SpotFlowTextStyle.body12Regular.copyWith(
-                    color: SpotFlowColors.kcBaseWhite,
-                  ),
-                ),
-                Text(
-                  paymentManager.paymentDescription ?? "",
-                  style: SpotFlowTextStyle.body14Regular.copyWith(
-                    color: SpotFlowColors.kcBaseWhite,
-                  ),
-                )
-              ],
-            ),
-            const SizedBox(
-              height: 8.0,
-            ),
-            const Divider(
-              color: SpotFlowColors.tone10,
-              thickness: 1,
-              height: 1,
-            ),
-            const SizedBox(
-              height: 8.0,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  'Pay',
-                  style: SpotFlowTextStyle.body14Regular.copyWith(
-                    color: SpotFlowColors.kcBaseWhite,
-                  ),
-                ),
-                const SizedBox(
-                  width: 4,
-                ),
-                Text(
-                  '$toCurrency ${amount?.toStringAsFixed(2) ?? ""}',
-                  style: SpotFlowTextStyle.body16SemiBold.copyWith(
-                    color: SpotFlowColors.kcBaseWhite,
-                  ),
-                )
-              ],
-            ),
-            const SizedBox(
-              height: 6.0,
-            ),
-          ],
+        const SizedBox(
+          height: 4,
         ),
-      ),
+        Text(
+          '$toCurrency ${convertedAmount?.toStringAsFixed(2) ?? ""}',
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            color: SpotFlowColors.tone100,
+          ),
+        ),
+        const SizedBox(
+          height: 4,
+        ),
+        RichText(
+            text: TextSpan(
+                text: 'To pay: ',
+                style: const TextStyle(
+                  color: SpotFlowColors.tone100,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                ),
+                children: [
+              TextSpan(
+                  text: "$fromCurrency $amount",
+                  style: const TextStyle(
+                    color: SpotFlowColors.tone100,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  )),
+            ]))
+      ],
     );
   }
 }
