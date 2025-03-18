@@ -11,6 +11,7 @@ import 'package:spotflow/src/ui/app_state_provider.dart';
 import 'package:spotflow/src/ui/utils/spotflow_colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/views/error_page.dart';
+import 'package:spotflow/src/ui/views/transfer/bank_account_card.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
 import 'package:spotflow/src/ui/widgets/dismissible_app_logo.dart';
 import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
@@ -198,115 +199,10 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
           const SizedBox(
             height: 16,
           ),
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: SpotFlowColors.tone40,
-                width: 1,
-              ),
-            ),
-            child: Column(
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      "Amount",
-                      style: SpotFlowTextStyle.body14Regular.copyWith(
-                        color: Colors.black,
-                      ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      formattedAmount ?? "",
-                      style: SpotFlowTextStyle.body14Regular.copyWith(
-                        color: Colors.black,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        context
-                            .read<AppStateProvider>()
-                            .trackEvent('copy_transferAmount');
-                        Clipboard.setData(
-                          ClipboardData(
-                            text: totalAmount ?? "",
-                          ),
-                        );
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 3.0, left: 8),
-                        child: Assets.svg.copyIcon.svg(),
-                      ),
-                    )
-                  ],
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      "Account number",
-                      style: SpotFlowTextStyle.body14Regular.copyWith(
-                        color: Colors.black,
-                      ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      paymentResponseBody?.bankDetails?.accountNumber ?? "",
-                      style: SpotFlowTextStyle.body14Regular.copyWith(
-                        color: Colors.black,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        Clipboard.setData(
-                          ClipboardData(
-                            text: paymentResponseBody
-                                    ?.bankDetails?.accountNumber ??
-                                "",
-                          ),
-                        );
-
-                        context
-                            .read<AppStateProvider>()
-                            .trackEvent('copy_transferBank');
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 3.0, left: 8),
-                        child: Assets.svg.copyIcon.svg(),
-                      ),
-                    )
-                  ],
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
-                Row(
-                  children: [
-                    Text(
-                      "Bank name",
-                      style: SpotFlowTextStyle.body14Regular.copyWith(
-                        color: Colors.black,
-                      ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      paymentResponseBody!.bankDetails?.name ?? "",
-                      style: SpotFlowTextStyle.body14SemiBold.copyWith(
-                        color: Colors.black,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+          BankAccountCard(
+            formattedAmount: formattedAmount ?? "",
+            paymentResponseBody: paymentResponseBody,
+            totalAmount: totalAmount,
           ),
           const SizedBox(
             height: 32,
@@ -407,7 +303,6 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
       currency:
           context.read<AppStateProvider>().merchantConfig?.rate.from ?? "",
       amount: amount,
-
       channel: "bank_transfer",
     );
     try {
@@ -426,13 +321,13 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
             ),
           );
         }
-      } else if(paymentResponseBody?.bankDetails == null) {
+      } else if (paymentResponseBody?.bankDetails == null) {
         if (mounted) {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
               builder: (context) => ErrorPage(
                   message:
-                  paymentResponseBody?.providerMessage ?? "Payment failed",
+                      paymentResponseBody?.providerMessage ?? "Payment failed",
                   paymentOptionsEnum: PaymentOptionsEnum.transfer),
             ),
           );
@@ -466,7 +361,6 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
             builder: (context) => const ErrorPage(
               message: "Account Expired",
               paymentOptionsEnum: PaymentOptionsEnum.transfer,
-
             ),
           ),
         );
