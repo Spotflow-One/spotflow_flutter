@@ -57,7 +57,6 @@ class _AddressInputUI extends StatefulWidget {
   final GestureTapCallback close;
 
   const _AddressInputUI({
-    super.key,
     required this.paymentResponseBody,
     required this.close,
   });
@@ -98,7 +97,7 @@ class _AddressInputUIState extends State<_AddressInputUI> with CardsNavigation {
 
   @override
   Widget build(BuildContext context) {
-    final paymentManager = context.read<AppStateProvider>().paymentManager!;
+    final paymentManager = context.read<AppStateProvider>().paymentManager;
     if (creatingPayment) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -229,12 +228,14 @@ class _AddressInputUIState extends State<_AddressInputUI> with CardsNavigation {
       final response = await paymentService.authorizePayment(
         avsPaymentRequest.toJson(),
       );
+      final paymentResponseBody = PaymentResponseBody.fromJson(response.data);
 
       if (mounted) {
         handleCardSuccessResponse(
-          response: response,
+          paymentResponseBody: paymentResponseBody,
           paymentManager: paymentManager,
           context: context,
+          onCancelPayment: widget.close,
         );
       }
     } on DioException catch (e) {

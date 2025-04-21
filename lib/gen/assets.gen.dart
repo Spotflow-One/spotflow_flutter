@@ -68,6 +68,9 @@ class $AssetsSvgGen {
   /// File path: assets/svg/info-circle.svg
   SvgGenImage get infoCircle => const SvgGenImage('assets/svg/info-circle.svg');
 
+  /// File path: assets/svg/mc_symbol_1.svg
+  SvgGenImage get mcSymbol1 => const SvgGenImage('assets/svg/mc_symbol_1.svg');
+
   /// File path: assets/svg/mobile.svg
   SvgGenImage get mobile => const SvgGenImage('assets/svg/mobile.svg');
 
@@ -77,6 +80,10 @@ class $AssetsSvgGen {
 
   /// File path: assets/svg/shield.svg
   SvgGenImage get shield => const SvgGenImage('assets/svg/shield.svg');
+
+  /// File path: assets/svg/visa_symbol_ic.svg
+  SvgGenImage get visaSymbolIc =>
+      const SvgGenImage('assets/svg/visa_symbol_ic.svg');
 
   /// File path: assets/svg/warning.svg
   SvgGenImage get warning => const SvgGenImage('assets/svg/warning.svg');
@@ -99,9 +106,11 @@ class $AssetsSvgGen {
         hashtag,
         infoCircleBlack,
         infoCircle,
+        mcSymbol1,
         mobile,
         payWithUsdIcon,
         shield,
+        visaSymbolIc,
         warning,
         xClose
       ];

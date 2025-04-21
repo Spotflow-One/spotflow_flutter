@@ -1,11 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:spotflow/spotflow.dart';
 import 'package:spotflow/src/core/models/validate_payment_request_body.dart';
 import 'package:spotflow/src/core/services/payment_service.dart';
 import 'package:spotflow/src/ui/app_state_provider.dart';
 import 'package:spotflow/src/ui/utils/cards_navigation.dart';
-import 'package:spotflow/src/ui/utils/spot_flow_route_name.dart';
 import 'package:spotflow/src/ui/utils/spotflow_colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
@@ -17,11 +17,14 @@ import 'package:spotflow/src/ui/widgets/primary_button.dart';
 class EnterOtpPage extends StatelessWidget {
   final String message;
   final String reference;
+  final GestureTapCallback close;
+
 
   const EnterOtpPage({
     super.key,
     required this.message,
     required this.reference,
+    required this.close,
   });
 
   @override
@@ -33,6 +36,7 @@ class EnterOtpPage extends StatelessWidget {
           child: _EnterOtpPageUi(
             message: message,
             reference: reference,
+            close: close,
           ),
         ),
       ],
@@ -43,11 +47,13 @@ class EnterOtpPage extends StatelessWidget {
 class _EnterOtpPageUi extends StatefulWidget {
   final String message;
   final String reference;
+  final GestureTapCallback close;
+
 
   const _EnterOtpPageUi({
-    super.key,
     required this.message,
     required this.reference,
+    required this.close,
   });
 
   @override
@@ -170,9 +176,7 @@ class _EnterOtpPageUiState extends State<_EnterOtpPageUi> with CardsNavigation {
         Center(
           child: TextButton(
             onPressed: () {
-              Navigator.of(context).popUntil(
-                  (route) => route.settings.name == SpotFlowRouteName.homePage);
-              Navigator.of(context).pop();
+              widget.close.call();
             },
             style: TextButton.styleFrom(
                 shape: RoundedRectangleBorder(
@@ -197,7 +201,7 @@ class _EnterOtpPageUiState extends State<_EnterOtpPageUi> with CardsNavigation {
   bool creatingPayment = false;
 
   Future<void> _authorizePayment() async {
-    final paymentManager = context.read<AppStateProvider>().paymentManager!;
+    final paymentManager = context.read<AppStateProvider>().paymentManager;
     final paymentRequestBody = ValidatePaymentRequestBody(
       reference: widget.reference,
       otp: controller.text,
@@ -214,11 +218,13 @@ class _EnterOtpPageUiState extends State<_EnterOtpPageUi> with CardsNavigation {
       final response = await paymentService.authorizePayment(
         paymentRequestBody.toJson(),
       );
+      final paymentResponseBody = PaymentResponseBody.fromJson(response.data);
       if (mounted) {
         handleCardSuccessResponse(
-          response: response,
+          paymentResponseBody: paymentResponseBody,
           paymentManager: paymentManager,
           context: context,
+          onCancelPayment: widget.close,
         );
       }
     } on DioException catch (e) {

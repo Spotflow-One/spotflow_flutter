@@ -22,6 +22,15 @@ class PaymentService {
     );
   }
 
+  Future<Response> retryPayment(
+      PaymentRequestBody paymentRequestBody,
+      ) {
+    return apiClient.post(
+      apiRoute.retryPayment,
+      data: paymentRequestBody.retryJson(),
+    );
+  }
+
   Future<Response> authorizePayment(
     Map<String, dynamic> body,
   ) {

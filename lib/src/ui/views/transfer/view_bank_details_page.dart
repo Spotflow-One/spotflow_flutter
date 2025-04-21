@@ -1,12 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:spotflow/gen/assets.gen.dart';
 import 'package:spotflow/src/core/models/payment_options_enum.dart';
 import 'package:spotflow/src/core/models/payment_request_body.dart';
 import 'package:spotflow/src/core/models/payment_response_body.dart';
-import 'package:spotflow/src/core/services/payment_service.dart';
 import 'package:spotflow/src/ui/app_state_provider.dart';
 import 'package:spotflow/src/ui/utils/spotflow_colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
@@ -290,13 +288,11 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
       initiatingPayment = true;
     });
 
-    final paymentManager = context.read<AppStateProvider>().paymentManager!;
+    final paymentManager = context.read<AppStateProvider>().paymentManager;
     final amount =
         context.read<AppStateProvider>().merchantConfig?.plan?.amount ??
             paymentManager.amount;
     if (amount == null) return;
-    final paymentService =
-        PaymentService(paymentManager.key, paymentManager.debugMode);
 
     final paymentRequestBody = PaymentRequestBody(
       customer: paymentManager.customer,
@@ -306,9 +302,9 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
       channel: "bank_transfer",
     );
     try {
-      final response = await paymentService.createPayment(paymentRequestBody);
-
-      paymentResponseBody = PaymentResponseBody.fromJson(response.data);
+      paymentResponseBody = await context
+          .read<AppStateProvider>()
+          .startPayment(paymentRequestBody);
 
       if (paymentResponseBody?.status == "failed") {
         if (mounted) {
@@ -338,9 +334,26 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
         _initCountDown(expiresAt);
       }
     } on DioException catch (e) {
-      debugPrint(e.message);
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => ErrorPage(
+                message: e.response?.data?['message'] ?? "Payment failed",
+                paymentOptionsEnum: PaymentOptionsEnum.transfer),
+          ),
+        );
+      }
+    } on Exception catch (e) {
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => ErrorPage(
+                message: "Payment failed",
+                paymentOptionsEnum: PaymentOptionsEnum.transfer),
+          ),
+        );
+      }
     }
-
     setState(() {
       initiatingPayment = false;
     });

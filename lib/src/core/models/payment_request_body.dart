@@ -4,7 +4,7 @@ import 'package:uuid/uuid.dart';
 import 'customer_info.dart';
 
 class PaymentRequestBody {
-  final String reference;
+  String reference;
   num amount;
 
   String currency;
@@ -32,11 +32,21 @@ class PaymentRequestBody {
       'amount': amount,
       'currency': currency,
       'channel': channel,
-      'callbackUrl':"",
       if (encryptedCard != null) 'encryptedCard': encryptedCard,
       if (planId != null) 'planId': planId,
       'customer': customer.toJson(),
       'metadata': {},
+      if (bank != null) "bank": bank!.toJson(),
+      if (mobileMoney != null) "mobileMoney": mobileMoney!.toJson(),
+    };
+  }
+
+  Map<String, dynamic> retryJson() {
+    return {
+      'reference': reference,
+      'channel': channel,
+      'callbackUrl': "",
+      if (encryptedCard != null) 'encryptedCard': encryptedCard,
       if (bank != null) "bank": bank!.toJson(),
       if (mobileMoney != null) "mobileMoney": mobileMoney!.toJson(),
     };

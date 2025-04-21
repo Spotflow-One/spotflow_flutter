@@ -66,7 +66,7 @@ class _CardPaymentStatusCheckPageState
 
   Future<void> _verifyPayment() async {
     try {
-      final paymentManager = context.read<AppStateProvider>().paymentManager!;
+      final paymentManager = context.read<AppStateProvider>().paymentManager;
       final paymentService =
           PaymentService(paymentManager.key, paymentManager.debugMode);
       final response = await paymentService.verifyPayment(

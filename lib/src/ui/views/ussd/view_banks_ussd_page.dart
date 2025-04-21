@@ -185,7 +185,7 @@ class _ViewBanksUssdPageState extends State<ViewBanksUssdPage> {
       loading = true;
     });
     try {
-      final paymentManager = context.read<AppStateProvider>().paymentManager!;
+      final paymentManager = context.read<AppStateProvider>().paymentManager;
       final paymentService =
           PaymentService(paymentManager.key, paymentManager.debugMode);
       final banksResponse = await paymentService.getBanks();

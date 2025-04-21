@@ -13,7 +13,6 @@ import 'package:spotflow/src/core/models/payment_options_enum.dart';
 import 'package:spotflow/src/core/models/payment_request_body.dart';
 import 'package:spotflow/src/core/models/payment_response_body.dart';
 import 'package:spotflow/src/core/models/spot_flow_card.dart';
-import 'package:spotflow/src/core/services/payment_service.dart';
 import 'package:spotflow/src/spotflow.dart';
 import 'package:spotflow/src/ui/app_state_provider.dart';
 import 'package:spotflow/src/ui/utils/cards_navigation.dart';
@@ -55,7 +54,6 @@ class _CardInputUI extends StatefulWidget {
   final GestureTapCallback close;
 
   const _CardInputUI({
-    super.key,
     required this.close,
   });
 
@@ -71,6 +69,8 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
   TextEditingController cvvController = TextEditingController();
 
   bool creatingPayment = false;
+
+  CardType cardType = CardType.others;
 
   bool? get validCard {
     if (_validCvv == null ||
@@ -91,9 +91,19 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
     super.dispose();
   }
 
-  onCardNumberChanged(_) {
+  onCardNumberChanged(val) {
+    final c = _ccValidator.validateCCNum(val);
+
     setState(() {
       _validCreditCardNumber = null;
+      print(c.ccType.type);
+      if (c.ccType.type == 'visa') {
+        cardType = CardType.visa;
+      } else if (c.ccType.type == 'mastercard') {
+        cardType = CardType.mastercard;
+      } else {
+        cardType = CardType.others;
+      }
     });
   }
 
@@ -112,7 +122,7 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
   @override
   Widget build(BuildContext context) {
     final merchantConfig = context.watch<AppStateProvider>().merchantConfig;
-    final paymentManager = context.watch<AppStateProvider>().paymentManager!;
+    final paymentManager = context.watch<AppStateProvider>().paymentManager;
     final amount = merchantConfig?.plan?.amount ?? paymentManager.amount;
 
     if (creatingPayment) {
@@ -190,9 +200,13 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 4.0, right: 8),
-                  child: Assets.svg.bankCardFill.svg(),
+                SizedBox(
+                  height: 25,
+                  width: 30,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 4.0, right: 8),
+                    child: cardType.icon,
+                  ),
                 ),
                 Expanded(
                   flex: 5,
@@ -305,19 +319,24 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
         amount: amount,
         channel: 'card',
         encryptedCard: encryptedCard);
-    final paymentService =
-        PaymentService(paymentManager.key, paymentManager.debugMode);
-    try {
-      final response = await paymentService.createPayment(
-        paymentRequestBody,
-      );
-      paymentResponseBody = PaymentResponseBody.fromJson(response.data);
 
+    try {
+      if (mounted == false) {
+        return;
+      }
+      paymentResponseBody = await context.read<AppStateProvider>().startPayment(
+            paymentRequestBody,
+          );
+
+      if (paymentResponseBody == null) {
+        return;
+      }
       if (mounted) {
         handleCardSuccessResponse(
-          response: response,
+          paymentResponseBody: paymentResponseBody!,
           paymentManager: paymentManager,
           context: context,
+          onCancelPayment: widget.close,
         );
       }
     } on DioException catch (e) {
@@ -331,6 +350,16 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
           MaterialPageRoute(
             builder: (context) => ErrorPage(
                 message: message ?? "Couldn't process your payment",
+                paymentOptionsEnum: PaymentOptionsEnum.card),
+          ),
+        );
+      }
+    } on Exception catch (e) {
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const ErrorPage(
+                message: "Couldn't process your payment",
                 paymentOptionsEnum: PaymentOptionsEnum.card),
           ),
         );
@@ -475,5 +504,20 @@ class InputField extends StatelessWidget {
         border: InputBorder.none,
       ),
     );
+  }
+}
+
+enum CardType { visa, mastercard, others }
+
+extension UiHelper on CardType {
+  Widget get icon {
+    switch (this) {
+      case CardType.visa:
+        return Assets.svg.visaSymbolIc.svg();
+      case CardType.mastercard:
+        return Assets.svg.mcSymbol1.svg();
+      case CardType.others:
+        return Assets.svg.bankCardFill.svg();
+    }
   }
 }

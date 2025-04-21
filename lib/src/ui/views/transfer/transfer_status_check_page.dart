@@ -157,7 +157,7 @@ class _TransferStatusCheckPageState extends State<TransferStatusCheckPage>
 
   _verifyPayment() async {
     try {
-      final paymentManager = context.read<AppStateProvider>().paymentManager!;
+      final paymentManager = context.read<AppStateProvider>().paymentManager;
 
       final paymentService =
           PaymentService(paymentManager.key, paymentManager.debugMode);

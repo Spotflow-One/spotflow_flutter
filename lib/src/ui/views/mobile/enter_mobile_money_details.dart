@@ -21,7 +21,6 @@ import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 import 'package:spotflow/src/ui/widgets/primary_button.dart';
 import 'package:spotflow/src/ui/widgets/user_and_rate_information_card.dart';
 
-import '../../../core/models/payment_response_body.dart';
 
 class EnterMobileMoneyDetails extends StatefulWidget {
   final GestureTapCallback close;
@@ -46,7 +45,7 @@ class _EnterMobileMoneyDetailsState extends State<EnterMobileMoneyDetails>
   @override
   Widget build(BuildContext context) {
     final merchantConfig = context.watch<AppStateProvider>().merchantConfig;
-    final paymentManager = context.watch<AppStateProvider>().paymentManager!;
+    final paymentManager = context.watch<AppStateProvider>().paymentManager;
 
     num? amount = merchantConfig?.plan?.amount ?? paymentManager.amount;
 
@@ -243,7 +242,7 @@ class _EnterMobileMoneyDetailsState extends State<EnterMobileMoneyDetails>
     setState(() {
       loading = true;
     });
-    final paymentManager = context.read<AppStateProvider>().paymentManager!;
+    final paymentManager = context.read<AppStateProvider>().paymentManager;
 
     try {
       final paymentService =
@@ -270,12 +269,9 @@ class _EnterMobileMoneyDetailsState extends State<EnterMobileMoneyDetails>
     setState(() {
       loading = true;
     });
-    final paymentManager = context.read<AppStateProvider>().paymentManager!;
+    final paymentManager = context.read<AppStateProvider>().paymentManager;
 
     try {
-      final paymentService =
-          PaymentService(paymentManager.key, paymentManager.debugMode);
-
       final mobileMoney = MobileMoney(
         code: mobileMoneyProvider!.code,
         phoneNumber: mobileNumberController.text,
@@ -288,31 +284,33 @@ class _EnterMobileMoneyDetailsState extends State<EnterMobileMoneyDetails>
         mobileMoney: mobileMoney,
       );
 
-      var response = await paymentService.createPayment(paymentRequestBody);
+      final paymentResponseBody = await context
+          .read<AppStateProvider>()
+          .startPayment(paymentRequestBody);
 
-      final paymentResponseBody = PaymentResponseBody.fromJson(response.data);
-      if (paymentResponseBody.status == "failed") {
+      if (paymentResponseBody?.status == "failed") {
         if (mounted) {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
               builder: (context) => ErrorPage(
                   message:
-                      paymentResponseBody.providerMessage ?? "Payment failed",
+                      paymentResponseBody?.providerMessage ?? "Payment failed",
                   paymentOptionsEnum: PaymentOptionsEnum.mobileMoney),
             ),
           );
         }
-      } else if (paymentResponseBody.authorization?.mode == 'otp' || paymentResponseBody.authorization?.mode == 'pin') {
+      } else if (paymentResponseBody?.authorization?.mode == 'otp' ||
+          paymentResponseBody?.authorization?.mode == 'pin') {
         if (mounted) {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
               builder: (context) => MobileMoneyOtpView(
-                paymentResponseBody: paymentResponseBody,
+                paymentResponseBody: paymentResponseBody!,
               ),
             ),
           );
         }
-      } else if (paymentResponseBody.status == "successful") {
+      } else if (paymentResponseBody?.status == "successful") {
         if (mounted) {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
@@ -320,7 +318,7 @@ class _EnterMobileMoneyDetailsState extends State<EnterMobileMoneyDetails>
                 paymentOptionsEnum: PaymentOptionsEnum.ussd,
                 close: () {},
                 onComplete: () {},
-                successMessage: paymentResponseBody.providerMessage ?? "",
+                successMessage: paymentResponseBody?.providerMessage ?? "",
               ),
             ),
           );

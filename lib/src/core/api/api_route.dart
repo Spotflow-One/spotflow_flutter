@@ -16,6 +16,7 @@ class ApiRoute {
   String get createPayment => '$baseUrl/api/v1/payments';
   String get fetchRate => '$baseUrl/api/v1/payments/rates';
   String get getUssdBanks => '$baseUrl/api/v1/banks';
+  String get retryPayment => '$baseUrl/api/v1/payments/retry';
 
   String get mobileMoneyProviders => '$baseUrl/api/v1/mobile-money/providers';
 

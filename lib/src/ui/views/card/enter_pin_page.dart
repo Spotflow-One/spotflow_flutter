@@ -17,10 +17,12 @@ import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 
 class EnterPinPage extends StatelessWidget {
   final String reference;
+  final GestureTapCallback onClose;
 
   const EnterPinPage({
     super.key,
     required this.reference,
+    required this.onClose,
   });
 
   @override
@@ -31,6 +33,7 @@ class EnterPinPage extends StatelessWidget {
           Expanded(
             child: _EnterPinPageUI(
               reference: reference,
+              onClose: onClose,
             ),
           ),
         ]);
@@ -39,10 +42,11 @@ class EnterPinPage extends StatelessWidget {
 
 class _EnterPinPageUI extends StatefulWidget {
   final String reference;
+  final GestureTapCallback onClose;
 
   const _EnterPinPageUI({
-    super.key,
     required this.reference,
+    required this.onClose,
   });
 
   @override
@@ -52,7 +56,7 @@ class _EnterPinPageUI extends StatefulWidget {
 class _EnterPinPageUIState extends State<_EnterPinPageUI> with CardsNavigation {
   @override
   Widget build(BuildContext context) {
-    final paymentManager = context.read<AppStateProvider>().paymentManager!;
+    final paymentManager = context.read<AppStateProvider>().paymentManager;
     if (creatingPayment) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -167,15 +171,19 @@ class _EnterPinPageUIState extends State<_EnterPinPageUI> with CardsNavigation {
       final response = await paymentService.authorizePayment(
         paymentRequestBody.toJson(),
       );
+      final paymentResponseBody = PaymentResponseBody.fromJson(response.data);
       if (mounted) {
         handleCardSuccessResponse(
-          response: response,
+          paymentResponseBody: paymentResponseBody,
           paymentManager: paymentManager,
           context: context,
+          onCancelPayment: widget.onClose,
         );
       }
     } on DioException catch (e) {
       debugPrint(e.message);
+    } on Exception catch (e) {
+      debugPrint(e.toString());
     }
     setState(() {
       creatingPayment = false;

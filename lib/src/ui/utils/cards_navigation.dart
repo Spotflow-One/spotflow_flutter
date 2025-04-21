@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spotflow/spotflow.dart';
@@ -15,11 +14,11 @@ import 'spot_flow_route_name.dart';
 
 mixin CardsNavigation {
   void handleCardSuccessResponse({
-    required Response<dynamic> response,
+    required PaymentResponseBody paymentResponseBody,
     required SpotFlowPaymentManager paymentManager,
+    required GestureTapCallback onCancelPayment,
     required BuildContext context,
   }) {
-    final paymentResponseBody = PaymentResponseBody.fromJson(response.data);
     if (paymentResponseBody.status == 'successful') {
       Navigator.of(context).pushNamedAndRemoveUntil(
         SpotFlowRouteName.successPage,
@@ -37,6 +36,7 @@ mixin CardsNavigation {
         MaterialPageRoute(
           builder: (context) => EnterPinPage(
             reference: paymentResponseBody.reference,
+            onClose: onCancelPayment,
           ),
         ),
       );
@@ -46,6 +46,8 @@ mixin CardsNavigation {
           builder: (context) => EnterOtpPage(
             message: paymentResponseBody.providerMessage ?? "",
             reference: paymentResponseBody.reference,
+            close: onCancelPayment,
+
           ),
         ),
       );
