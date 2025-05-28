@@ -10,7 +10,7 @@ class DismissibleAppLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appLogo = context.read<AppStateProvider>().paymentManager?.appLogo;
+    final appLogo = context.read<AppStateProvider>().paymentManager.appLogo;
 
     return Column(
       children: [

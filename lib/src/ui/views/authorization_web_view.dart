@@ -7,9 +7,14 @@ import 'package:webview_flutter/webview_flutter.dart';
 class SpotFlowInAppBrowser extends StatefulWidget {
   final String url;
   final String reference;
+  final GestureTapCallback onClose;
 
-  const SpotFlowInAppBrowser(
-      {super.key, required this.url, required this.reference});
+  const SpotFlowInAppBrowser({
+    super.key,
+    required this.url,
+    required this.reference,
+    required this.onClose,
+  });
 
   @override
   State<SpotFlowInAppBrowser> createState() => _SpotFlowInAppBrowserState();
@@ -74,6 +79,7 @@ class _SpotFlowInAppBrowserState extends State<SpotFlowInAppBrowser> {
       MaterialPageRoute(
         builder: (context) => CardPaymentStatusCheckPage(
           paymentReference: widget.reference,
+          close: widget.onClose,
         ),
       ),
     );

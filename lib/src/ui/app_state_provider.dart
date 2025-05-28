@@ -31,6 +31,15 @@ class AppStateProvider extends ChangeNotifier {
     return merchantConfig?.plan?.amount ?? paymentManager.amount;
   }
 
+  String? get currencyName {
+    String? from = merchantConfig?.rate.from;
+
+    if (from == "NGN") {
+      return "Naira";
+    }
+    return null;
+  }
+
   String getFormattedAmount() {
     final amount = merchantConfig?.plan?.amount ?? paymentManager.amount;
     String formattedAmount = "";
@@ -59,7 +68,8 @@ class AppStateProvider extends ChangeNotifier {
     final paymentService =
         PaymentService(paymentManager.key, paymentManager.debugMode);
 
-    if (paymentResponseBody == null || paymentResponseBody?.status == 'pending') {
+    if (paymentResponseBody == null ||
+        paymentResponseBody?.status == 'pending') {
       final response = await paymentService.createPayment(paymentRequestBody);
       paymentResponseBody = PaymentResponseBody.fromJson(response.data);
     } else {

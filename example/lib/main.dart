@@ -54,6 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
         planId: planIdController.text,
         amount: num.tryParse(amountController.text) ?? 5,
         currency: currencyController.text,
+        debugMode: true,
         appLogo: Image.asset(
           'assets/images/audiomack-logo.png',
         ),

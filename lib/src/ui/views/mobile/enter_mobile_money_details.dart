@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spotflow/gen/assets.gen.dart';
@@ -20,7 +21,6 @@ import 'package:spotflow/src/ui/widgets/payment_options_tile.dart';
 import 'package:spotflow/src/ui/widgets/pci_dss_icon.dart';
 import 'package:spotflow/src/ui/widgets/primary_button.dart';
 import 'package:spotflow/src/ui/widgets/user_and_rate_information_card.dart';
-
 
 class EnterMobileMoneyDetails extends StatefulWidget {
   final GestureTapCallback close;
@@ -198,23 +198,25 @@ class _EnterMobileMoneyDetailsState extends State<EnterMobileMoneyDetails>
           const SizedBox(
             height: 24,
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(
-              vertical: 12,
-              horizontal: 16,
-            ),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFEF7ED),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              'This payment may incur a 1% E-Levy, as mandated by the Ghana Revenue Authority (GRA).',
-              textAlign: TextAlign.center,
-              style: SpotFlowTextStyle.body12SemiBold.copyWith(
-                color: const Color(0xFF816039),
+          if (merchantConfig?.rate.from.toLowerCase() == "ghs") ...[
+            Container(
+              padding: const EdgeInsets.symmetric(
+                vertical: 12,
+                horizontal: 16,
+              ),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFEF7ED),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                'This payment may incur a 1% E-Levy, as mandated by the Ghana Revenue Authority (GRA).',
+                textAlign: TextAlign.center,
+                style: SpotFlowTextStyle.body12SemiBold.copyWith(
+                  color: const Color(0xFF816039),
+                ),
               ),
             ),
-          ),
+          ],
           const SizedBox(
             height: 100,
           ),
@@ -228,7 +230,7 @@ class _EnterMobileMoneyDetailsState extends State<EnterMobileMoneyDetails>
   void _checkButtonEnabled() {
     setState(() {
       buttonEnabled =
-          mobileMoneyProvider != null && mobileNumberController.text.length > 8;
+          mobileMoneyProvider != null && mobileNumberController.text.length > 4;
     });
   }
 
@@ -306,6 +308,7 @@ class _EnterMobileMoneyDetailsState extends State<EnterMobileMoneyDetails>
             MaterialPageRoute(
               builder: (context) => MobileMoneyOtpView(
                 paymentResponseBody: paymentResponseBody!,
+                close: widget.close,
               ),
             ),
           );
@@ -315,7 +318,7 @@ class _EnterMobileMoneyDetailsState extends State<EnterMobileMoneyDetails>
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
               builder: (context) => SuccessPage(
-                paymentOptionsEnum: PaymentOptionsEnum.ussd,
+                paymentOptionsEnum: PaymentOptionsEnum.mobileMoney,
                 close: () {},
                 onComplete: () {},
                 successMessage: paymentResponseBody?.providerMessage ?? "",
@@ -324,8 +327,26 @@ class _EnterMobileMoneyDetailsState extends State<EnterMobileMoneyDetails>
           );
         }
       }
+    } on DioException catch (e) {
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => ErrorPage(
+                message: e.response?.data?['message'] ?? "Payment failed",
+                paymentOptionsEnum: PaymentOptionsEnum.transfer),
+          ),
+        );
+      }
     } on Exception catch (e) {
-      debugPrint(e.toString());
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => ErrorPage(
+                message: "Payment failed",
+                paymentOptionsEnum: PaymentOptionsEnum.transfer),
+          ),
+        );
+      }
     }
 
     setState(() {

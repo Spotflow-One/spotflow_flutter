@@ -143,10 +143,13 @@ class SuccessPageArguments {
   final PaymentOptionsEnum paymentOptionsEnum;
   final PaymentResponseBody paymentResponseBody;
   final String successMessage;
+  final GestureTapCallback close;
+
 
   SuccessPageArguments({
     required this.paymentOptionsEnum,
     required this.successMessage,
     required this.paymentResponseBody,
+    required this.close,
   });
 }

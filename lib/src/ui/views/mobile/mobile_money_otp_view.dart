@@ -23,8 +23,10 @@ import 'package:spotflow/src/ui/widgets/user_and_rate_information_card.dart';
 
 class MobileMoneyOtpView extends StatefulWidget {
   final PaymentResponseBody paymentResponseBody;
+  final GestureTapCallback close;
 
-  const MobileMoneyOtpView({super.key, required this.paymentResponseBody});
+
+  const MobileMoneyOtpView({super.key, required this.paymentResponseBody, required this.close});
 
   @override
   State<MobileMoneyOtpView> createState() => _MobileMoneyOtpViewState();
@@ -252,6 +254,7 @@ class _MobileMoneyOtpViewState extends State<MobileMoneyOtpView>
                 paymentOptionsEnum: PaymentOptionsEnum.mobileMoney,
                 successMessage: "Payment successful",
                 paymentResponseBody: paymentResponse,
+                close: widget.close,
               ),
             );
           }

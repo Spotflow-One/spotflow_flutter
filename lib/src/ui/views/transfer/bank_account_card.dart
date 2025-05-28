@@ -121,7 +121,27 @@ class BankAccountCard extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                paymentResponseBody!.bankDetails?.name ?? "",
+                paymentResponseBody!.bankDetails?.bankName ?? "",
+                style: SpotFlowTextStyle.body14SemiBold.copyWith(
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(
+            height: 16,
+          ),
+          Row(
+            children: [
+              Text(
+                "Beneficiary",
+                style: SpotFlowTextStyle.body14Regular.copyWith(
+                  color: Colors.black,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                paymentResponseBody!.bankDetails?.accountName ?? "",
                 style: SpotFlowTextStyle.body14SemiBold.copyWith(
                   color: Colors.black,
                 ),
@@ -130,6 +150,7 @@ class BankAccountCard extends StatelessWidget {
           ),
         ],
       ),
+
     );
   }
 }

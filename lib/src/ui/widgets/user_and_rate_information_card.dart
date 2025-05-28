@@ -10,7 +10,7 @@ class UserAndRateInformationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final email =
-        context.read<AppStateProvider>().paymentManager?.customerEmail ?? "";
+        context.read<AppStateProvider>().paymentManager.customerEmail;
 
     final merchantConfig = context.read<AppStateProvider>().merchantConfig;
 

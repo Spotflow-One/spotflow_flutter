@@ -157,31 +157,7 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
             height: 1,
             thickness: 1,
           ),
-          const SizedBox(
-            height: 24,
-          ),
-          Text(
-            'Selected payment method',
-            style: SpotFlowTextStyle.body14SemiBold.copyWith(
-              color: SpotFlowColors.tone70,
-            ),
-          ),
-          const SizedBox(
-            height: 12,
-          ),
-          PaymentOptionsTile(
-            icon: PaymentOptionsEnum.transfer.icon,
-            text: PaymentOptionsEnum.transfer.title,
-            onTap: () {},
-          ),
-          const SizedBox(
-            height: 16.0,
-          ),
-          const Divider(
-            color: Color(0xFFF7F7F8),
-            height: 1,
-            thickness: 1,
-          ),
+
           const SizedBox(
             height: 32.0,
           ),
@@ -262,7 +238,7 @@ class _ViewBankDetailsUiState extends State<_ViewBankDetailsUi>
                   ),
                 );
               },
-              text: "I've sent the money",
+              text: "I have made this bank transfer",
             ),
           ),
           const SizedBox(

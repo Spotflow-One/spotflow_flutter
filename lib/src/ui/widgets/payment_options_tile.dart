@@ -57,6 +57,7 @@ class PaymentOptionsTile extends StatelessWidget {
 
 class HomePaymentOptionsTile extends StatelessWidget {
   final Widget icon;
+  final Widget? trailing;
   final String text;
   final GestureTapCallback? onTap;
 
@@ -65,6 +66,7 @@ class HomePaymentOptionsTile extends StatelessWidget {
     required this.icon,
     required this.text,
     this.onTap,
+    this.trailing,
   });
 
   @override
@@ -94,12 +96,18 @@ class HomePaymentOptionsTile extends StatelessWidget {
             const SizedBox(
               width: 16,
             ),
-            Text(
-              text,
-              style: SpotFlowTextStyle.body16Regular.copyWith(
-                color: SpotFlowColors.tone100,
+            Expanded(
+              child: Text(
+                text,
+                style: SpotFlowTextStyle.body16Regular.copyWith(
+                  color: SpotFlowColors.tone100,
+                ),
               ),
-            )
+            ),
+            const SizedBox(
+              width: 16,
+            ),
+            if (trailing != null) ...[trailing!]
           ],
         ),
       ),

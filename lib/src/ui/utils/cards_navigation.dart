@@ -29,6 +29,7 @@ mixin CardsNavigation {
           paymentOptionsEnum: PaymentOptionsEnum.card,
           paymentResponseBody: paymentResponseBody,
           successMessage: "Card payment successful",
+          close: onCancelPayment,
         ),
       );
     } else if (paymentResponseBody.authorization?.mode == 'pin') {
@@ -65,6 +66,7 @@ mixin CardsNavigation {
           builder: (context) => SpotFlowInAppBrowser(
             url: redirectUrl,
             reference: paymentResponseBody.reference,
+            onClose: onCancelPayment,
           ),
         ),
       );

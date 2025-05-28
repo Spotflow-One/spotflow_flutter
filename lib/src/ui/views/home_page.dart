@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spotflow/gen/assets.gen.dart';
@@ -9,6 +10,8 @@ import 'package:spotflow/src/ui/app_state_provider.dart';
 import 'package:spotflow/src/ui/utils/spotflow_colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
 import 'package:spotflow/src/ui/views/card/enter_card_details_page.dart';
+import 'package:spotflow/src/ui/views/card/widgets/currency_card_pill.dart';
+import 'package:spotflow/src/ui/views/error_page.dart';
 import 'package:spotflow/src/ui/views/mobile/enter_mobile_money_details.dart';
 import 'package:spotflow/src/ui/views/transfer/view_bank_details_page.dart';
 import 'package:spotflow/src/ui/views/ussd/view_banks_ussd_page.dart';
@@ -104,6 +107,15 @@ class _HomePageState extends State<HomePage> {
       if (mounted) {
         context.read<AppStateProvider>().setMerchantConfig(merchantConfig!);
       }
+    } on DioException catch (e) {
+      if (mounted) {
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => ErrorPage(
+                  message: e.response?.data['message'] ?? "Unable to start payment",
+                  paymentOptionsEnum: PaymentOptionsEnum.card,
+                )));
+      }
+      debugPrint(e.toString());
     } on Exception catch (e) {
       debugPrint(e.toString());
     }
@@ -166,6 +178,9 @@ class _HomePageUi extends StatelessWidget {
               child: HomePaymentOptionsTile(
                 icon: e!.icon,
                 text: e.title,
+                trailing: e == PaymentOptionsEnum.card
+                    ? const CurrencyCardPill()
+                    : null,
                 onTap: () {
                   switch (e) {
                     case PaymentOptionsEnum.card:

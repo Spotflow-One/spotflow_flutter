@@ -14,12 +14,12 @@ import 'package:spotflow/src/ui/widgets/primary_button.dart';
 
 class ErrorPage extends StatefulWidget {
   final String message;
-  final PaymentOptionsEnum paymentOptionsEnum;
+  final PaymentOptionsEnum? paymentOptionsEnum;
 
   const ErrorPage({
     super.key,
     required this.message,
-    required this.paymentOptionsEnum,
+    this.paymentOptionsEnum,
   });
 
   @override
@@ -65,61 +65,17 @@ class _ErrorPageState extends State<ErrorPage> {
         const SizedBox(
           height: 32.0,
         ),
-        if (widget.paymentOptionsEnum == PaymentOptionsEnum.card) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 90.0),
-            child: PrimaryButton(
-              onTap: () {
-                Navigator.of(context).pushReplacementNamed(
-                    SpotFlowRouteName.enterCardDetailsPage);
-                context.read<AppStateProvider>().trackEvent('payment_retry');
-              },
-              text: 'Try another card',
-            ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 90.0),
+          child: PrimaryButton(
+            onTap: () {
+              Navigator.of(context)
+                  .pushReplacementNamed(SpotFlowRouteName.homePage);
+              context.read<AppStateProvider>().trackEvent('payment_retry');
+            },
+            text: 'Try again',
           ),
-          const SizedBox(
-            height: 16,
-          ),
-        ] else if (widget.paymentOptionsEnum ==
-            PaymentOptionsEnum.transfer) ...[
-
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 90.0),
-            child: PrimaryButton(
-              onTap: () {
-                Navigator.of(context).pop();
-                context.read<AppStateProvider>().trackEvent('payment_retry');
-              },
-              text: 'Try again',
-            ),
-          ),
-        ] else if (widget.paymentOptionsEnum == PaymentOptionsEnum.ussd) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 90.0),
-            child: PrimaryButton(
-              onTap: () {
-                context.read<AppStateProvider>().trackEvent('payment_retry');
-
-                Navigator.of(context)
-                    .pushReplacementNamed(SpotFlowRouteName.viewBanksUssdPage);
-              },
-              text: 'Try again',
-            ),
-          ),
-        ] else ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 90.0),
-            child: PrimaryButton(
-              onTap: () {
-                context.read<AppStateProvider>().trackEvent('payment_retry');
-
-                Navigator.of(context).pop();
-              },
-              text: 'Try again',
-            ),
-          ),
-        ],
+        ),
         const Spacer(),
         const PoweredBySpotflowTag(),
         const SizedBox(

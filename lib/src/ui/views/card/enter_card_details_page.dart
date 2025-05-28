@@ -18,6 +18,7 @@ import 'package:spotflow/src/ui/app_state_provider.dart';
 import 'package:spotflow/src/ui/utils/cards_navigation.dart';
 import 'package:spotflow/src/ui/utils/spotflow_colors.dart';
 import 'package:spotflow/src/ui/utils/text_theme.dart';
+import 'package:spotflow/src/ui/views/card/widgets/currency_card_pill.dart';
 import 'package:spotflow/src/ui/views/error_page.dart';
 import 'package:spotflow/src/ui/widgets/base_scaffold.dart';
 import 'package:spotflow/src/ui/widgets/dismissible_app_logo.dart';
@@ -68,6 +69,10 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
 
   TextEditingController cvvController = TextEditingController();
 
+  FocusNode focusNode = FocusNode();
+  FocusNode expiryDateFocusNode = FocusNode();
+  FocusNode cvvFocusNode = FocusNode();
+
   bool creatingPayment = false;
 
   CardType cardType = CardType.others;
@@ -96,7 +101,6 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
 
     setState(() {
       _validCreditCardNumber = null;
-      print(c.ccType.type);
       if (c.ccType.type == 'visa') {
         cardType = CardType.visa;
       } else if (c.ccType.type == 'mastercard') {
@@ -105,6 +109,11 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
         cardType = CardType.others;
       }
     });
+
+    if (c.isValid && c.isPotentiallyValid == true) {
+      //move to next
+      expiryDateFocusNode.requestFocus();
+    }
   }
 
   onCardCvvChanged(_) {
@@ -117,6 +126,10 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
     setState(() {
       _validExpiryDate = null;
     });
+    final expDateResults = _ccValidator.validateExpDate(expiryController.text);
+    if (expDateResults.isPotentiallyValid) {
+      cvvFocusNode.requestFocus();
+    }
   }
 
   @override
@@ -177,11 +190,17 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
           const SizedBox(
             height: 32,
           ),
-          Text(
-            'Enter your card details to pay',
-            style: SpotFlowTextStyle.body14SemiBold.copyWith(
-              color: SpotFlowColors.tone70,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Enter your card details to pay',
+                style: SpotFlowTextStyle.body14SemiBold.copyWith(
+                  color: SpotFlowColors.tone70,
+                ),
+              ),
+              const CurrencyCardPill()
+            ],
           ),
           const SizedBox(
             height: 12,
@@ -212,6 +231,7 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
                   flex: 5,
                   child: InputField(
                     hintText: 'Card number',
+                    focusNode: focusNode,
                     validInput: _validCreditCardNumber,
                     onChanged: onCardNumberChanged,
                     textEditingController: cardNumberController,
@@ -226,6 +246,7 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
                   child: InputField(
                     hintText: 'MM/YY',
                     validInput: _validExpiryDate,
+                    focusNode: expiryDateFocusNode,
                     onChanged: onCardExpiryChanged,
                     textEditingController: expiryController,
                     inputFormatters: [
@@ -241,6 +262,7 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
                   child: InputField(
                     hintText: 'CVV',
                     textEditingController: cvvController,
+                    focusNode: cvvFocusNode,
                     onChanged: onCardCvvChanged,
                     validInput: _validCvv,
                     inputFormatters: [
@@ -285,6 +307,17 @@ class _CardInputUIState extends State<_CardInputUI> with CardsNavigation {
                 ),
               )
             ],
+          ),
+          SizedBox(
+            height: 16,
+          ),
+          Text(
+            "By confirming this payment, you allow ${merchantConfig?.merchantName ?? ""} to charge your card for this payment and future payments in accordance with their terms.",
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: SpotFlowColors.tone70,
+            ),
           ),
           const Spacer(),
           const PoweredBySpotflowTag(),
@@ -466,6 +499,7 @@ class InputField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final TextInputType? textInputType;
   final bool? validInput;
+  final FocusNode? focusNode;
 
   const InputField({
     super.key,
@@ -475,6 +509,7 @@ class InputField extends StatelessWidget {
     this.onChanged,
     this.textInputType,
     this.validInput,
+    this.focusNode,
   });
 
   @override
@@ -485,6 +520,7 @@ class InputField extends StatelessWidget {
       onChanged: onChanged,
       maxLines: 1,
       keyboardType: textInputType,
+      focusNode: focusNode,
       style: SpotFlowTextStyle.body14SemiBold.copyWith(
         color: validInput == false
             ? const Color(0xFFD62020)

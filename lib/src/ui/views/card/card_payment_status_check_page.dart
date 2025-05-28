@@ -16,10 +16,13 @@ import '../success_page.dart';
 
 class CardPaymentStatusCheckPage extends StatefulWidget {
   final String paymentReference;
+  final GestureTapCallback close;
+
 
   const CardPaymentStatusCheckPage({
     super.key,
     required this.paymentReference,
+    required this.close,
   });
 
   @override
@@ -84,6 +87,7 @@ class _CardPaymentStatusCheckPageState
               paymentOptionsEnum: PaymentOptionsEnum.card,
               successMessage: "Card payment successful",
               paymentResponseBody: body,
+              close: widget.close,
             ),
           );
         }

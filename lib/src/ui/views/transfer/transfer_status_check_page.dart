@@ -177,6 +177,7 @@ class _TransferStatusCheckPageState extends State<TransferStatusCheckPage>
               paymentResponseBody: widget.paymentResponseBody,
               successMessage:
                   "${paymentManager.paymentDescription} payment successful",
+              close: widget.close,
             ),
           );
         }

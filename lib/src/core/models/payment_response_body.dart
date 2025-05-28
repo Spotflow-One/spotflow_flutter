@@ -9,7 +9,7 @@ class PaymentResponseBody {
   final String channel;
   final String status;
   final CustomerInfo customer;
-  final String provider;
+  final String? provider;
   final num? rate; // Made nullable to handle potential absence of "rate" object
   final Authorization?
       authorization; // Made nullable to handle potential absence of "authorization" object
@@ -47,7 +47,7 @@ class PaymentResponseBody {
         status: json['status'] as String,
         customer:
             CustomerInfo.fromJson(json['customer'] as Map<String, dynamic>),
-        provider: json['provider'] as String,
+        provider: json['provider'] as String?,
         rate: json['rate'],
         authorization: json['authorization'] != null
             ? Authorization.fromJson(
@@ -104,17 +104,20 @@ class Authorization {
 
 class BankDetails {
   String accountNumber;
-  String name;
+  String bankName;
+  String? accountName;
   DateTime expiresAt;
 
   BankDetails({
-    required this.name,
+    required this.bankName,
     required this.accountNumber,
+    this.accountName,
   }) : expiresAt = _getDateTime();
 
   factory BankDetails.fromJson(Map<String, dynamic> json) => BankDetails(
         accountNumber: json['accountNumber'] as String,
-        name: json['bankName'] as String,
+        bankName: json['bankName'] as String,
+        accountName: json['accountName'] as String?
       );
 
   static DateTime _getDateTime() {
